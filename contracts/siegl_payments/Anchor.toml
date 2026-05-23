@@ -1,0 +1,19 @@
+[features]
+seeds = false
+skip-lint = false
+
+[programs.devnet]
+siegl_payments = "58Pbj3wmbveLzQVbYBdEqSh6eVkhs6q8BKcbyhFsLnMu"
+
+[programs.mainnet]
+siegl_payments = "58Pbj3wmbveLzQVbYBdEqSh6eVkhs6q8BKcbyhFsLnMu"
+
+[registry]
+url = "https://api.apr.dev"
+
+[provider]
+cluster = "Devnet"
+wallet = "~/.config/solana/id.json"
+
+[scripts]
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"

@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Allow: /i/
+Disallow: /verify/
+Disallow: /dashboard/
+Disallow: /admin/
+Disallow: /api/
+
+Sitemap: https://solvikstudio.com/sitemap.xml

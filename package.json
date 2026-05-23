@@ -9,18 +9,41 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@ardrive/turbo-sdk": "^1.41.3",
+    "@bonfida/spl-name-service": "^3.0.21",
+    "@metaplex-foundation/mpl-bubblegum": "^5.0.2",
+    "@metaplex-foundation/mpl-token-metadata": "^3.4.0",
+    "@metaplex-foundation/umi": "^1.5.1",
+    "@metaplex-foundation/umi-bundle-defaults": "^1.5.1",
+    "@metaplex-foundation/umi-web3js-adapters": "^1.5.1",
+    "bs58": "^5.0.0",
+    "@pythnetwork/client": "^2.22.1",
+    "@solana/spl-token": "^0.4.14",
+    "@solana/web3.js": "^1.98.4",
+    "@supabase/supabase-js": "^2.106.1",
+    "framer-motion": "^12.40.0",
+    "gsap": "^3.15.0",
+    "jose": "^6.2.3",
+    "jszip": "^3.10.1",
+    "lucide-react": "^1.16.0",
+    "next": "14.2.35",
+    "p-queue": "^9.3.0",
+    "pdf-lib": "^1.17.1",
+    "qrcode": "^1.5.4",
     "react": "^18",
     "react-dom": "^18",
-    "next": "14.2.35"
+    "sas-lib": "^1.0.10",
+    "tweetnacl": "^1.0.3"
   },
   "devDependencies": {
-    "typescript": "^5",
     "@types/node": "^20",
+    "@types/qrcode": "^1.5.6",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "eslint": "^8",
+    "eslint-config-next": "14.2.35",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
-    "eslint": "^8",
-    "eslint-config-next": "14.2.35"
+    "typescript": "^5"
   }
 }
