@@ -14,9 +14,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body>
         <BubbleBackground />
-        <LanguageProvider>
-          {children}
-        </LanguageProvider>
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <LanguageProvider>
+            {children}
+          </LanguageProvider>
+        </div>
       </body>
     </html>
   )
