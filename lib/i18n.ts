@@ -203,7 +203,8 @@ const en = {
     top_certs: 'Most verified certificates',
   },
   inactivity: {
-    warning: 'Session expires in 2 minutes due to inactivity.',
+    warning: 'Session closing due to inactivity.',
+    stay: 'Stay connected',
   },
   admin: {
     title: 'Admin Dashboard',
@@ -428,7 +429,8 @@ const es: typeof en = {
     top_certs: 'Certificados más verificados',
   },
   inactivity: {
-    warning: 'La sesión expira en 2 minutos por inactividad.',
+    warning: 'La sesión cerrará por inactividad.',
+    stay: 'Mantener sesión',
   },
   admin: {
     title: 'Dashboard Admin',
@@ -483,7 +485,7 @@ const fr: typeof en = {
   certs: { ...es.certs, title: 'Mes certificats', total: 'total', search_placeholder: 'Rechercher par nom...', recipient: 'Destinataire', type: 'Type', date: 'Date', expires: 'Expire', actions: 'Actions', view_qr: 'Voir QR', no_results: 'Aucun résultat.', empty: 'Aucun certificat.', prev: 'Précédent', next: 'Suivant' },
   verify: { ...es.verify, title: 'Vérification', verified_badge: '✓ Vérifié sur Solana', issuer: 'Émetteur', recipient: 'Destinataire', doc_type: 'Type', issued: 'Émis', expires: 'Expire', no_expiry: 'Sans expiration', arweave_hash: 'Hash Arweave', attestation: 'Attestation on-chain', attestation_active: 'Active', attestation_inactive: 'Non trouvée', sns_verified: 'SNS vérifié', disclaimer: 'Ce certificat a été émis par le wallet indiqué. Solvik Studio est une infrastructure blockchain.', scan: 'Scanner pour vérifier', powered: 'powered by Solvik Studio', ticket_before: 'Billet d\'accès — valable jusqu\'à la date', ticket_after: 'Attestation de présence — événement terminé' },
   gallery: { ...es.gallery, title: 'Galerie publique', issued_tab: 'Certificats émis', nft_tab: 'Ma collection NFT', widget_title: 'Widget intégrable', widget_desc: 'Collez ce code sur votre site.', copy_code: 'Copier le code', no_certs: 'Aucun certificat public.', no_nfts: 'Aucun NFT.', toggle_public: 'Public', verifications_month: 'vérifications ce mois', top_certs: 'Certificats les plus vérifiés' },
-  inactivity: { warning: 'Session expire dans 2 minutes.' },
+  inactivity: { warning: 'Session fermée pour inactivité.', stay: 'Rester connecté' },
   admin: { ...es.admin, title: 'Tableau de bord Admin', only_you: 'Vous seul pouvez voir ceci', revenue_month: 'Revenus ce mois', revenue_total: 'Revenus totaux', active_issuers: 'Émetteurs actifs', total_certs: 'Total certificats', fee_pool_sol: 'Balance FEE_POOL (SOL)', contract_balance: 'CONTRACT_WALLET (USDC)', ready: 'Prêt à activer', not_ready: 'Pas encore prêt', activate_title: 'Smart Contract', activate_desc: 'Accumulé vers le seuil de $25.', activate_btn: 'Activer Smart Contract', confirm_title: 'Confirmer l\'activation', confirm_warning: 'Cette action est irréversible.', program_id_label: 'Program ID', confirm_type: 'Tapez CONFIRMER pour continuer', confirm_btn: 'Activer définitivement', issuers_title: 'Tous les émetteurs', col_wallet: 'Wallet', col_institution: 'Institution', col_plan: 'Plan', col_credits: 'Crédits', col_certs: 'Certs', col_registered: 'Inscrit', col_sns: 'SNS', monthly_chart: 'Revenus mensuels (USDC)', logout: 'Déconnexion' },
 }
 
@@ -508,7 +510,7 @@ const ru: typeof en = {
   certs: { ...es.certs, title: 'Мои сертификаты', total: 'всего', search_placeholder: 'Поиск по имени...', recipient: 'Получатель', type: 'Тип', date: 'Дата', expires: 'Истекает', actions: 'Действия', view_qr: 'QR', no_results: 'Нет результатов.', empty: 'Нет сертификатов.', prev: 'Назад', next: 'Вперёд' },
   verify: { ...es.verify, title: 'Верификация сертификата', verified_badge: '✓ Проверено в Solana', issuer: 'Эмитент', recipient: 'Получатель', doc_type: 'Тип', issued: 'Выдан', expires: 'Истекает', no_expiry: 'Бессрочный', arweave_hash: 'Хэш Arweave', attestation: 'On-chain аттестация', attestation_active: 'Активна', attestation_inactive: 'Не найдена', sns_verified: 'SNS верифицирован', disclaimer: 'Сертификат выдан указанным кошельком. Solvik Studio — блокчейн-инфраструктура.', scan: 'Сканировать для проверки', powered: 'powered by Solvik Studio', ticket_before: 'Билет доступа — до даты мероприятия', ticket_after: 'Сертификат посещения — мероприятие завершено' },
   gallery: { ...es.gallery, title: 'Публичная галерея', issued_tab: 'Выданные сертификаты', nft_tab: 'Моя коллекция NFT', widget_title: 'Встраиваемый виджет', widget_desc: 'Вставьте этот код на ваш сайт.', copy_code: 'Копировать код', no_certs: 'Нет публичных сертификатов.', no_nfts: 'Нет NFT.', toggle_public: 'Публичный', verifications_month: 'верификаций в этом месяце', top_certs: 'Самые проверяемые' },
-  inactivity: { warning: 'Сессия истекает через 2 минуты.' },
+  inactivity: { warning: 'Сессия закрывается из-за неактивности.', stay: 'Остаться' },
   admin: { ...es.admin, title: 'Панель администратора', only_you: 'Только вы видите это', revenue_month: 'Доход этого месяца', revenue_total: 'Общий доход', active_issuers: 'Активные эмитенты', total_certs: 'Всего сертификатов', fee_pool_sol: 'Баланс FEE_POOL (SOL)', contract_balance: 'CONTRACT_WALLET (USDC)', ready: 'Готово к активации', not_ready: 'Ещё не готово', activate_title: 'Смарт-контракт', activate_desc: 'Накоплено к порогу $25.', activate_btn: 'Активировать смарт-контракт', confirm_title: 'Подтвердить активацию', confirm_warning: 'Это действие необратимо.', program_id_label: 'Program ID', confirm_type: 'Введите ПОДТВЕРДИТЬ', confirm_btn: 'Активировать навсегда', issuers_title: 'Все эмитенты', col_wallet: 'Кошелёк', col_institution: 'Учреждение', col_plan: 'План', col_credits: 'Кредиты', col_certs: 'Серт.', col_registered: 'Зарегистрирован', col_sns: 'SNS', monthly_chart: 'Ежемесячный доход (USDC)', logout: 'Выйти' },
 }
 
@@ -533,7 +535,7 @@ const de: typeof en = {
   certs: { ...es.certs, title: 'Meine Zertifikate', total: 'gesamt', search_placeholder: 'Nach Empfänger suchen...', recipient: 'Empfänger', type: 'Typ', date: 'Datum', expires: 'Läuft ab', actions: 'Aktionen', view_qr: 'QR ansehen', no_results: 'Keine Ergebnisse.', empty: 'Keine Zertifikate.', prev: 'Zurück', next: 'Weiter' },
   verify: { ...es.verify, title: 'Zertifikatsverifikation', verified_badge: '✓ Auf Solana verifiziert', issuer: 'Aussteller', recipient: 'Empfänger', doc_type: 'Typ', issued: 'Ausgestellt', expires: 'Läuft ab', no_expiry: 'Kein Ablaufdatum', arweave_hash: 'Arweave-Hash', attestation: 'On-Chain-Attestierung', attestation_active: 'Aktiv', attestation_inactive: 'Nicht gefunden', sns_verified: 'SNS verifiziert', disclaimer: 'Dieses Zertifikat wurde vom angegebenen Wallet ausgestellt. Solvik Studio ist Blockchain-Infrastruktur.', scan: 'Scannen zur Verifizierung', powered: 'powered by Solvik Studio', ticket_before: 'Zugangsticket — gültig bis Veranstaltungsdatum', ticket_after: 'Teilnahmebescheinigung — Veranstaltung beendet' },
   gallery: { ...es.gallery, title: 'Öffentliche Galerie', issued_tab: 'Ausgestellte Zertifikate', nft_tab: 'Meine NFT-Sammlung', widget_title: 'Einbettbares Widget', widget_desc: 'Fügen Sie diesen Code auf Ihrer Website ein.', copy_code: 'Code kopieren', no_certs: 'Keine öffentlichen Zertifikate.', no_nfts: 'Keine NFTs.', toggle_public: 'Öffentlich', verifications_month: 'Prüfungen diesen Monat', top_certs: 'Meistgeprüfte Zertifikate' },
-  inactivity: { warning: 'Sitzung läuft in 2 Minuten ab.' },
+  inactivity: { warning: 'Sitzung wird wegen Inaktivität geschlossen.', stay: 'Verbunden bleiben' },
   admin: { ...es.admin, title: 'Admin-Dashboard', only_you: 'Nur Sie können dies sehen', revenue_month: 'Einnahmen diesen Monat', revenue_total: 'Gesamteinnahmen', active_issuers: 'Aktive Aussteller', total_certs: 'Gesamtzertifikate', fee_pool_sol: 'FEE_POOL-Guthaben (SOL)', contract_balance: 'CONTRACT_WALLET (USDC)', ready: 'Bereit zur Aktivierung', not_ready: 'Noch nicht bereit', activate_title: 'Smart Contract', activate_desc: 'Angesammelt zum $25-Schwellenwert.', activate_btn: 'Smart Contract aktivieren', confirm_title: 'Aktivierung bestätigen', confirm_warning: 'Diese Aktion ist irreversibel.', program_id_label: 'Program ID', confirm_type: 'Geben Sie BESTÄTIGEN ein', confirm_btn: 'Dauerhaft aktivieren', issuers_title: 'Alle Aussteller', col_wallet: 'Wallet', col_institution: 'Institution', col_plan: 'Plan', col_credits: 'Credits', col_certs: 'Zerts.', col_registered: 'Registriert', col_sns: 'SNS', monthly_chart: 'Monatliche Einnahmen (USDC)', logout: 'Abmelden' },
 }
 
