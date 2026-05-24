@@ -23,7 +23,7 @@ export function LanguageSwitcher() {
     <div ref={ref} style={{ position: 'relative' }}>
       <button
         onClick={() => setOpen(o => !o)}
-        style={{ background: 'rgba(0,50,120,0.3)', border: '1px solid rgba(100,200,255,0.2)', borderRadius: 8, padding: '6px 12px', color: 'rgba(180,210,255,0.8)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontFamily: 'Inter, sans-serif' }}
+        style={{ background: 'rgba(0,50,120,0.3)', border: '1px solid rgba(100,200,255,0.2)', borderRadius: 8, padding: '6px 12px', color: 'rgba(180,210,255,0.8)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontFamily: 'Luna, sans-serif' }}
       >
         <Globe size={14} />
         {current?.flag} {current?.code.toUpperCase()}
@@ -34,7 +34,7 @@ export function LanguageSwitcher() {
             <button
               key={l.code}
               onClick={() => { setLocale(l.code as Locale); setOpen(false) }}
-              style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 12px', background: locale === l.code ? 'rgba(74,186,255,0.15)' : 'transparent', border: 'none', color: locale === l.code ? '#4ABAFF' : 'rgba(180,210,255,0.7)', cursor: 'pointer', fontSize: 13, fontFamily: 'Inter, sans-serif', borderRadius: 6 }}
+              style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 12px', background: locale === l.code ? 'rgba(74,186,255,0.15)' : 'transparent', border: 'none', color: locale === l.code ? '#4ABAFF' : 'rgba(180,210,255,0.7)', cursor: 'pointer', fontSize: 13, fontFamily: 'Luna, sans-serif', borderRadius: 6 }}
             >
               {l.flag} {l.label}
             </button>

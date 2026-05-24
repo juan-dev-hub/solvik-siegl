@@ -111,11 +111,11 @@ export function WalletAuthButton() {
     window.location.href = '/'
   }
 
-  if (hasSession && walletAddress) {
+  if (hasSession) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
         <a href="/dashboard" className="btn-primary">{t.common.dashboard}</a>
-        <span className="wallet-address">{truncate(walletAddress)}</span>
+        {walletAddress && <span className="wallet-address">{truncate(walletAddress)}</span>}
         <button className="btn-secondary" onClick={handleLogout}>{t.common.disconnect}</button>
       </div>
     )
@@ -133,7 +133,7 @@ export function WalletAuthButton() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
       <button className="btn-primary" onClick={handleConnect}>{t.common.connect}</button>
-      {error && <p style={{ color: '#ff6b6b', fontSize: 13, textAlign: 'center', maxWidth: 280, fontFamily: 'Inter, sans-serif' }}>{error}</p>}
+      {error && <p style={{ color: '#ff6b6b', fontSize: 13, textAlign: 'center', maxWidth: 280, fontFamily: 'Luna, sans-serif' }}>{error}</p>}
     </div>
   )
 }

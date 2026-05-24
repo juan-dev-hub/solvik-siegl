@@ -37,10 +37,10 @@ export default function LibraryPage() {
   return (
     <div>
       <div style={{ marginBottom: 32 }}>
-        <h1 style={{ fontFamily: 'Nunito, sans-serif', fontWeight: 800, fontSize: 28, color: '#F0F8FF', marginBottom: 4 }}>
+        <h1 style={{ fontFamily: 'Luna, sans-serif', fontWeight: 800, fontSize: 28, color: '#F0F8FF', marginBottom: 4 }}>
           Mis compras
         </h1>
-        <p style={{ color: 'rgba(180,210,255,0.4)', fontSize: 13, fontFamily: 'Inter, sans-serif' }}>
+        <p style={{ color: 'rgba(180,210,255,0.4)', fontSize: 13, fontFamily: 'Luna, sans-serif' }}>
           Todos los libros que has adquirido.
         </p>
       </div>
@@ -60,10 +60,10 @@ export default function LibraryPage() {
           style={{ textAlign: 'center', padding: '60px 40px' }}
         >
           <Library size={40} color="rgba(180,210,255,0.2)" style={{ margin: '0 auto 16px', display: 'block' }} />
-          <p style={{ fontFamily: 'Nunito, sans-serif', fontWeight: 700, fontSize: 18, color: '#F0F8FF', marginBottom: 8 }}>
+          <p style={{ fontFamily: 'Luna, sans-serif', fontWeight: 700, fontSize: 18, color: '#F0F8FF', marginBottom: 8 }}>
             Sin compras aún
           </p>
-          <p style={{ color: 'rgba(180,210,255,0.45)', fontFamily: 'Inter, sans-serif', fontSize: 14, marginBottom: 24 }}>
+          <p style={{ color: 'rgba(180,210,255,0.45)', fontFamily: 'Luna, sans-serif', fontSize: 14, marginBottom: 24 }}>
             Explora la tienda y adquiere tu primer libro digital.
           </p>
           <motion.a
@@ -102,15 +102,15 @@ export default function LibraryPage() {
                     </div>
                   )}
                   <div style={{ padding: 18 }}>
-                    <p style={{ fontFamily: 'Nunito, sans-serif', fontWeight: 700, fontSize: 14, color: '#F0F8FF', marginBottom: 4 }}>
+                    <p style={{ fontFamily: 'Luna, sans-serif', fontWeight: 700, fontSize: 14, color: '#F0F8FF', marginBottom: 4 }}>
                       {product?.title ?? 'Producto'}
                     </p>
                     {product?.issuers && (
-                      <p style={{ fontSize: 11, color: 'rgba(180,210,255,0.4)', fontFamily: 'Inter, sans-serif', marginBottom: 12 }}>
+                      <p style={{ fontSize: 11, color: 'rgba(180,210,255,0.4)', fontFamily: 'Luna, sans-serif', marginBottom: 12 }}>
                         {product.issuers.institution_name}
                       </p>
                     )}
-                    <p style={{ fontSize: 11, color: 'rgba(180,210,255,0.3)', fontFamily: 'Inter, sans-serif', marginBottom: 14 }}>
+                    <p style={{ fontSize: 11, color: 'rgba(180,210,255,0.3)', fontFamily: 'Luna, sans-serif', marginBottom: 14 }}>
                       {new Date(lic.purchased_at).toLocaleDateString('es-ES')}
                     </p>
                     <div style={{ display: 'flex', gap: 8 }}>
@@ -118,7 +118,7 @@ export default function LibraryPage() {
                         href={product?.id ? `/api/products/${product.id}/download?license=${lic.id}&wallet=${wallet ?? ''}` : '#'}
                         whileHover={{ scale: 1.03 }}
                         whileTap={{ scale: 0.97 }}
-                        style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, background: '#4ABAFF', color: '#fff', borderRadius: 8, padding: '7px 12px', fontSize: 12, fontWeight: 700, textDecoration: 'none', fontFamily: 'Nunito, sans-serif' }}
+                        style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, background: '#4ABAFF', color: '#fff', borderRadius: 8, padding: '7px 12px', fontSize: 12, fontWeight: 700, textDecoration: 'none', fontFamily: 'Luna, sans-serif' }}
                       >
                         <Download size={13} /> Descargar
                       </motion.a>

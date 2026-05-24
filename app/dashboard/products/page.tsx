@@ -36,10 +36,10 @@ export default function ProductsPage() {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
         <div>
-          <h1 style={{ fontFamily: 'Nunito, sans-serif', fontWeight: 800, fontSize: 28, color: '#F0F8FF', marginBottom: 4 }}>
+          <h1 style={{ fontFamily: 'Luna, sans-serif', fontWeight: 800, fontSize: 28, color: '#F0F8FF', marginBottom: 4 }}>
             Mis productos
           </h1>
-          <p style={{ color: 'rgba(180,210,255,0.4)', fontSize: 13, fontFamily: 'Inter, sans-serif' }}>
+          <p style={{ color: 'rgba(180,210,255,0.4)', fontSize: 13, fontFamily: 'Luna, sans-serif' }}>
             Gestiona tus libros digitales y recursos.
           </p>
         </div>
@@ -69,10 +69,10 @@ export default function ProductsPage() {
           style={{ textAlign: 'center', padding: '60px 40px' }}
         >
           <ShoppingBag size={40} color="rgba(180,210,255,0.2)" style={{ margin: '0 auto 16px', display: 'block' }} />
-          <p style={{ fontFamily: 'Nunito, sans-serif', fontWeight: 700, fontSize: 18, color: '#F0F8FF', marginBottom: 8 }}>
+          <p style={{ fontFamily: 'Luna, sans-serif', fontWeight: 700, fontSize: 18, color: '#F0F8FF', marginBottom: 8 }}>
             Sin productos aún
           </p>
-          <p style={{ color: 'rgba(180,210,255,0.45)', fontFamily: 'Inter, sans-serif', fontSize: 14, marginBottom: 24 }}>
+          <p style={{ color: 'rgba(180,210,255,0.45)', fontFamily: 'Luna, sans-serif', fontSize: 14, marginBottom: 24 }}>
             Crea tu primer libro digital y empieza a vender.
           </p>
           <motion.a
@@ -98,17 +98,17 @@ export default function ProductsPage() {
                 style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 24px' }}
               >
                 <div style={{ flex: 1 }}>
-                  <p style={{ fontFamily: 'Nunito, sans-serif', fontWeight: 700, fontSize: 15, color: '#F0F8FF', marginBottom: 4 }}>
+                  <p style={{ fontFamily: 'Luna, sans-serif', fontWeight: 700, fontSize: 15, color: '#F0F8FF', marginBottom: 4 }}>
                     {p.title}
                   </p>
-                  <div style={{ display: 'flex', gap: 16, fontSize: 12, color: 'rgba(180,210,255,0.45)', fontFamily: 'Inter, sans-serif' }}>
+                  <div style={{ display: 'flex', gap: 16, fontSize: 12, color: 'rgba(180,210,255,0.45)', fontFamily: 'Luna, sans-serif' }}>
                     <span>${(p.price_usdc / 1_000_000).toFixed(2)} USDC</span>
                     <span>{p.sold_copies}/{p.total_copies} vendidos</span>
                     <span>{new Date(p.created_at).toLocaleDateString('es-ES')}</span>
                   </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <span style={{ fontSize: 11, color: p.is_active ? '#52C878' : 'rgba(180,210,255,0.3)', fontFamily: 'Inter, sans-serif', background: p.is_active ? 'rgba(82,200,120,0.1)' : 'rgba(180,210,255,0.05)', borderRadius: 20, padding: '3px 10px', border: `1px solid ${p.is_active ? 'rgba(82,200,120,0.3)' : 'rgba(180,210,255,0.1)'}` }}>
+                  <span style={{ fontSize: 11, color: p.is_active ? '#52C878' : 'rgba(180,210,255,0.3)', fontFamily: 'Luna, sans-serif', background: p.is_active ? 'rgba(82,200,120,0.1)' : 'rgba(180,210,255,0.05)', borderRadius: 20, padding: '3px 10px', border: `1px solid ${p.is_active ? 'rgba(82,200,120,0.3)' : 'rgba(180,210,255,0.1)'}` }}>
                     {p.is_active ? 'Activo' : 'Inactivo'}
                   </span>
                   <button

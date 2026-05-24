@@ -50,16 +50,16 @@ export default function GalleryPage() {
 
   return (
     <div>
-      <h1 style={{ fontFamily: 'Nunito, sans-serif', fontWeight: 800, fontSize: 28, color: '#F0F8FF', marginBottom: 8 }}>{t.gallery.title}</h1>
+      <h1 style={{ fontFamily: 'Luna, sans-serif', fontWeight: 800, fontSize: 28, color: '#F0F8FF', marginBottom: 8 }}>{t.gallery.title}</h1>
 
       {/* Verifications this month */}
       <div className="glass-card" style={{ marginBottom: 28, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <p style={{ fontSize: 32, fontFamily: 'Nunito, sans-serif', fontWeight: 800, color: '#4ABAFF' }}>{monthVerifs}</p>
-          <p style={{ fontSize: 13, color: 'rgba(180,210,255,0.5)', fontFamily: 'Inter, sans-serif' }}>{t.gallery.verifications_month}</p>
+          <p style={{ fontSize: 32, fontFamily: 'Luna, sans-serif', fontWeight: 800, color: '#4ABAFF' }}>{monthVerifs}</p>
+          <p style={{ fontSize: 13, color: 'rgba(180,210,255,0.5)', fontFamily: 'Luna, sans-serif' }}>{t.gallery.verifications_month}</p>
         </div>
         <div style={{ textAlign: 'right' }}>
-          <p style={{ fontSize: 12, color: 'rgba(180,210,255,0.4)', fontFamily: 'Inter, sans-serif', marginBottom: 8 }}>{t.gallery.widget_title}</p>
+          <p style={{ fontSize: 12, color: 'rgba(180,210,255,0.4)', fontFamily: 'Luna, sans-serif', marginBottom: 8 }}>{t.gallery.widget_title}</p>
           <button onClick={copyWidget} className="btn-secondary" style={{ fontSize: 12, padding: '8px 16px' }}>
             {copied ? <><CheckCircle size={13} /> Copied!</> : <><Copy size={13} /> {t.gallery.copy_code}</>}
           </button>
@@ -69,7 +69,7 @@ export default function GalleryPage() {
       {/* Tabs */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 24 }}>
         {(['issued', 'nfts'] as const).map(tb => (
-          <button key={tb} onClick={() => setTab(tb)} style={{ padding: '8px 20px', borderRadius: 50, border: 'none', cursor: 'pointer', fontFamily: 'Nunito, sans-serif', fontWeight: 700, fontSize: 14, background: tab === tb ? '#4ABAFF' : 'rgba(0,50,120,0.3)', color: tab === tb ? '#fff' : 'rgba(180,210,255,0.6)' }}>
+          <button key={tb} onClick={() => setTab(tb)} style={{ padding: '8px 20px', borderRadius: 50, border: 'none', cursor: 'pointer', fontFamily: 'Luna, sans-serif', fontWeight: 700, fontSize: 14, background: tab === tb ? '#4ABAFF' : 'rgba(0,50,120,0.3)', color: tab === tb ? '#fff' : 'rgba(180,210,255,0.6)' }}>
             {tb === 'issued' ? t.gallery.issued_tab : t.gallery.nft_tab}
           </button>
         ))}
@@ -78,7 +78,7 @@ export default function GalleryPage() {
       {tab === 'issued' && (
         <div>
           {certs.length === 0 ? (
-            <div className="glass-card" style={{ textAlign: 'center', padding: 48, color: 'rgba(180,210,255,0.4)', fontFamily: 'Inter, sans-serif', fontSize: 14 }}>
+            <div className="glass-card" style={{ textAlign: 'center', padding: 48, color: 'rgba(180,210,255,0.4)', fontFamily: 'Luna, sans-serif', fontSize: 14 }}>
               {t.gallery.no_certs}
             </div>
           ) : (
@@ -86,12 +86,12 @@ export default function GalleryPage() {
               {certs.map(c => (
                 <div key={c.id} className="glass-card" style={{ padding: 20 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
-                    <p style={{ fontFamily: 'Nunito, sans-serif', fontWeight: 700, fontSize: 15, color: '#F0F8FF' }}>{c.issued_to}</p>
+                    <p style={{ fontFamily: 'Luna, sans-serif', fontWeight: 700, fontSize: 15, color: '#F0F8FF' }}>{c.issued_to}</p>
                     <span className={c.is_public ? 'badge-verified' : 'badge-pending'} style={{ fontSize: 10 }}>
                       {c.is_public ? t.gallery.toggle_public : 'Privado'}
                     </span>
                   </div>
-                  <p style={{ fontSize: 12, color: 'rgba(180,210,255,0.5)', fontFamily: 'Inter, sans-serif', marginBottom: 12 }}>{c.doc_type}</p>
+                  <p style={{ fontSize: 12, color: 'rgba(180,210,255,0.5)', fontFamily: 'Luna, sans-serif', marginBottom: 12 }}>{c.doc_type}</p>
                   <a href={`/verify/${c.arweave_tx_id}`} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 4, color: '#4ABAFF', fontSize: 12, textDecoration: 'none' }}>
                     <ExternalLink size={12} /> Ver QR
                   </a>
@@ -105,7 +105,7 @@ export default function GalleryPage() {
       {tab === 'nfts' && (
         <div>
           {nfts.length === 0 ? (
-            <div className="glass-card" style={{ textAlign: 'center', padding: 48, color: 'rgba(180,210,255,0.4)', fontFamily: 'Inter, sans-serif', fontSize: 14 }}>
+            <div className="glass-card" style={{ textAlign: 'center', padding: 48, color: 'rgba(180,210,255,0.4)', fontFamily: 'Luna, sans-serif', fontSize: 14 }}>
               {t.gallery.no_nfts}
             </div>
           ) : (

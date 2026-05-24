@@ -55,7 +55,7 @@ export default function StorePage() {
       <nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 40px', borderBottom: '1px solid rgba(100,200,255,0.08)', backdropFilter: 'blur(12px)', background: 'rgba(8,14,28,0.7)', position: 'sticky', top: 0, zIndex: 50 }}>
         <a href="/" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}>
           <img src="/logo.jpg" alt="Solvik Studio" style={{ height: 28, borderRadius: 4 }} />
-          <span style={{ fontFamily: 'Nunito, sans-serif', fontWeight: 800, fontSize: 16, color: '#F0F8FF' }}>Solvik Studio</span>
+          <span style={{ fontFamily: 'Luna, sans-serif', fontWeight: 800, fontSize: 16, color: '#F0F8FF' }}>Solvik Studio</span>
         </a>
         <LanguageSwitcher />
       </nav>
@@ -69,11 +69,11 @@ export default function StorePage() {
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 8 }}>
             <ShoppingBag size={32} color="#4ABAFF" />
-            <h1 style={{ fontFamily: 'Nunito, sans-serif', fontWeight: 800, fontSize: 36, color: '#F0F8FF' }}>
+            <h1 style={{ fontFamily: 'Luna, sans-serif', fontWeight: 800, fontSize: 36, color: '#F0F8FF' }}>
               Tienda
             </h1>
           </div>
-          <p style={{ fontSize: 15, color: 'rgba(180,210,255,0.55)', fontFamily: 'Inter, sans-serif' }}>
+          <p style={{ fontSize: 15, color: 'rgba(180,210,255,0.55)', fontFamily: 'Luna, sans-serif' }}>
             Libros digitales y recursos verificados en blockchain.
           </p>
         </motion.div>
@@ -90,7 +90,7 @@ export default function StorePage() {
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Buscar productos..."
-            style={{ width: '100%', padding: '10px 14px 10px 40px', background: 'rgba(0,30,80,0.4)', border: '1px solid rgba(74,186,255,0.15)', borderRadius: 10, color: '#F0F8FF', fontFamily: 'Inter, sans-serif', fontSize: 14 }}
+            style={{ width: '100%', padding: '10px 14px 10px 40px', background: 'rgba(0,30,80,0.4)', border: '1px solid rgba(74,186,255,0.15)', borderRadius: 10, color: '#F0F8FF', fontFamily: 'Luna, sans-serif', fontSize: 14 }}
           />
         </motion.div>
 
@@ -103,7 +103,7 @@ export default function StorePage() {
         ) : filtered.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '80px 0' }}>
             <ShoppingBag size={48} color="rgba(180,210,255,0.15)" style={{ margin: '0 auto 20px', display: 'block' }} />
-            <p style={{ color: 'rgba(180,210,255,0.4)', fontFamily: 'Nunito, sans-serif', fontSize: 18 }}>
+            <p style={{ color: 'rgba(180,210,255,0.4)', fontFamily: 'Luna, sans-serif', fontSize: 18 }}>
               {search ? 'Sin resultados' : 'La tienda está vacía por ahora.'}
             </p>
           </div>
@@ -157,23 +157,23 @@ function ProductCard({ product: p }: { product: Product }) {
           </div>
         )}
         <div style={{ padding: 20 }}>
-          <p style={{ fontFamily: 'Nunito, sans-serif', fontWeight: 800, fontSize: 16, color: '#F0F8FF', marginBottom: 6 }}>{p.title}</p>
+          <p style={{ fontFamily: 'Luna, sans-serif', fontWeight: 800, fontSize: 16, color: '#F0F8FF', marginBottom: 6 }}>{p.title}</p>
           {p.issuers && (
-            <p style={{ fontSize: 11, color: 'rgba(180,210,255,0.4)', fontFamily: 'Inter, sans-serif', marginBottom: 8 }}>
+            <p style={{ fontSize: 11, color: 'rgba(180,210,255,0.4)', fontFamily: 'Luna, sans-serif', marginBottom: 8 }}>
               por {p.issuers.institution_name}
             </p>
           )}
           {p.description && (
-            <p style={{ fontSize: 12, color: 'rgba(180,210,255,0.5)', fontFamily: 'Inter, sans-serif', marginBottom: 14, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' } as React.CSSProperties}>
+            <p style={{ fontSize: 12, color: 'rgba(180,210,255,0.5)', fontFamily: 'Luna, sans-serif', marginBottom: 14, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' } as React.CSSProperties}>
               {p.description}
             </p>
           )}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
-              <p style={{ color: '#4ABAFF', fontFamily: 'Nunito, sans-serif', fontWeight: 800, fontSize: 18 }}>
+              <p style={{ color: '#4ABAFF', fontFamily: 'Luna, sans-serif', fontWeight: 800, fontSize: 18 }}>
                 ${(p.price_usdc / 1_000_000).toFixed(2)}
               </p>
-              <p style={{ fontSize: 10, color: 'rgba(180,210,255,0.3)', fontFamily: 'Inter, sans-serif' }}>
+              <p style={{ fontSize: 10, color: 'rgba(180,210,255,0.3)', fontFamily: 'Luna, sans-serif' }}>
                 {available} disponibles
               </p>
             </div>
@@ -181,7 +181,7 @@ function ProductCard({ product: p }: { product: Product }) {
               href={`/store/${p.id}`}
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
-              style={{ background: '#4ABAFF', color: '#fff', borderRadius: 8, padding: '8px 18px', fontSize: 13, fontWeight: 700, textDecoration: 'none', fontFamily: 'Nunito, sans-serif' }}
+              style={{ background: '#4ABAFF', color: '#fff', borderRadius: 8, padding: '8px 18px', fontSize: 13, fontWeight: 700, textDecoration: 'none', fontFamily: 'Luna, sans-serif' }}
             >
               Ver
             </motion.a>

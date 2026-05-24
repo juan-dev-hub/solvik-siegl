@@ -95,7 +95,7 @@ export default function IssuerPage() {
       <nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 40px', borderBottom: '1px solid rgba(100,200,255,0.08)' }}>
         <a href="/" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}>
           <img src="/logo.jpg" alt="Solvik Studio" style={{ height: 28, objectFit: 'contain', borderRadius: 4 }} />
-          <span style={{ fontFamily: 'Nunito, sans-serif', fontWeight: 800, fontSize: 16, color: '#F0F8FF' }}>Solvik Studio</span>
+          <span style={{ fontFamily: 'Luna, sans-serif', fontWeight: 800, fontSize: 16, color: '#F0F8FF' }}>Solvik Studio</span>
         </a>
         <LanguageSwitcher />
       </nav>
@@ -108,7 +108,7 @@ export default function IssuerPage() {
           transition={{ duration: 0.4, ease: 'easeOut' }}
           style={{ marginBottom: 40 }}
         >
-          <h1 style={{ fontFamily: 'Nunito, sans-serif', fontWeight: 800, fontSize: 36, color: '#F0F8FF', marginBottom: 10 }}>
+          <h1 style={{ fontFamily: 'Luna, sans-serif', fontWeight: 800, fontSize: 36, color: '#F0F8FF', marginBottom: 10 }}>
             {issuer.institution_name}
           </h1>
           {issuer.sns_verified && issuer.sns_domain && (
@@ -136,7 +136,7 @@ export default function IssuerPage() {
               whileTap={{ scale: 0.97 }}
               style={{
                 padding: '8px 20px', borderRadius: 50, border: 'none', cursor: 'pointer',
-                fontFamily: 'Nunito, sans-serif', fontWeight: 700, fontSize: 14,
+                fontFamily: 'Luna, sans-serif', fontWeight: 700, fontSize: 14,
                 background: tab === tb.id ? '#4ABAFF' : 'rgba(0,50,120,0.3)',
                 color: tab === tb.id ? '#fff' : 'rgba(180,210,255,0.6)',
                 transition: 'background 0.2s',
@@ -159,12 +159,12 @@ export default function IssuerPage() {
             {tab === 'issued' && (
               <div ref={gridRef} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 16 }}>
                 {certs.length === 0 ? (
-                  <p style={{ color: 'rgba(180,210,255,0.4)', fontFamily: 'Inter, sans-serif' }}>{t.gallery.no_certs}</p>
+                  <p style={{ color: 'rgba(180,210,255,0.4)', fontFamily: 'Luna, sans-serif' }}>{t.gallery.no_certs}</p>
                 ) : certs.map(c => (
                   <div key={c.id} className="glass-card grid-card" style={{ padding: 20, overflow: 'hidden' }}>
                     <GlowCard>
-                      <p style={{ fontFamily: 'Nunito, sans-serif', fontWeight: 700, fontSize: 15, color: '#F0F8FF', marginBottom: 6 }}>{c.issued_to}</p>
-                      <p style={{ fontSize: 12, color: 'rgba(180,210,255,0.5)', fontFamily: 'Inter, sans-serif', marginBottom: 12 }}>{c.doc_type}</p>
+                      <p style={{ fontFamily: 'Luna, sans-serif', fontWeight: 700, fontSize: 15, color: '#F0F8FF', marginBottom: 6 }}>{c.issued_to}</p>
+                      <p style={{ fontSize: 12, color: 'rgba(180,210,255,0.5)', fontFamily: 'Luna, sans-serif', marginBottom: 12 }}>{c.doc_type}</p>
                       <a href={`/verify/${c.arweave_tx_id}`} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 4, color: '#4ABAFF', fontSize: 12, textDecoration: 'none' }}>
                         <ExternalLink size={12} /> Verificar
                       </a>
@@ -177,7 +177,7 @@ export default function IssuerPage() {
             {tab === 'nfts' && (
               <div ref={gridRef} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 16 }}>
                 {nfts.length === 0 ? (
-                  <p style={{ color: 'rgba(180,210,255,0.4)', fontFamily: 'Inter, sans-serif' }}>{t.gallery.no_nfts}</p>
+                  <p style={{ color: 'rgba(180,210,255,0.4)', fontFamily: 'Luna, sans-serif' }}>{t.gallery.no_nfts}</p>
                 ) : nfts.map(n => (
                   <div key={n.mint} className="glass-card grid-card" style={{ padding: 16 }}>
                     <GlowCard>
@@ -193,7 +193,7 @@ export default function IssuerPage() {
                 {products.length === 0 ? (
                   <div style={{ textAlign: 'center', padding: '60px 0' }}>
                     <ShoppingBag size={40} color="rgba(180,210,255,0.2)" style={{ margin: '0 auto 16px', display: 'block' }} />
-                    <p style={{ color: 'rgba(180,210,255,0.4)', fontFamily: 'Nunito, sans-serif', fontSize: 16 }}>
+                    <p style={{ color: 'rgba(180,210,255,0.4)', fontFamily: 'Luna, sans-serif', fontSize: 16 }}>
                       Esta institución no tiene productos en venta aún.
                     </p>
                   </div>
@@ -210,19 +210,19 @@ export default function IssuerPage() {
                             />
                           )}
                           <div style={{ padding: 20 }}>
-                            <p style={{ fontFamily: 'Nunito, sans-serif', fontWeight: 700, fontSize: 15, color: '#F0F8FF', marginBottom: 6 }}>{p.title}</p>
+                            <p style={{ fontFamily: 'Luna, sans-serif', fontWeight: 700, fontSize: 15, color: '#F0F8FF', marginBottom: 6 }}>{p.title}</p>
                             {p.description && (
-                              <p style={{ fontSize: 12, color: 'rgba(180,210,255,0.5)', fontFamily: 'Inter, sans-serif', marginBottom: 12, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' } as React.CSSProperties}>
+                              <p style={{ fontSize: 12, color: 'rgba(180,210,255,0.5)', fontFamily: 'Luna, sans-serif', marginBottom: 12, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' } as React.CSSProperties}>
                                 {p.description}
                               </p>
                             )}
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                              <span style={{ color: '#4ABAFF', fontFamily: 'Nunito, sans-serif', fontWeight: 800, fontSize: 16 }}>
+                              <span style={{ color: '#4ABAFF', fontFamily: 'Luna, sans-serif', fontWeight: 800, fontSize: 16 }}>
                                 ${(p.price_usdc / 1_000_000).toFixed(2)} USDC
                               </span>
                               <a
                                 href={`/store/${p.id}`}
-                                style={{ background: '#4ABAFF', color: '#fff', borderRadius: 8, padding: '6px 14px', fontSize: 12, fontWeight: 700, textDecoration: 'none', fontFamily: 'Nunito, sans-serif' }}
+                                style={{ background: '#4ABAFF', color: '#fff', borderRadius: 8, padding: '6px 14px', fontSize: 12, fontWeight: 700, textDecoration: 'none', fontFamily: 'Luna, sans-serif' }}
                               >
                                 Ver más
                               </a>
@@ -246,14 +246,14 @@ export default function IssuerPage() {
           transition={{ duration: 0.4, ease: 'easeOut', delay: 0.2 }}
           style={{ marginTop: 48 }}
         >
-          <p style={{ fontFamily: 'Nunito, sans-serif', fontWeight: 700, fontSize: 16, color: '#F0F8FF', marginBottom: 8 }}>{t.gallery.widget_title}</p>
-          <p style={{ fontSize: 13, color: 'rgba(180,210,255,0.5)', fontFamily: 'Inter, sans-serif', marginBottom: 16 }}>{t.gallery.widget_desc}</p>
+          <p style={{ fontFamily: 'Luna, sans-serif', fontWeight: 700, fontSize: 16, color: '#F0F8FF', marginBottom: 8 }}>{t.gallery.widget_title}</p>
+          <p style={{ fontSize: 13, color: 'rgba(180,210,255,0.5)', fontFamily: 'Luna, sans-serif', marginBottom: 16 }}>{t.gallery.widget_desc}</p>
           <code style={{ display: 'block', background: 'rgba(0,15,50,0.6)', border: '1px solid rgba(74,186,255,0.15)', borderRadius: 8, padding: '12px 16px', fontSize: 11, color: '#4ABAFF', fontFamily: 'SF Mono, Fira Code, monospace', wordBreak: 'break-all' }}>
             {`<a href="https://www.solvikstudio.com/i/${issuer.slug}" target="_blank">✓ Verificado con Solvik Studio · ${certs.length} certificados</a>`}
           </code>
         </motion.div>
 
-        <p style={{ textAlign: 'center', marginTop: 40, fontSize: 11, color: 'rgba(180,210,255,0.2)', fontFamily: 'Inter, sans-serif' }}>
+        <p style={{ textAlign: 'center', marginTop: 40, fontSize: 11, color: 'rgba(180,210,255,0.2)', fontFamily: 'Luna, sans-serif' }}>
           powered by Solvik Studio
         </p>
       </div>

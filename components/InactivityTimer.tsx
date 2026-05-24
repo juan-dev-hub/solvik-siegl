@@ -39,7 +39,7 @@ export function InactivityTimer() {
   if (!showWarn) return null
 
   return (
-    <div style={{ position: 'fixed', bottom: 24, right: 24, background: 'rgba(255,229,102,0.15)', border: '1px solid #FFE566', borderRadius: 12, padding: '12px 20px', color: '#FFE566', fontSize: 13, fontFamily: 'Inter, sans-serif', zIndex: 9999, backdropFilter: 'blur(20px)', maxWidth: 320 }}>
+    <div style={{ position: 'fixed', bottom: 24, right: 24, background: 'rgba(255,229,102,0.15)', border: '1px solid #FFE566', borderRadius: 12, padding: '12px 20px', color: '#FFE566', fontSize: 13, fontFamily: 'Luna, sans-serif', zIndex: 9999, backdropFilter: 'blur(20px)', maxWidth: 320 }}>
       ⚠ {t.inactivity.warning}
     </div>
   )

@@ -54,10 +54,10 @@ export default function NewProductPage() {
   return (
     <div>
       <div style={{ marginBottom: 32 }}>
-        <h1 style={{ fontFamily: 'Nunito, sans-serif', fontWeight: 800, fontSize: 28, color: '#F0F8FF', marginBottom: 4 }}>
+        <h1 style={{ fontFamily: 'Luna, sans-serif', fontWeight: 800, fontSize: 28, color: '#F0F8FF', marginBottom: 4 }}>
           Nuevo producto
         </h1>
-        <p style={{ color: 'rgba(180,210,255,0.4)', fontSize: 13, fontFamily: 'Inter, sans-serif' }}>
+        <p style={{ color: 'rgba(180,210,255,0.4)', fontSize: 13, fontFamily: 'Luna, sans-serif' }}>
           Sube un PDF y empieza a vender con licencias verificadas en blockchain.
         </p>
       </div>
@@ -73,10 +73,10 @@ export default function NewProductPage() {
             style={{ textAlign: 'center', padding: '60px 40px' }}
           >
             <CheckCircle size={48} color="#52C878" style={{ margin: '0 auto 20px', display: 'block' }} />
-            <h2 style={{ fontFamily: 'Nunito, sans-serif', fontWeight: 800, fontSize: 24, color: '#F0F8FF', marginBottom: 8 }}>
+            <h2 style={{ fontFamily: 'Luna, sans-serif', fontWeight: 800, fontSize: 24, color: '#F0F8FF', marginBottom: 8 }}>
               ¡Producto publicado!
             </h2>
-            <p style={{ color: 'rgba(180,210,255,0.5)', fontFamily: 'Inter, sans-serif', marginBottom: 28 }}>
+            <p style={{ color: 'rgba(180,210,255,0.5)', fontFamily: 'Luna, sans-serif', marginBottom: 28 }}>
               Tu libro ya está disponible en la tienda.
             </p>
             <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
@@ -115,13 +115,13 @@ export default function NewProductPage() {
             {error && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,80,80,0.08)', border: '1px solid rgba(255,80,80,0.25)', borderRadius: 10, padding: '12px 16px', marginBottom: 24 }}>
                 <AlertCircle size={16} color="#ff6b6b" />
-                <p style={{ fontSize: 13, color: '#ff6b6b', fontFamily: 'Inter, sans-serif' }}>{error}</p>
+                <p style={{ fontSize: 13, color: '#ff6b6b', fontFamily: 'Luna, sans-serif' }}>{error}</p>
               </div>
             )}
 
             {/* PDF upload */}
             <div style={{ marginBottom: 24 }}>
-              <label style={{ display: 'block', fontSize: 13, color: 'rgba(180,210,255,0.6)', fontFamily: 'Inter, sans-serif', marginBottom: 8 }}>
+              <label style={{ display: 'block', fontSize: 13, color: 'rgba(180,210,255,0.6)', fontFamily: 'Luna, sans-serif', marginBottom: 8 }}>
                 Archivo PDF *
               </label>
               <input type="file" ref={fileRef} accept=".pdf" style={{ display: 'none' }} onChange={e => setFile(e.target.files?.[0] ?? null)} />
@@ -135,15 +135,15 @@ export default function NewProductPage() {
                 {file ? (
                   <>
                     <BookOpen size={28} color="#52C878" />
-                    <p style={{ color: '#52C878', fontFamily: 'Nunito, sans-serif', fontWeight: 700, fontSize: 14 }}>{file.name}</p>
-                    <p style={{ color: 'rgba(82,200,120,0.6)', fontSize: 12, fontFamily: 'Inter, sans-serif' }}>
+                    <p style={{ color: '#52C878', fontFamily: 'Luna, sans-serif', fontWeight: 700, fontSize: 14 }}>{file.name}</p>
+                    <p style={{ color: 'rgba(82,200,120,0.6)', fontSize: 12, fontFamily: 'Luna, sans-serif' }}>
                       {(file.size / 1024 / 1024).toFixed(2)} MB
                     </p>
                   </>
                 ) : (
                   <>
                     <Upload size={28} color="rgba(74,186,255,0.4)" />
-                    <p style={{ color: 'rgba(180,210,255,0.5)', fontFamily: 'Nunito, sans-serif', fontWeight: 600, fontSize: 14 }}>Click para seleccionar PDF</p>
+                    <p style={{ color: 'rgba(180,210,255,0.5)', fontFamily: 'Luna, sans-serif', fontWeight: 600, fontSize: 14 }}>Click para seleccionar PDF</p>
                   </>
                 )}
               </motion.button>
@@ -151,14 +151,14 @@ export default function NewProductPage() {
 
             {/* Cover image */}
             <div style={{ marginBottom: 24 }}>
-              <label style={{ display: 'block', fontSize: 13, color: 'rgba(180,210,255,0.6)', fontFamily: 'Inter, sans-serif', marginBottom: 8 }}>
+              <label style={{ display: 'block', fontSize: 13, color: 'rgba(180,210,255,0.6)', fontFamily: 'Luna, sans-serif', marginBottom: 8 }}>
                 Imagen de portada (opcional)
               </label>
               <input type="file" ref={coverRef} accept="image/*" style={{ display: 'none' }} onChange={e => setCover(e.target.files?.[0] ?? null)} />
               <button
                 type="button"
                 onClick={() => coverRef.current?.click()}
-                style={{ padding: '10px 18px', background: 'rgba(0,30,80,0.3)', border: `1px solid ${cover ? 'rgba(74,186,255,0.4)' : 'rgba(74,186,255,0.12)'}`, borderRadius: 10, cursor: 'pointer', color: cover ? '#4ABAFF' : 'rgba(180,210,255,0.4)', fontSize: 13, fontFamily: 'Inter, sans-serif' }}
+                style={{ padding: '10px 18px', background: 'rgba(0,30,80,0.3)', border: `1px solid ${cover ? 'rgba(74,186,255,0.4)' : 'rgba(74,186,255,0.12)'}`, borderRadius: 10, cursor: 'pointer', color: cover ? '#4ABAFF' : 'rgba(180,210,255,0.4)', fontSize: 13, fontFamily: 'Luna, sans-serif' }}
               >
                 {cover ? `✓ ${cover.name}` : 'Subir portada'}
               </button>
@@ -166,7 +166,7 @@ export default function NewProductPage() {
 
             {/* Title */}
             <div style={{ marginBottom: 20 }}>
-              <label style={{ display: 'block', fontSize: 13, color: 'rgba(180,210,255,0.6)', fontFamily: 'Inter, sans-serif', marginBottom: 8 }}>
+              <label style={{ display: 'block', fontSize: 13, color: 'rgba(180,210,255,0.6)', fontFamily: 'Luna, sans-serif', marginBottom: 8 }}>
                 Título *
               </label>
               <input
@@ -180,7 +180,7 @@ export default function NewProductPage() {
 
             {/* Description */}
             <div style={{ marginBottom: 20 }}>
-              <label style={{ display: 'block', fontSize: 13, color: 'rgba(180,210,255,0.6)', fontFamily: 'Inter, sans-serif', marginBottom: 8 }}>
+              <label style={{ display: 'block', fontSize: 13, color: 'rgba(180,210,255,0.6)', fontFamily: 'Luna, sans-serif', marginBottom: 8 }}>
                 Descripción
               </label>
               <textarea
@@ -195,7 +195,7 @@ export default function NewProductPage() {
             {/* Price + copies */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 32 }}>
               <div>
-                <label style={{ display: 'block', fontSize: 13, color: 'rgba(180,210,255,0.6)', fontFamily: 'Inter, sans-serif', marginBottom: 8 }}>
+                <label style={{ display: 'block', fontSize: 13, color: 'rgba(180,210,255,0.6)', fontFamily: 'Luna, sans-serif', marginBottom: 8 }}>
                   Precio (USDC) *
                 </label>
                 <input
@@ -209,7 +209,7 @@ export default function NewProductPage() {
                 />
               </div>
               <div>
-                <label style={{ display: 'block', fontSize: 13, color: 'rgba(180,210,255,0.6)', fontFamily: 'Inter, sans-serif', marginBottom: 8 }}>
+                <label style={{ display: 'block', fontSize: 13, color: 'rgba(180,210,255,0.6)', fontFamily: 'Luna, sans-serif', marginBottom: 8 }}>
                   Copias disponibles
                 </label>
                 <input
@@ -222,7 +222,7 @@ export default function NewProductPage() {
               </div>
             </div>
 
-            <p style={{ fontSize: 11, color: 'rgba(180,210,255,0.3)', fontFamily: 'Inter, sans-serif', marginBottom: 20 }}>
+            <p style={{ fontSize: 11, color: 'rgba(180,210,255,0.3)', fontFamily: 'Luna, sans-serif', marginBottom: 20 }}>
               5% de cada venta se destina a Solvik Studio como comisión de plataforma.
             </p>
 

@@ -63,7 +63,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div style={{ padding: '0 20px 24px', borderBottom: '1px solid rgba(100,200,255,0.08)' }}>
           <a href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
             <img src="/logo.jpg" alt="Solvik Studio" style={{ height: 28, objectFit: 'contain', borderRadius: 4 }} />
-            <span style={{ fontFamily: 'Nunito, sans-serif', fontWeight: 800, fontSize: 15, color: '#F0F8FF' }}>Solvik Studio</span>
+            <span style={{ fontFamily: 'Luna, sans-serif', fontWeight: 800, fontSize: 15, color: '#F0F8FF' }}>Solvik Studio</span>
           </a>
         </div>
 
@@ -85,7 +85,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     textDecoration: 'none',
                     background: active ? 'rgba(74,186,255,0.12)' : 'transparent',
                     color: active ? '#4ABAFF' : 'rgba(180,210,255,0.6)',
-                    fontSize: 14, fontFamily: 'Inter, sans-serif', transition: 'background 0.15s, color 0.15s',
+                    fontSize: 14, fontFamily: 'Luna, sans-serif', transition: 'background 0.15s, color 0.15s',
                   }}
                 >
                   {item.icon}
@@ -111,7 +111,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   target="_blank"
                   rel="noopener noreferrer"
                   whileHover={{ x: 2 }}
-                  style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 10, marginBottom: 4, textDecoration: 'none', color: 'rgba(180,210,255,0.6)', fontSize: 14, fontFamily: 'Inter, sans-serif', transition: 'color 0.15s' }}
+                  style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 10, marginBottom: 4, textDecoration: 'none', color: 'rgba(180,210,255,0.6)', fontSize: 14, fontFamily: 'Luna, sans-serif', transition: 'color 0.15s' }}
                 >
                   <ExternalLink size={16} />
                   Mi página pública
@@ -121,7 +121,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   onClick={() => setShowWidgetModal(true)}
                   whileHover={{ scale: 1.02, x: 2 }}
                   whileTap={{ scale: 0.97 }}
-                  style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 10, width: '100%', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(180,210,255,0.6)', fontSize: 14, fontFamily: 'Inter, sans-serif', textAlign: 'left' }}
+                  style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 10, width: '100%', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(180,210,255,0.6)', fontSize: 14, fontFamily: 'Luna, sans-serif', textAlign: 'left' }}
                 >
                   <Code2 size={16} />
                   Obtener widget
@@ -137,7 +137,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
           <button
             onClick={handleLogout}
-            style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', background: 'none', border: 'none', color: 'rgba(180,210,255,0.4)', cursor: 'pointer', fontSize: 13, fontFamily: 'Inter, sans-serif', padding: '8px 0' }}
+            style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', background: 'none', border: 'none', color: 'rgba(180,210,255,0.4)', cursor: 'pointer', fontSize: 13, fontFamily: 'Luna, sans-serif', padding: '8px 0' }}
           >
             <LogOut size={14} />
             {t.dashboard.disconnect_label}
@@ -147,7 +147,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       {/* Main content */}
       <main style={{ marginLeft: 240, flex: 1, padding: '40px 48px' }}>
-        <div style={{ background: 'rgba(74,186,255,0.06)', border: '1px solid rgba(74,186,255,0.15)', borderRadius: 10, padding: '10px 18px', marginBottom: 32, fontSize: 12, color: 'rgba(180,210,255,0.5)', fontFamily: 'Inter, sans-serif' }}>
+        <div style={{ background: 'rgba(74,186,255,0.06)', border: '1px solid rgba(74,186,255,0.15)', borderRadius: 10, padding: '10px 18px', marginBottom: 32, fontSize: 12, color: 'rgba(180,210,255,0.5)', fontFamily: 'Luna, sans-serif' }}>
           ℹ️ {t.dashboard.disclaimer_banner}
         </div>
         {children}
@@ -172,17 +172,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               onClick={e => e.stopPropagation()}
               style={{ background: 'rgba(5,20,60,0.97)', backdropFilter: 'blur(24px)', border: '1px solid rgba(74,186,255,0.2)', borderRadius: 16, padding: 32, maxWidth: 560, width: '90%' }}
             >
-              <h3 style={{ fontFamily: 'Nunito, sans-serif', fontWeight: 800, fontSize: 20, color: '#F0F8FF', marginBottom: 8 }}>
+              <h3 style={{ fontFamily: 'Luna, sans-serif', fontWeight: 800, fontSize: 20, color: '#F0F8FF', marginBottom: 8 }}>
                 Obtener widget
               </h3>
-              <p style={{ fontSize: 13, color: 'rgba(180,210,255,0.5)', fontFamily: 'Inter, sans-serif', marginBottom: 20 }}>
+              <p style={{ fontSize: 13, color: 'rgba(180,210,255,0.5)', fontFamily: 'Luna, sans-serif', marginBottom: 20 }}>
                 Pega este código en tu sitio web para mostrar tu badge verificado.
               </p>
               <code style={{ display: 'block', background: 'rgba(0,15,50,0.7)', border: '1px solid rgba(74,186,255,0.15)', borderRadius: 8, padding: '14px 16px', fontSize: 11, color: '#4ABAFF', fontFamily: 'SF Mono, Fira Code, monospace', wordBreak: 'break-all', marginBottom: 20, whiteSpace: 'pre' }}>
                 {embedCode}
               </code>
               <div style={{ marginBottom: 20 }}>
-                <p style={{ fontSize: 12, color: 'rgba(180,210,255,0.4)', fontFamily: 'Inter, sans-serif', marginBottom: 8 }}>Vista previa:</p>
+                <p style={{ fontSize: 12, color: 'rgba(180,210,255,0.4)', fontFamily: 'Luna, sans-serif', marginBottom: 8 }}>Vista previa:</p>
                 <img
                   src={`${APP_URL}/api/widget/${slug}`}
                   alt="Widget preview"

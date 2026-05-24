@@ -29,15 +29,15 @@ export default function SNSPage() {
 
   return (
     <div>
-      <h1 style={{ fontFamily: 'Nunito, sans-serif', fontWeight: 800, fontSize: 28, color: '#F0F8FF', marginBottom: 8 }}>
+      <h1 style={{ fontFamily: 'Luna, sans-serif', fontWeight: 800, fontSize: 28, color: '#F0F8FF', marginBottom: 8 }}>
         {t.dashboard.verify_sns}
       </h1>
-      <p style={{ color: 'rgba(180,210,255,0.5)', fontSize: 14, fontFamily: 'Inter, sans-serif', marginBottom: 36 }}>
+      <p style={{ color: 'rgba(180,210,255,0.5)', fontSize: 14, fontFamily: 'Luna, sans-serif', marginBottom: 36 }}>
         Vincula tu dominio .sol a tu wallet para mostrar un badge verificado en tus certificados.
       </p>
 
       <div className="glass-card" style={{ maxWidth: 500 }}>
-        <label style={{ display: 'block', fontSize: 12, color: 'rgba(180,210,255,0.5)', marginBottom: 6, fontFamily: 'Inter, sans-serif', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+        <label style={{ display: 'block', fontSize: 12, color: 'rgba(180,210,255,0.5)', marginBottom: 6, fontFamily: 'Luna, sans-serif', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
           Dominio .sol
         </label>
         <input
@@ -54,7 +54,7 @@ export default function SNSPage() {
         {result && (
           <div style={{ marginTop: 20, display: 'flex', alignItems: 'flex-start', gap: 12, padding: '14px 16px', borderRadius: 10, background: result.verified ? 'rgba(82,200,120,0.1)' : 'rgba(255,80,80,0.08)', border: `1px solid ${result.verified ? 'rgba(82,200,120,0.3)' : 'rgba(255,80,80,0.2)'}` }}>
             {result.verified ? <CheckCircle size={18} color="#52C878" /> : <AlertCircle size={18} color="#ff6b6b" />}
-            <p style={{ fontSize: 14, color: result.verified ? '#52C878' : '#ff6b6b', fontFamily: 'Inter, sans-serif' }}>
+            <p style={{ fontSize: 14, color: result.verified ? '#52C878' : '#ff6b6b', fontFamily: 'Luna, sans-serif' }}>
               {result.verified ? `✓ ${result.domain} verificado correctamente.` : result.message ?? 'No verificado.'}
             </p>
           </div>

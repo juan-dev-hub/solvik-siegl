@@ -48,7 +48,7 @@ function AnimatedNumber({ value, color }: { value: number; color: string }) {
   return (
     <p
       ref={spanRef}
-      style={{ fontSize: 28, fontFamily: 'Nunito, sans-serif', fontWeight: 800, color }}
+      style={{ fontSize: 28, fontFamily: 'Luna, sans-serif', fontWeight: 800, color }}
     >
       0
     </p>
@@ -74,7 +74,7 @@ export function DashboardHome({ wallet, issuer, totalCerts, recentCerts, monthVe
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: 'easeOut' }}
-        style={{ fontFamily: 'Nunito, sans-serif', fontWeight: 800, fontSize: 28, color: '#F0F8FF', marginBottom: 4 }}
+        style={{ fontFamily: 'Luna, sans-serif', fontWeight: 800, fontSize: 28, color: '#F0F8FF', marginBottom: 4 }}
       >
         {issuer?.institution_name ?? 'Dashboard'}
       </motion.h1>
@@ -82,7 +82,7 @@ export function DashboardHome({ wallet, issuer, totalCerts, recentCerts, monthVe
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.4, delay: 0.06 }}
-        style={{ color: 'rgba(180,210,255,0.4)', fontSize: 13, fontFamily: 'Inter, sans-serif', marginBottom: 32 }}
+        style={{ color: 'rgba(180,210,255,0.4)', fontSize: 13, fontFamily: 'Luna, sans-serif', marginBottom: 32 }}
       >
         <span className="wallet-address">{truncate(wallet)}</span>
       </motion.p>
@@ -98,8 +98,8 @@ export function DashboardHome({ wallet, issuer, totalCerts, recentCerts, monthVe
           style={{ background: 'rgba(255,229,102,0.08)', border: '1px solid rgba(255,229,102,0.3)', borderRadius: 12, padding: '14px 20px', marginBottom: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
         >
           <div>
-            <p style={{ color: '#FFE566', fontFamily: 'Nunito, sans-serif', fontWeight: 700, fontSize: 15 }}>⚠ {t.dashboard.low_credits}</p>
-            <p style={{ color: 'rgba(255,229,102,0.6)', fontSize: 13, fontFamily: 'Inter, sans-serif' }}>{t.dashboard.low_credits_desc}</p>
+            <p style={{ color: '#FFE566', fontFamily: 'Luna, sans-serif', fontWeight: 700, fontSize: 15 }}>⚠ {t.dashboard.low_credits}</p>
+            <p style={{ color: 'rgba(255,229,102,0.6)', fontSize: 13, fontFamily: 'Luna, sans-serif' }}>{t.dashboard.low_credits_desc}</p>
           </div>
           <motion.a
             href="/pricing"
@@ -127,7 +127,7 @@ export function DashboardHome({ wallet, issuer, totalCerts, recentCerts, monthVe
             <div style={{ background: `${s.color}18`, borderRadius: 10, padding: 10 }}>{s.icon}</div>
             <div>
               <AnimatedNumber value={s.value} color={s.color} />
-              <p style={{ fontSize: 12, color: 'rgba(180,210,255,0.5)', fontFamily: 'Inter, sans-serif' }}>{s.label}</p>
+              <p style={{ fontSize: 12, color: 'rgba(180,210,255,0.5)', fontFamily: 'Luna, sans-serif' }}>{s.label}</p>
             </div>
           </motion.div>
         ))}
@@ -143,17 +143,17 @@ export function DashboardHome({ wallet, issuer, totalCerts, recentCerts, monthVe
           style={{ marginBottom: 32, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
         >
           <div>
-            <p style={{ fontSize: 12, color: 'rgba(180,210,255,0.45)', fontFamily: 'Inter, sans-serif', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>
+            <p style={{ fontSize: 12, color: 'rgba(180,210,255,0.45)', fontFamily: 'Luna, sans-serif', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>
               {t.dashboard.current_plan}
             </p>
-            <p style={{ fontFamily: 'Nunito, sans-serif', fontWeight: 700, fontSize: 20, color: '#F0F8FF', textTransform: 'capitalize' }}>
+            <p style={{ fontFamily: 'Luna, sans-serif', fontWeight: 700, fontSize: 20, color: '#F0F8FF', textTransform: 'capitalize' }}>
               {issuer.plan}
             </p>
           </div>
           {issuer.plan_expires_at && (
             <div style={{ textAlign: 'right' }}>
-              <p style={{ fontSize: 12, color: 'rgba(180,210,255,0.45)', fontFamily: 'Inter, sans-serif', marginBottom: 4 }}>{t.dashboard.renews}</p>
-              <p style={{ fontSize: 14, color: 'rgba(180,210,255,0.7)', fontFamily: 'Inter, sans-serif' }}>
+              <p style={{ fontSize: 12, color: 'rgba(180,210,255,0.45)', fontFamily: 'Luna, sans-serif', marginBottom: 4 }}>{t.dashboard.renews}</p>
+              <p style={{ fontSize: 14, color: 'rgba(180,210,255,0.7)', fontFamily: 'Luna, sans-serif' }}>
                 {new Date(issuer.plan_expires_at).toLocaleDateString(dateLocale)}
               </p>
             </div>
@@ -167,8 +167,8 @@ export function DashboardHome({ wallet, issuer, totalCerts, recentCerts, monthVe
           transition={{ duration: 0.4, ease: 'easeOut', delay: 0.24 }}
           style={{ marginBottom: 32, background: 'rgba(0,80,160,0.15)', borderColor: 'rgba(74,186,255,0.2)' }}
         >
-          <p style={{ fontFamily: 'Nunito, sans-serif', fontWeight: 700, fontSize: 16, color: '#4ABAFF', marginBottom: 6 }}>{t.dashboard.no_plan}</p>
-          <p style={{ fontSize: 14, color: 'rgba(180,210,255,0.55)', fontFamily: 'Inter, sans-serif', marginBottom: 16 }}>{t.dashboard.no_plan_desc}</p>
+          <p style={{ fontFamily: 'Luna, sans-serif', fontWeight: 700, fontSize: 16, color: '#4ABAFF', marginBottom: 6 }}>{t.dashboard.no_plan}</p>
+          <p style={{ fontSize: 14, color: 'rgba(180,210,255,0.55)', fontFamily: 'Luna, sans-serif', marginBottom: 16 }}>{t.dashboard.no_plan_desc}</p>
           <motion.a
             href="/pricing"
             whileHover={{ scale: 1.03 }}
@@ -188,11 +188,11 @@ export function DashboardHome({ wallet, issuer, totalCerts, recentCerts, monthVe
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: 'easeOut', delay: 0.32 }}
       >
-        <p style={{ fontFamily: 'Nunito, sans-serif', fontWeight: 700, fontSize: 16, color: '#F0F8FF', marginBottom: 20 }}>{t.dashboard.recent}</p>
+        <p style={{ fontFamily: 'Luna, sans-serif', fontWeight: 700, fontSize: 16, color: '#F0F8FF', marginBottom: 20 }}>{t.dashboard.recent}</p>
         {recentCerts.length === 0 ? (
-          <p style={{ color: 'rgba(180,210,255,0.35)', fontFamily: 'Inter, sans-serif', fontSize: 14 }}>{t.dashboard.no_certs}</p>
+          <p style={{ color: 'rgba(180,210,255,0.35)', fontFamily: 'Luna, sans-serif', fontSize: 14 }}>{t.dashboard.no_certs}</p>
         ) : (
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'Inter, sans-serif', fontSize: 14 }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'Luna, sans-serif', fontSize: 14 }}>
             <tbody>
               {recentCerts.map(c => (
                 <tr key={c.id} style={{ borderBottom: '1px solid rgba(100,200,255,0.06)' }}>

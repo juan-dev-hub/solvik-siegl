@@ -47,10 +47,10 @@ export default function LicensePage() {
   if (error || !license) return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 16, padding: 40 }}>
       <AlertCircle size={48} color="#ff6b6b" />
-      <h2 style={{ fontFamily: 'Nunito, sans-serif', fontWeight: 800, fontSize: 24, color: '#ff6b6b' }}>
+      <h2 style={{ fontFamily: 'Luna, sans-serif', fontWeight: 800, fontSize: 24, color: '#ff6b6b' }}>
         Licencia no encontrada
       </h2>
-      <p style={{ color: 'rgba(180,210,255,0.5)', fontFamily: 'Inter, sans-serif', textAlign: 'center' }}>
+      <p style={{ color: 'rgba(180,210,255,0.5)', fontFamily: 'Luna, sans-serif', textAlign: 'center' }}>
         Este QR no corresponde a una licencia válida en Solvik Studio.
       </p>
     </div>
@@ -73,8 +73,8 @@ export default function LicensePage() {
             <img src="/logo.jpg" alt="Solvik Studio" style={{ height: 32, borderRadius: 6 }} />
           </a>
           <div>
-            <p style={{ fontSize: 11, color: 'rgba(180,210,255,0.4)', fontFamily: 'Inter, sans-serif', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Solvik Studio</p>
-            <p style={{ fontFamily: 'Nunito, sans-serif', fontWeight: 700, fontSize: 14, color: '#F0F8FF' }}>Verificación de licencia</p>
+            <p style={{ fontSize: 11, color: 'rgba(180,210,255,0.4)', fontFamily: 'Luna, sans-serif', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Solvik Studio</p>
+            <p style={{ fontFamily: 'Luna, sans-serif', fontWeight: 700, fontSize: 14, color: '#F0F8FF' }}>Verificación de licencia</p>
           </div>
         </div>
 
@@ -82,20 +82,20 @@ export default function LicensePage() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: 'rgba(82,200,120,0.1)', border: '1px solid rgba(82,200,120,0.3)', borderRadius: 12, padding: '14px 20px', marginBottom: 28 }}>
           <CheckCircle size={24} color="#52C878" />
           <div>
-            <p style={{ fontFamily: 'Nunito, sans-serif', fontWeight: 700, fontSize: 16, color: '#52C878' }}>Licencia válida</p>
-            <p style={{ fontSize: 12, color: 'rgba(82,200,120,0.7)', fontFamily: 'Inter, sans-serif' }}>Compra verificada en Solana blockchain</p>
+            <p style={{ fontFamily: 'Luna, sans-serif', fontWeight: 700, fontSize: 16, color: '#52C878' }}>Licencia válida</p>
+            <p style={{ fontSize: 12, color: 'rgba(82,200,120,0.7)', fontFamily: 'Luna, sans-serif' }}>Compra verificada en Solana blockchain</p>
           </div>
         </div>
 
         {/* Product info */}
         {product && (
           <div style={{ marginBottom: 28 }}>
-            <p style={{ fontSize: 12, color: 'rgba(180,210,255,0.4)', fontFamily: 'Inter, sans-serif', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Producto</p>
-            <p style={{ fontFamily: 'Nunito, sans-serif', fontWeight: 800, fontSize: 22, color: '#F0F8FF', marginBottom: 4 }}>
+            <p style={{ fontSize: 12, color: 'rgba(180,210,255,0.4)', fontFamily: 'Luna, sans-serif', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Producto</p>
+            <p style={{ fontFamily: 'Luna, sans-serif', fontWeight: 800, fontSize: 22, color: '#F0F8FF', marginBottom: 4 }}>
               {product.title}
             </p>
             {product.issuers && (
-              <p style={{ fontSize: 13, color: '#4ABAFF', fontFamily: 'Inter, sans-serif' }}>
+              <p style={{ fontSize: 13, color: '#4ABAFF', fontFamily: 'Luna, sans-serif' }}>
                 por {product.issuers.institution_name}
               </p>
             )}
@@ -111,7 +111,7 @@ export default function LicensePage() {
             { label: 'TX Solana', value: truncate(license.solana_tx_hash) },
           ].map(row => (
             <div key={row.label} style={{ background: 'rgba(0,30,80,0.3)', borderRadius: 10, padding: '12px 16px' }}>
-              <p style={{ fontSize: 10, color: 'rgba(180,210,255,0.4)', fontFamily: 'Inter, sans-serif', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>{row.label}</p>
+              <p style={{ fontSize: 10, color: 'rgba(180,210,255,0.4)', fontFamily: 'Luna, sans-serif', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>{row.label}</p>
               <p style={{ fontSize: 13, color: '#F0F8FF', fontFamily: 'SF Mono, Fira Code, monospace' }}>{row.value}</p>
             </div>
           ))}
@@ -122,14 +122,14 @@ export default function LicensePage() {
             href={`https://solscan.io/token/${license.cnft_address}`}
             target="_blank"
             rel="noopener noreferrer"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#4ABAFF', textDecoration: 'none', fontFamily: 'Inter, sans-serif' }}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#4ABAFF', textDecoration: 'none', fontFamily: 'Luna, sans-serif' }}
           >
             <ExternalLink size={12} />
             Ver NFT de licencia en Solscan
           </a>
         )}
 
-        <p style={{ textAlign: 'center', marginTop: 32, fontSize: 11, color: 'rgba(180,210,255,0.2)', fontFamily: 'Inter, sans-serif' }}>
+        <p style={{ textAlign: 'center', marginTop: 32, fontSize: 11, color: 'rgba(180,210,255,0.2)', fontFamily: 'Luna, sans-serif' }}>
           powered by Solvik Studio
         </p>
       </motion.div>
