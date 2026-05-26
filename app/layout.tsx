@@ -3,6 +3,7 @@ import { Outfit } from 'next/font/google'
 import './globals.css'
 import { SeasonalBackground } from '@/components/SeasonalBackground'
 import { LanguageProvider } from '@/components/LanguageProvider'
+import { ToastProvider } from '@/components/ToastProvider'
 
 const outfit = Outfit({
   subsets: ['latin'],
@@ -24,7 +25,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <SeasonalBackground />
         <div style={{ position: 'relative', zIndex: 1 }}>
           <LanguageProvider>
-            {children}
+            <ToastProvider>
+              {children}
+            </ToastProvider>
           </LanguageProvider>
         </div>
       </body>

@@ -265,6 +265,11 @@ select option { background: #0a1a3a; color: white; }
 }
 .animate-spin { animation: spin 1s linear infinite; }
 
+@keyframes toast-in {
+  from { opacity: 0; transform: translateX(120%) scale(0.92); }
+  to   { opacity: 1; transform: translateX(0)    scale(1);    }
+}
+
 /* ── Responsive ── */
 @media (max-width: 768px) {
   .hero-title {

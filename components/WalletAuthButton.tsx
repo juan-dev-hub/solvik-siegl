@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { Loader2, ShieldCheck } from 'lucide-react'
 import { useTranslation } from '@/components/LanguageProvider'
+import { useToast } from '@/components/ToastProvider'
 
 type SolanaProvider = {
   isSolflare?: boolean
@@ -49,12 +50,12 @@ function truncate(addr: string) {
 
 export function WalletAuthButton() {
   const { t } = useTranslation()
-  const [loading, setLoading]           = useState(false)
-  const [error, setError]               = useState<string | null>(null)
-  const [hasSession, setHasSession]     = useState(false)
+  const toast = useToast()
+  const [loading, setLoading]             = useState(false)
+  const [hasSession, setHasSession]       = useState(false)
   const [walletAddress, setWalletAddress] = useState<string | null>(null)
-  const [altchaToken, setAltchaToken]   = useState<string | null>(null)
-  const [altchaReady, setAltchaReady]   = useState(false)
+  const [altchaToken, setAltchaToken]     = useState<string | null>(null)
+  const [altchaReady, setAltchaReady]     = useState(false)
   const widgetRef = useRef<HTMLElement | null>(null)
 
   useEffect(() => {
@@ -66,7 +67,6 @@ export function WalletAuthButton() {
     }
   }, [])
 
-  // Load altcha web component script once, then wire up the event listener
   useEffect(() => {
     if (hasSession) return
 
@@ -79,7 +79,6 @@ export function WalletAuthButton() {
       document.head.appendChild(script)
     }
 
-    // Poll until the web component is defined, then attach listener
     const poll = setInterval(() => {
       const el = document.getElementById('altcha-widget-main')
       if (el) {
@@ -99,21 +98,29 @@ export function WalletAuthButton() {
   }, [hasSession])
 
   const handleConnect = async () => {
-    setError(null)
-
     if (!altchaToken) {
-      setError('Completa la verificación ☝️ antes de conectar.')
+      toast.error('Verificación requerida', 'Completa el captcha antes de conectar tu wallet.')
       return
     }
 
     setLoading(true)
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 30_000)
+
     try {
       const provider = getProvider()
-      if (!provider) { setError(t.common.install_wallet); return }
+      if (!provider) {
+        toast.error('Wallet no encontrada', t.common.install_wallet)
+        return
+      }
+
       const connectResult = await provider.connect()
       const rawKey = (connectResult as { publicKey?: unknown })?.publicKey ?? provider.publicKey
       const address = getAddress(rawKey)
-      if (!address) { setError(t.common.wallet_no_address); return }
+      if (!address) {
+        toast.error('Error de wallet', t.common.wallet_no_address)
+        return
+      }
       setWalletAddress(address)
 
       const timestamp = Date.now()
@@ -129,19 +136,32 @@ export function WalletAuthButton() {
           'x-altcha-payload': altchaToken,
         },
         body: JSON.stringify({ wallet_address: address, message, signature: Array.from(sigBytes) }),
+        signal: controller.signal,
       })
+      clearTimeout(timeoutId)
+
       const data = (await res.json()) as { ok?: boolean; error?: string }
-      if (!res.ok) { setError(data.error ?? t.common.server_error); return }
+      if (!res.ok) {
+        toast.error('Error de autenticación', data.error ?? t.common.server_error)
+        return
+      }
+
       setHasSession(true)
-      setError(null)
       window.location.href = '/dashboard'
     } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : String(e)
-      setError(
-        msg.toLowerCase().includes('rejected') || msg.toLowerCase().includes('cancel')
-          ? t.common.cancelled
-          : 'Error: ' + msg
-      )
+      clearTimeout(timeoutId)
+      if (e instanceof Error) {
+        if (e.name === 'AbortError') {
+          toast.error(
+            'Tiempo de espera agotado',
+            'El servidor no respondió en 30 segundos. Verifica tu conexión e inténtalo de nuevo.'
+          )
+        } else if (e.message.toLowerCase().includes('rejected') || e.message.toLowerCase().includes('cancel')) {
+          toast.info('Cancelado', 'Rechazaste la firma en tu wallet.')
+        } else {
+          toast.error('Error de conexión', e.message)
+        }
+      }
     } finally {
       setLoading(false)
     }
@@ -167,7 +187,6 @@ export function WalletAuthButton() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
-      {/* Altcha widget — always visible when not authenticated */}
       {/* @ts-expect-error — altcha is a custom web component */}
       <altcha-widget
         id="altcha-widget-main"
@@ -176,12 +195,12 @@ export function WalletAuthButton() {
       />
 
       {altchaToken ? (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#00FFB3', fontFamily: 'Luna, sans-serif' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#00FFB3' }}>
           <ShieldCheck size={14} />
           Verificado
         </div>
       ) : altchaReady ? (
-        <p style={{ fontSize: 11, color: 'rgba(240,240,255,0.4)', fontFamily: 'Luna, sans-serif' }}>
+        <p style={{ fontSize: 11, color: 'rgba(240,240,255,0.4)' }}>
           Completa la verificación para continuar
         </p>
       ) : null}
@@ -199,12 +218,6 @@ export function WalletAuthButton() {
         >
           {t.common.connect}
         </button>
-      )}
-
-      {error && (
-        <p style={{ color: '#ff6b6b', fontSize: 13, textAlign: 'center', maxWidth: 280, fontFamily: 'Luna, sans-serif' }}>
-          {error}
-        </p>
       )}
     </div>
   )
