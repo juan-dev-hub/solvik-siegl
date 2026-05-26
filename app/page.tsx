@@ -22,21 +22,22 @@ export default function LandingPage() {
           <img src="/logo.jpg" alt="Solvik Studio" style={{ height: 32, objectFit: 'contain', borderRadius: 6 }} />
           <span style={{ fontFamily: 'Luna, sans-serif', fontWeight: 800, fontSize: 18, color: '#F0F0FF' }}>Solvik Studio</span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
-          <a href="/pricing" style={{ color: 'rgba(240,240,255,0.65)', textDecoration: 'none', fontSize: 14, fontFamily: 'Luna, sans-serif' }}>{t.nav.pricing}</a>
-          <a href="/terms" style={{ color: 'rgba(240,240,255,0.65)', textDecoration: 'none', fontSize: 14, fontFamily: 'Luna, sans-serif' }}>{t.nav.terms}</a>
+        <div className="nav-links" style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+          <a href="/pricing" style={{ color: 'rgba(240,240,255,0.65)', textDecoration: 'none', fontSize: 14 }}>{t.nav.pricing}</a>
+          <a href="/terms" style={{ color: 'rgba(240,240,255,0.65)', textDecoration: 'none', fontSize: 14 }}>{t.nav.terms}</a>
           <LanguageSwitcher />
           <WalletAuthButton />
         </div>
       </nav>
 
       {/* Hero */}
-      <div style={{ textAlign: 'center', padding: '100px 40px 80px', maxWidth: 800, margin: '0 auto' }}>
+      <div className="hero-section" style={{ textAlign: 'center', padding: '100px 40px 80px', maxWidth: 800, margin: '0 auto' }}>
         <HeroTitle
           text={t.landing.hero_title}
-          style={{ fontFamily: 'Luna, sans-serif', fontWeight: 800, fontSize: 52, color: '#F0F0FF', lineHeight: 1.1, marginBottom: 24 }}
+          className="hero-title"
+          style={{ marginBottom: 28 }}
         />
-        <p style={{ fontSize: 20, color: 'rgba(240,240,255,0.65)', fontFamily: 'Luna, sans-serif', lineHeight: 1.6, marginBottom: 40 }}>
+        <p style={{ fontSize: 20, color: 'rgba(0,212,255,0.75)', fontFamily: 'var(--font-outfit), Outfit, Luna, sans-serif', lineHeight: 1.7, marginBottom: 40, maxWidth: 600, margin: '0 auto 40px' }}>
           {t.landing.hero_sub}
         </p>
         <WalletAuthButton />
@@ -52,7 +53,7 @@ export default function LandingPage() {
       </div>
 
       {/* Pain cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24, maxWidth: 900, margin: '0 auto 80px', padding: '0 40px' }}>
+      <div className="pain-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24, maxWidth: 900, margin: '0 auto 80px', padding: '0 40px' }}>
         {[
           { icon: <AlertTriangle size={28} color="#FF6B6B" />, title: t.landing.feat1_title, desc: t.landing.feat1_desc },
           { icon: <Shield size={28} color="#B06FFF" />, title: t.landing.feat2_title, desc: t.landing.feat2_desc },
@@ -68,14 +69,14 @@ export default function LandingPage() {
 
       {/* Solution block */}
       <div style={{ maxWidth: 700, margin: '0 auto 80px', padding: '0 40px', textAlign: 'center' }}>
-        <div style={{ borderLeft: '3px solid #7B2FFF', background: 'rgba(123,47,255,0.08)', borderRadius: 16, padding: '32px 40px' }}>
-          <p style={{ fontFamily: 'Luna, sans-serif', fontWeight: 800, fontSize: 22, color: '#F0F0FF', marginBottom: 12 }}>
+        <div style={{ borderLeft: '3px solid #7B2FFF', borderRight: '3px solid #00D4FF', background: 'linear-gradient(135deg, rgba(123,47,255,0.10) 0%, rgba(0,212,255,0.06) 100%)', borderRadius: 16, padding: '32px 40px' }}>
+          <p style={{ fontWeight: 800, fontSize: 22, color: '#F0F0FF', marginBottom: 12 }}>
             {t.landing.solution_title}
           </p>
-          <p style={{ fontSize: 16, color: '#B06FFF', fontFamily: 'Luna, sans-serif', lineHeight: 1.6, marginBottom: 20 }}>
+          <p style={{ fontSize: 16, lineHeight: 1.6, marginBottom: 20, background: 'linear-gradient(90deg, #B06FFF, #00D4FF)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', fontWeight: 600 }}>
             {t.landing.solution_body}
           </p>
-          <p style={{ fontSize: 14, color: 'rgba(240,240,255,0.5)', fontFamily: 'Luna, sans-serif', fontStyle: 'italic' }}>
+          <p style={{ fontSize: 14, color: 'rgba(0,212,255,0.55)', fontStyle: 'italic' }}>
             {t.landing.urgency}
           </p>
         </div>
@@ -89,7 +90,7 @@ export default function LandingPage() {
         <p style={{ textAlign: 'center', color: 'rgba(240,240,255,0.5)', fontSize: 15, fontFamily: 'Luna, sans-serif', marginBottom: 40 }}>
           {t.landing.pricing_sub}
         </p>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20, marginBottom: 28 }}>
+        <div className="pricing-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20, marginBottom: 28 }}>
           {PLANS.map(p => (
             <div key={p.id} className="glass-card" style={{ border: p.popular ? '1px solid #7B2FFF' : undefined, position: 'relative' }}>
               {p.popular && (

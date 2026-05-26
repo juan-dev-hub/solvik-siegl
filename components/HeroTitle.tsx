@@ -2,15 +2,13 @@
 import { useEffect, useRef } from 'react'
 import gsap from 'gsap'
 
-export function HeroTitle({ text, style }: { text: string; style?: React.CSSProperties }) {
+export function HeroTitle({ text, style, className }: { text: string; style?: React.CSSProperties; className?: string }) {
   const containerRef = useRef<HTMLHeadingElement>(null)
 
   useEffect(() => {
     const el = containerRef.current
     if (!el) return
 
-    // gsap.context scopes all tweens to this element and properly
-    // kills them on cleanup — fixes React 18 Strict Mode double-invoke
     const ctx = gsap.context(() => {
       gsap.fromTo(
         '.char',
@@ -29,19 +27,23 @@ export function HeroTitle({ text, style }: { text: string; style?: React.CSSProp
     return () => ctx.revert()
   }, [text])
 
+  const words = text.split(' ')
+
   return (
-    <h1 ref={containerRef} style={{ ...style, perspective: 500 }}>
-      {text.split('').map((char, i) => (
-        <span
-          key={i}
-          className="char"
-          style={{
-            display: 'inline-block',
-            opacity: 0,
-            whiteSpace: char === ' ' ? 'pre' : undefined,
-          }}
-        >
-          {char === ' ' ? ' ' : char}
+    <h1 ref={containerRef} style={{ ...style, perspective: 500 }} className={className}>
+      {words.map((word, wi) => (
+        <span key={wi}>
+          {/* nowrap wrapper = browser can only break between words, never mid-word */}
+          <span style={{ display: 'inline-block', whiteSpace: 'nowrap' }}>
+            {word.split('').map((char, ci) => (
+              <span key={ci} className="char" style={{ display: 'inline-block', opacity: 0 }}>
+                {char}
+              </span>
+            ))}
+          </span>
+          {wi < words.length - 1 && (
+            <span className="char" style={{ display: 'inline-block', opacity: 0, whiteSpace: 'pre' }}>{' '}</span>
+          )}
         </span>
       ))}
     </h1>
