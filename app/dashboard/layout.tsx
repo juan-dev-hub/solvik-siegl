@@ -53,8 +53,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   ]
 
   const quickLinks = [
-    { label: 'Página de inicio',  href: '/',       icon: <Home  size={16} /> },
-    { label: 'Tienda pública',    href: '/store',  icon: <Store size={16} /> },
+    { label: 'Tienda pública', href: '/store', icon: <Store size={16} /> },
   ]
 
   const embedCode = `<a href="${APP_URL}/i/${slug}" target="_blank">\n  <img src="${APP_URL}/api/widget/${slug}" alt="Verificado con Solvik Studio" />\n</a>`
@@ -105,6 +104,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <p style={{ fontSize: 10, fontWeight: 600, color: 'rgba(180,210,255,0.25)', textTransform: 'uppercase', letterSpacing: '0.08em', padding: '0 12px', marginBottom: 6 }}>
               Acceso rápido
             </p>
+            {/* Store — always visible */}
             {quickLinks.map(item => (
               <motion.a
                 key={item.href}
@@ -119,6 +119,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 <ExternalLink size={10} style={{ marginLeft: 'auto', opacity: 0.4 }} />
               </motion.a>
             ))}
+            {/* Public profile — only when slug is loaded */}
+            {slug && (
+              <motion.a
+                href={`/i/${slug}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                whileHover={{ x: 2 }}
+                style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderRadius: 10, marginBottom: 2, textDecoration: 'none', color: 'rgba(180,210,255,0.5)', fontSize: 13, transition: 'color 0.15s' }}
+              >
+                <Home size={16} />
+                Mi página pública
+                <ExternalLink size={10} style={{ marginLeft: 'auto', opacity: 0.4 }} />
+              </motion.a>
+            )}
           </div>
 
           {/* Public page + widget — only shown once slug loads */}
@@ -132,17 +146,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 transition={{ duration: 0.28, ease: 'easeOut' }}
                 style={{ borderTop: '1px solid rgba(100,200,255,0.08)', marginTop: 10, paddingTop: 12 }}
               >
-                <motion.a
-                  href={`/i/${slug}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  whileHover={{ x: 2 }}
-                  style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 10, marginBottom: 4, textDecoration: 'none', color: 'rgba(180,210,255,0.6)', fontSize: 14, fontFamily: 'Luna, sans-serif', transition: 'color 0.15s' }}
-                >
-                  <ExternalLink size={16} />
-                  Mi página pública
-                </motion.a>
-
                 <motion.button
                   onClick={() => setShowWidgetModal(true)}
                   whileHover={{ scale: 1.02, x: 2 }}
