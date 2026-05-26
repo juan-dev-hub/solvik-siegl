@@ -1,9 +1,11 @@
 User-agent: *
 Allow: /
 Allow: /i/
+Allow: /store/
+Allow: /pricing
+Allow: /terms
 Disallow: /verify/
+Disallow: /license/
 Disallow: /dashboard/
 Disallow: /admin/
 Disallow: /api/
-
-Sitemap: https://solvikstudio.com/sitemap.xml

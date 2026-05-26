@@ -1,24 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { Keypair } from '@solana/web3.js'
+import { verifyChallenge } from '@/lib/altcha'
 
 const USDC_MINT = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
 
 const PLAN_AMOUNTS: Record<string, number> = {
-  starter: 9,
-  pro:     25,
-  studio:  59,
-}
-
-const PACKAGE_AMOUNTS: Record<string, number> = {
-  mini:   5,
-  normal: 18,
-  grande: 55,
+  starter:  49,
+  pro:      99,
+  studio:  249,
 }
 
 export async function GET(req: NextRequest) {
+  const altchaPayload = req.headers.get('x-altcha-payload')
+  if (altchaPayload) {
+    const valid = await verifyChallenge(altchaPayload)
+    if (!valid) {
+      return NextResponse.json({ error: 'Verificación fallida' }, { status: 400 })
+    }
+  }
+
   const { searchParams } = new URL(req.url)
   const plan         = searchParams.get('plan')
-  const pkg          = searchParams.get('package')
   const product      = searchParams.get('product')
   const amount_param = searchParams.get('amount')
 
@@ -28,9 +30,6 @@ export async function GET(req: NextRequest) {
   if (plan && PLAN_AMOUNTS[plan] !== undefined) {
     amount = PLAN_AMOUNTS[plan]
     memo   = `plan-${plan}`
-  } else if (pkg && PACKAGE_AMOUNTS[pkg] !== undefined) {
-    amount = PACKAGE_AMOUNTS[pkg]
-    memo   = `credits-${pkg}`
   } else if (product && amount_param) {
     amount = Number(amount_param) / 1_000_000
     memo   = `product-${product}`

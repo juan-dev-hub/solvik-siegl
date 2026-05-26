@@ -53,6 +53,8 @@ export function WalletAuthButton() {
   const [error, setError]               = useState<string | null>(null)
   const [hasSession, setHasSession]     = useState(false)
   const [walletAddress, setWalletAddress] = useState<string | null>(null)
+  const [altchaToken, setAltchaToken]   = useState<string | null>(null)
+  const [showAltcha, setShowAltcha]     = useState(false)
 
   useEffect(() => {
     const active = document.cookie.includes('session_active=1')
@@ -63,8 +65,26 @@ export function WalletAuthButton() {
     }
   }, [])
 
+  // Load altcha web component script once
+  useEffect(() => {
+    if (!showAltcha) return
+    if (document.querySelector('script[data-altcha]')) return
+    const script = document.createElement('script')
+    script.src = 'https://cdn.jsdelivr.net/npm/altcha/dist/altcha.min.js'
+    script.type = 'module'
+    script.setAttribute('data-altcha', '1')
+    document.head.appendChild(script)
+  }, [showAltcha])
+
   const handleConnect = async () => {
     setError(null)
+    setShowAltcha(true)
+
+    if (!altchaToken) {
+      setError('Completa la verificación antes de conectar.')
+      return
+    }
+
     setLoading(true)
     try {
       const provider = getProvider()
@@ -83,7 +103,10 @@ export function WalletAuthButton() {
 
       const res = await fetch('/api/auth/wallet', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-altcha-payload': altchaToken,
+        },
         body: JSON.stringify({ wallet_address: address, message, signature: Array.from(sigBytes) }),
       })
       const data = (await res.json()) as { ok?: boolean; error?: string }
@@ -131,7 +154,20 @@ export function WalletAuthButton() {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
+      {showAltcha && (
+        // @ts-expect-error — altcha is a custom web component
+        <altcha-widget
+          challengeurl="/api/altcha"
+          style={{ '--altcha-max-width': '320px' } as React.CSSProperties}
+          onStateChange={(e: CustomEvent<{ state: string; payload?: string }>) => {
+            if (e.detail?.state === 'verified' && e.detail.payload) {
+              setAltchaToken(e.detail.payload)
+              setError(null)
+            }
+          }}
+        />
+      )}
       <button className="btn-primary" onClick={handleConnect}>{t.common.connect}</button>
       {error && <p style={{ color: '#ff6b6b', fontSize: 13, textAlign: 'center', maxWidth: 280, fontFamily: 'Luna, sans-serif' }}>{error}</p>}
     </div>

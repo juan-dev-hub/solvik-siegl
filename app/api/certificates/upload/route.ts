@@ -1,36 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getWalletSession } from '@/lib/wallet-auth'
+import { getWalletSession } from '@/lib/auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import { uploadToArweave } from '@/lib/arweave'
 import { mintCNFT } from '@/lib/cnft'
-import { createAttestation } from '@/lib/sas'
-import { generateCertificatePDF } from '@/lib/generate-pdf'
-
-const ALLOWED_TYPES = ['application/pdf', 'image/webp', 'video/webm']
-const MAX_SIZE = 5 * 1024 * 1024
+import { generateCertificatePDF, createAttestation, validateFileAndAccess, updateStorageUsed } from '@/lib/certificates'
 
 export async function POST(req: NextRequest) {
   try {
     const wallet = await getWalletSession()
     if (!wallet) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    const { data: issuer } = await supabaseAdmin
-      .from('issuers').select('*').eq('wallet_address', wallet).single()
-    if (!issuer || issuer.credits < 1) {
-      return NextResponse.json({ error: 'Insufficient credits' }, { status: 402 })
-    }
-
     const fd = await req.formData()
-    const file     = fd.get('file') as File | null
-    const issuedTo = (fd.get('issued_to') as string)?.trim()
-    const docType  = fd.get('doc_type') as string
+    const file      = fd.get('file') as File | null
+    const issuedTo  = (fd.get('issued_to') as string)?.trim()
+    const docType   = fd.get('doc_type') as string
     const expiresAt = fd.get('expires_at') as string | null
 
     if (!file || !issuedTo) return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
-    if (!ALLOWED_TYPES.includes(file.type)) {
-      return NextResponse.json({ error: 'Solo aceptamos PDF, WebP y WebM. Convierte tu archivo antes de subirlo para pagar menos en Arweave.' }, { status: 400 })
+
+    const validation = await validateFileAndAccess(wallet, file.size, file.type)
+    if (!validation.valid) {
+      return NextResponse.json({ error: validation.error }, { status: 402 })
     }
-    if (file.size > MAX_SIZE) return NextResponse.json({ error: 'File exceeds 5 MB' }, { status: 400 })
 
     const buffer = Buffer.from(await file.arrayBuffer())
 
@@ -39,12 +30,10 @@ export async function POST(req: NextRequest) {
       issuer_wallet: wallet,
       issued_to: issuedTo,
     })
-
     const arweaveTxId = arweave.id
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://www.solvikstudio.com'
     const verifyUrl = `${appUrl}/verify/${arweaveTxId}`
 
-    // Mint cNFT
     let cnftAddress: string | null = null
     try {
       cnftAddress = await mintCNFT({
@@ -57,7 +46,6 @@ export async function POST(req: NextRequest) {
       console.error('cNFT mint error:', e)
     }
 
-    // SAS Attestation
     let attestationPda: string | null = null
     try {
       attestationPda = await createAttestation({
@@ -66,22 +54,19 @@ export async function POST(req: NextRequest) {
         doc_type: docType,
       })
     } catch (e) {
-      console.error('SAS error:', e)
+      console.error('Attestation error:', e)
     }
 
-    // Decrement credit
-    await supabaseAdmin
-      .from('issuers')
-      .update({ credits: issuer.credits - 1 })
-      .eq('wallet_address', wallet)
+    await updateStorageUsed(wallet, file.size)
 
-    const issuerName = issuer.institution_name ?? 'Solvik Studio'
+    const { data: issuer } = await supabaseAdmin
+      .from('issuers').select('institution_name').eq('wallet_address', wallet).single()
+    const issuerName = issuer?.institution_name ?? 'Solvik Studio'
 
     await supabaseAdmin.from('certificates').insert({
       issuer_wallet: wallet,
       arweave_tx_id: arweaveTxId,
       cnft_address: cnftAddress,
-      attestation_pda: attestationPda,
       file_name: file.name,
       file_size_bytes: file.size,
       doc_type: docType,
@@ -91,7 +76,6 @@ export async function POST(req: NextRequest) {
       expires_at: expiresAt ?? null,
     })
 
-    // Generate PDF in memory
     const pdfBuffer = await generateCertificatePDF({
       issued_to: issuedTo,
       issuer_name: issuerName,
