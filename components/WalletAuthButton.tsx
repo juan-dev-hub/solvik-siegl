@@ -1,6 +1,6 @@
 'use client'
-import { useState, useEffect } from 'react'
-import { Loader2 } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { Loader2, ShieldCheck } from 'lucide-react'
 import { useTranslation } from '@/components/LanguageProvider'
 
 type SolanaProvider = {
@@ -54,7 +54,8 @@ export function WalletAuthButton() {
   const [hasSession, setHasSession]     = useState(false)
   const [walletAddress, setWalletAddress] = useState<string | null>(null)
   const [altchaToken, setAltchaToken]   = useState<string | null>(null)
-  const [showAltcha, setShowAltcha]     = useState(false)
+  const [altchaReady, setAltchaReady]   = useState(false)
+  const widgetRef = useRef<HTMLElement | null>(null)
 
   useEffect(() => {
     const active = document.cookie.includes('session_active=1')
@@ -65,23 +66,43 @@ export function WalletAuthButton() {
     }
   }, [])
 
-  // Load altcha web component script once
+  // Load altcha web component script once, then wire up the event listener
   useEffect(() => {
-    if (!showAltcha) return
-    if (document.querySelector('script[data-altcha]')) return
-    const script = document.createElement('script')
-    script.src = 'https://cdn.jsdelivr.net/npm/altcha/dist/altcha.min.js'
-    script.type = 'module'
-    script.setAttribute('data-altcha', '1')
-    document.head.appendChild(script)
-  }, [showAltcha])
+    if (hasSession) return
+
+    const scriptId = 'altcha-script'
+    if (!document.getElementById(scriptId)) {
+      const script = document.createElement('script')
+      script.id = scriptId
+      script.src = 'https://cdn.jsdelivr.net/npm/altcha/dist/altcha.min.js'
+      script.type = 'module'
+      document.head.appendChild(script)
+    }
+
+    // Poll until the web component is defined, then attach listener
+    const poll = setInterval(() => {
+      const el = document.getElementById('altcha-widget-main')
+      if (el) {
+        widgetRef.current = el as HTMLElement
+        el.addEventListener('statechange', (e: Event) => {
+          const detail = (e as CustomEvent<{ state: string; payload?: string }>).detail
+          if (detail?.state === 'verified' && detail.payload) {
+            setAltchaToken(detail.payload)
+          }
+        })
+        setAltchaReady(true)
+        clearInterval(poll)
+      }
+    }, 200)
+
+    return () => clearInterval(poll)
+  }, [hasSession])
 
   const handleConnect = async () => {
     setError(null)
-    setShowAltcha(true)
 
     if (!altchaToken) {
-      setError('Completa la verificación antes de conectar.')
+      setError('Completa la verificación ☝️ antes de conectar.')
       return
     }
 
@@ -144,32 +165,47 @@ export function WalletAuthButton() {
     )
   }
 
-  if (loading) {
-    return (
-      <button className="btn-primary" disabled>
-        <Loader2 size={16} className="animate-spin" />
-        {t.common.connecting}
-      </button>
-    )
-  }
-
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
-      {showAltcha && (
-        // @ts-expect-error — altcha is a custom web component
-        <altcha-widget
-          challengeurl="/api/altcha"
-          style={{ '--altcha-max-width': '320px' } as React.CSSProperties}
-          onStateChange={(e: CustomEvent<{ state: string; payload?: string }>) => {
-            if (e.detail?.state === 'verified' && e.detail.payload) {
-              setAltchaToken(e.detail.payload)
-              setError(null)
-            }
-          }}
-        />
+      {/* Altcha widget — always visible when not authenticated */}
+      {/* @ts-expect-error — altcha is a custom web component */}
+      <altcha-widget
+        id="altcha-widget-main"
+        challengeurl="/api/altcha"
+        style={{ '--altcha-max-width': '280px' } as React.CSSProperties}
+      />
+
+      {altchaToken ? (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#00FFB3', fontFamily: 'Luna, sans-serif' }}>
+          <ShieldCheck size={14} />
+          Verificado
+        </div>
+      ) : altchaReady ? (
+        <p style={{ fontSize: 11, color: 'rgba(240,240,255,0.4)', fontFamily: 'Luna, sans-serif' }}>
+          Completa la verificación para continuar
+        </p>
+      ) : null}
+
+      {loading ? (
+        <button className="btn-primary" disabled>
+          <Loader2 size={16} className="animate-spin" />
+          {t.common.connecting}
+        </button>
+      ) : (
+        <button
+          className="btn-primary"
+          onClick={handleConnect}
+          style={{ opacity: altchaToken ? 1 : 0.6 }}
+        >
+          {t.common.connect}
+        </button>
       )}
-      <button className="btn-primary" onClick={handleConnect}>{t.common.connect}</button>
-      {error && <p style={{ color: '#ff6b6b', fontSize: 13, textAlign: 'center', maxWidth: 280, fontFamily: 'Luna, sans-serif' }}>{error}</p>}
+
+      {error && (
+        <p style={{ color: '#ff6b6b', fontSize: 13, textAlign: 'center', maxWidth: 280, fontFamily: 'Luna, sans-serif' }}>
+          {error}
+        </p>
+      )}
     </div>
   )
 }
