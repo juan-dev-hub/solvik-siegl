@@ -163,19 +163,23 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               Tienda pública
               <ExternalLink size={9} style={{ marginLeft: 'auto', opacity: 0.35 }} />
             </a>
-            {slug && (
-              <a href={`/i/${slug}`} target="_blank" rel="noopener noreferrer" style={linkStyle}>
-                <Home size={15} />
-                Mi página pública
-                <ExternalLink size={9} style={{ marginLeft: 'auto', opacity: 0.35 }} />
-              </a>
-            )}
-            {slug && (
-              <button onClick={() => setShowWidgetModal(true)} style={linkStyle}>
-                <Code2 size={15} />
-                Obtener widget
-              </button>
-            )}
+            <a
+              href={slug ? `/i/${slug}` : undefined}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ ...linkStyle, opacity: slug ? 1 : 0.38, pointerEvents: slug ? 'auto' : 'none' }}
+            >
+              <Home size={15} />
+              Mi página pública
+              <ExternalLink size={9} style={{ marginLeft: 'auto', opacity: 0.35 }} />
+            </a>
+            <button
+              onClick={() => slug && setShowWidgetModal(true)}
+              style={{ ...linkStyle, opacity: slug ? 1 : 0.38, cursor: slug ? 'pointer' : 'default' }}
+            >
+              <Code2 size={15} />
+              Obtener widget
+            </button>
           </Accordion>
 
           {/* Accordion 2: Cuenta */}
