@@ -35,6 +35,33 @@ export async function GET(req: NextRequest) {
   }
 }
 
+// PATCH: toggle is_public for a certificate
+export async function PATCH(req: NextRequest) {
+  try {
+    const wallet = await getWalletSession()
+    if (!wallet) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    const { cert_id, is_public } = (await req.json()) as { cert_id: string; is_public: boolean }
+    if (!cert_id || typeof is_public !== 'boolean') {
+      return NextResponse.json({ error: 'Missing cert_id or is_public' }, { status: 400 })
+    }
+
+    const { error } = await supabaseAdmin
+      .from('certificates')
+      .update({ is_public })
+      .eq('id', cert_id)
+      .eq('issuer_wallet', wallet)   // ownership guard
+
+    if (error) throw error
+    return NextResponse.json({ ok: true })
+  } catch (err) {
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : String(err) },
+      { status: 500 }
+    )
+  }
+}
+
 // POST: regenerate PDF from arweave_tx_id
 export async function POST(req: NextRequest) {
   try {

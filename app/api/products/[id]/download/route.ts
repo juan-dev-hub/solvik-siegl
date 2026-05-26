@@ -43,19 +43,17 @@ async function embedQrOnAllPages(
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   const { searchParams } = new URL(req.url)
   const licenseId = searchParams.get('license')
-  const buyerWallet = searchParams.get('wallet')
 
-  if (!licenseId || !buyerWallet) {
-    return NextResponse.json({ error: 'Missing license or wallet' }, { status: 400 })
+  if (!licenseId) {
+    return NextResponse.json({ error: 'Missing license' }, { status: 400 })
   }
 
-  // Validate license belongs to this product and buyer
+  // Validate license belongs to this product — buyer_wallet is authoritative from DB
   const { data: license } = await supabaseAdmin
     .from('digital_licenses')
     .select('id, product_id, buyer_wallet, arweave_tx_id')
     .eq('id', licenseId)
     .eq('product_id', params.id)
-    .eq('buyer_wallet', buyerWallet)
     .single()
 
   if (!license) return NextResponse.json({ error: 'License not found' }, { status: 404 })

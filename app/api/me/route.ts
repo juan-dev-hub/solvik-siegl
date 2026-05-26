@@ -8,7 +8,7 @@ export async function GET() {
 
   const { data: issuer } = await supabaseAdmin
     .from('issuers')
-    .select('wallet_address, institution_name, slug, plan, credits')
+    .select('wallet_address, institution_name, slug, storage_used_bytes, storage_limit_bytes')
     .eq('wallet_address', wallet)
     .single()
 
