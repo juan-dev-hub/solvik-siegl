@@ -5,7 +5,7 @@ export async function GET(_req: NextRequest, { params }: { params: { slug: strin
   try {
     const { data: issuer } = await supabaseAdmin
       .from('issuers')
-      .select('wallet_address, institution_name, slug, sns_domain, sns_verified, registered_at')
+      .select('wallet_address, institution_name, slug, sns_domain, sns_verified, registered_at, page_active, page_headline, page_tagline, page_about, page_cta')
       .eq('slug', params.slug)
       .single()
 

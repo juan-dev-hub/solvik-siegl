@@ -297,10 +297,26 @@ select option { background: #0a1a3a; color: white; }
   .nav-links {
     display: none;
   }
+
+  /* Dashboard mobile */
+  .glass-card {
+    padding: var(--space-md);
+  }
 }
 
 @media (max-width: 480px) {
   .hero-title {
     font-size: clamp(24px, 9vw, 36px);
   }
+
+  .btn-primary,
+  .btn-secondary {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Smooth scroll for anchor links */
+html {
+  scroll-behavior: smooth;
 }
