@@ -7,7 +7,7 @@ import { InactivityTimer } from '@/components/InactivityTimer'
 import { usePathname, useRouter } from 'next/navigation'
 import {
   Award, FolderOpen, List, CreditCard, Globe, LayoutDashboard,
-  Image, LogOut, ExternalLink, Code2, ShoppingBag, Library,
+  Image, LogOut, ExternalLink, Code2, ShoppingBag, Library, Home, Store,
 } from 'lucide-react'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://www.solvikstudio.com'
@@ -52,6 +52,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     { label: t.dashboard.verify_sns, href: '/dashboard/sns',      icon: <Globe size={16} /> },
   ]
 
+  const quickLinks = [
+    { label: 'Página de inicio',  href: '/',       icon: <Home  size={16} /> },
+    { label: 'Tienda pública',    href: '/store',  icon: <Store size={16} /> },
+  ]
+
   const embedCode = `<a href="${APP_URL}/i/${slug}" target="_blank">\n  <img src="${APP_URL}/api/widget/${slug}" alt="Verificado con Solvik Studio" />\n</a>`
 
   return (
@@ -94,6 +99,27 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               )
             })}
           </AnimatePresence>
+
+          {/* Quick links — always visible */}
+          <div style={{ borderTop: '1px solid rgba(100,200,255,0.08)', marginTop: 10, paddingTop: 12 }}>
+            <p style={{ fontSize: 10, fontWeight: 600, color: 'rgba(180,210,255,0.25)', textTransform: 'uppercase', letterSpacing: '0.08em', padding: '0 12px', marginBottom: 6 }}>
+              Acceso rápido
+            </p>
+            {quickLinks.map(item => (
+              <motion.a
+                key={item.href}
+                href={item.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                whileHover={{ x: 2 }}
+                style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderRadius: 10, marginBottom: 2, textDecoration: 'none', color: 'rgba(180,210,255,0.5)', fontSize: 13, transition: 'color 0.15s' }}
+              >
+                {item.icon}
+                {item.label}
+                <ExternalLink size={10} style={{ marginLeft: 'auto', opacity: 0.4 }} />
+              </motion.a>
+            ))}
+          </div>
 
           {/* Public page + widget — only shown once slug loads */}
           <AnimatePresence>
