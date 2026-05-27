@@ -4,6 +4,7 @@ import './globals.css'
 import { SeasonalBackground } from '@/components/SeasonalBackground'
 import { LanguageProvider } from '@/components/LanguageProvider'
 import { ToastProvider } from '@/components/ToastProvider'
+import { InactivityTimer } from '@/components/InactivityTimer'
 
 const outfit = Outfit({
   subsets: ['latin'],
@@ -26,6 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <div style={{ position: 'relative', zIndex: 1 }}>
           <LanguageProvider>
             <ToastProvider>
+              <InactivityTimer />
               {children}
             </ToastProvider>
           </LanguageProvider>

@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTranslation } from '@/components/LanguageProvider'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
-import { InactivityTimer } from '@/components/InactivityTimer'
 import { usePathname, useRouter } from 'next/navigation'
 import {
   Award, FolderOpen, List, CreditCard, Globe, LayoutDashboard,
@@ -238,7 +237,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh' }}>
-      <InactivityTimer />
 
       {/* Mobile overlay */}
       {isMobile && sidebarOpen && (
