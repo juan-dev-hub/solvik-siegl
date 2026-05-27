@@ -31,10 +31,18 @@ export async function POST(req: NextRequest) {
 
     const slug = wallet_address.slice(0, 8).toLowerCase()
 
+    // Create issuer if new; if already exists, leave institution_name untouched
     await supabaseAdmin.from('issuers').upsert(
       { wallet_address, institution_name: 'Sin nombre', slug },
       { onConflict: 'wallet_address', ignoreDuplicates: true }
     )
+
+    // Backfill slug for existing accounts that had it null
+    await supabaseAdmin
+      .from('issuers')
+      .update({ slug })
+      .eq('wallet_address', wallet_address)
+      .is('slug', null)
 
     await createWalletSession(wallet_address)
     return NextResponse.json({ ok: true, wallet: wallet_address })

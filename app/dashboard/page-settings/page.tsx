@@ -48,15 +48,25 @@ export default function PageSettingsPage() {
   const set = <K extends keyof PageSettings>(k: K, v: PageSettings[K]) =>
     setSettings(s => ({ ...s, [k]: v }))
 
+  const handleSlugChange = (raw: string) => {
+    // only lowercase letters, numbers, hyphens
+    setSlug(raw.toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 30))
+  }
+
   const handleSave = async () => {
+    if (!slug || slug.length < 3) {
+      toast.error('Slug inválido', 'El slug debe tener al menos 3 caracteres (solo letras, números y guiones).')
+      return
+    }
     setSaving(true)
     try {
       const res = await fetch('/api/issuer/settings', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(settings),
+        body: JSON.stringify({ ...settings, slug }),
       })
-      if (!res.ok) throw new Error('Error al guardar')
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Error al guardar')
       toast.success('Cambios guardados', 'Tu página pública ha sido actualizada.')
     } catch (err) {
       toast.error('Error', err instanceof Error ? err.message : 'No se pudo guardar')
@@ -107,6 +117,43 @@ export default function PageSettingsPage() {
           >
             <Eye size={14} /> Ver página
           </a>
+        )}
+      </div>
+
+      {/* URL / Slug */}
+      <div className="glass-card" style={{ marginBottom: 20, padding: '20px 24px' }}>
+        <p style={{ fontWeight: 700, fontSize: 15, color: '#F0F8FF', marginBottom: 4 }}>Tu URL pública</p>
+        <p style={{ fontSize: 13, color: 'rgba(180,210,255,0.45)', marginBottom: 16 }}>
+          Esta es la dirección donde cualquiera puede ver tu página. Solo letras, números y guiones.
+        </p>
+        <div style={{
+          display: 'flex', alignItems: 'center',
+          background: 'rgba(0,15,50,0.60)', border: '1px solid rgba(100,180,255,0.20)',
+          borderRadius: 10, overflow: 'hidden',
+        }}>
+          <span style={{
+            padding: '12px 14px', color: 'rgba(180,210,255,0.3)', fontSize: 13,
+            whiteSpace: 'nowrap', borderRight: '1px solid rgba(100,180,255,0.12)',
+            flexShrink: 0, fontFamily: 'SF Mono, Fira Code, monospace',
+          }}>
+            /i/
+          </span>
+          <input
+            style={{
+              background: 'transparent', border: 'none', color: 'white',
+              padding: '12px 14px', fontSize: 14, outline: 'none', flex: 1,
+              fontFamily: 'SF Mono, Fira Code, monospace',
+            }}
+            value={slug}
+            onChange={e => handleSlugChange(e.target.value)}
+            placeholder="mi-universidad"
+            maxLength={30}
+          />
+        </div>
+        {slug && slug.length >= 3 && (
+          <p style={{ fontSize: 12, color: 'rgba(74,186,255,0.6)', marginTop: 8 }}>
+            {APP_URL}/i/{slug}
+          </p>
         )}
       </div>
 
