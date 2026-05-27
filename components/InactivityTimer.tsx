@@ -46,7 +46,7 @@ export function InactivityTimer() {
   }, [router, stopCountdown])
 
   useEffect(() => {
-    const events = ['mousemove', 'mousedown', 'keypress', 'scroll', 'touchstart', 'click']
+    const events = ['mousedown', 'keypress', 'scroll', 'touchstart', 'click']
     events.forEach(e => window.addEventListener(e, reset, { passive: true }))
     reset()
     return () => {
