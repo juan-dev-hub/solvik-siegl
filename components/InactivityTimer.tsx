@@ -10,17 +10,22 @@ const WARN_SECS   = (TIMEOUT_MS - WARN_MS) / 1000  // 120 seconds
 export function InactivityTimer() {
   const router = useRouter()
   const { t } = useTranslation()
-  const timerRef    = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const warnRef     = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const timerRef     = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const warnRef      = useRef<ReturnType<typeof setTimeout> | null>(null)
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null)
-  const [showWarn, setShowWarn]     = useState(false)
+  const routerRef    = useRef(router)
+  const [showWarn, setShowWarn]       = useState(false)
   const [secondsLeft, setSecondsLeft] = useState(WARN_SECS)
+
+  // Keep routerRef current without triggering effect re-runs
+  useEffect(() => { routerRef.current = router }, [router])
 
   const stopCountdown = useCallback(() => {
     if (countdownRef.current) clearInterval(countdownRef.current)
     countdownRef.current = null
   }, [])
 
+  // reset has no router dependency — stable across navigations
   const reset = useCallback(() => {
     setShowWarn(false)
     setSecondsLeft(WARN_SECS)
@@ -41,9 +46,9 @@ export function InactivityTimer() {
 
     timerRef.current = setTimeout(async () => {
       await fetch('/api/auth/logout', { method: 'POST' })
-      router.push('/')
+      routerRef.current.push('/')
     }, TIMEOUT_MS)
-  }, [router, stopCountdown])
+  }, [stopCountdown])
 
   useEffect(() => {
     const events = ['mousedown', 'keypress', 'scroll', 'touchstart', 'click']
