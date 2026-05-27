@@ -27,8 +27,8 @@ export const metadata: Metadata = {
   description: 'Emite certificados digitales permanentes en Arweave, verificables con QR, firmados con tu wallet de Solana.',
   manifest: '/manifest.json',
   icons: {
-    icon: '/logo.jpg',
-    apple: '/logo.jpg',
+    icon: '/icon-192.png',
+    apple: '/icon-192.png',
   },
   appleWebApp: {
     capable: true,
