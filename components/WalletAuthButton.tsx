@@ -92,7 +92,7 @@ export function WalletAuthButton() {
         setAltchaReady(true)
         clearInterval(poll)
       }
-    }, 200)
+    }, 500)
 
     return () => clearInterval(poll)
   }, [hasSession])

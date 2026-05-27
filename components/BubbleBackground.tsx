@@ -8,9 +8,12 @@ export function BubbleBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
+    // Skip entirely on reduced-motion preference — saves ~30KB GSAP execution
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+
     const canvas = canvasRef.current
     if (!canvas) return
-    const ctx = canvas.getContext('2d')
+    const ctx = canvas.getContext('2d', { alpha: true, willReadFrequently: false })
     if (!ctx) return
 
     const resize = () => {
@@ -18,19 +21,22 @@ export function BubbleBackground() {
       canvas.height = window.innerHeight
     }
     resize()
-    window.addEventListener('resize', resize)
+    window.addEventListener('resize', resize, { passive: true })
 
     const W = () => canvas.width
     const H = () => canvas.height
 
-    const bubbles: Bubble[] = Array.from({ length: 20 }, () => ({
+    // Fewer bubbles on low-memory devices
+    const memory = (navigator as { deviceMemory?: number }).deviceMemory ?? 4
+    const count = memory <= 2 ? 6 : 10
+
+    const bubbles: Bubble[] = Array.from({ length: count }, () => ({
       x: Math.random() * window.innerWidth,
       y: Math.random() * window.innerHeight,
       r: 40 + Math.random() * 120,
       vspeed: 0.2 + Math.random() * 0.4,
     }))
 
-    // Use gsap.context so ALL tweens are killed on cleanup (fixes Strict Mode)
     const gCtx = gsap.context(() => {})
 
     const driftTargets = bubbles.map(b => {
@@ -54,7 +60,16 @@ export function BubbleBackground() {
       )
     }
 
+    let paused = false
+    const handleVisibility = () => {
+      paused = document.hidden
+      if (paused) gsap.ticker.sleep()
+      else gsap.ticker.wake()
+    }
+    document.addEventListener('visibilitychange', handleVisibility)
+
     const tick = () => {
+      if (paused) return
       ctx.clearRect(0, 0, W(), H())
       bubbles.forEach((b, i) => {
         b.x  = driftTargets[i].x
@@ -90,12 +105,14 @@ export function BubbleBackground() {
       gsap.ticker.remove(tick)
       gCtx.revert()
       window.removeEventListener('resize', resize)
+      document.removeEventListener('visibilitychange', handleVisibility)
     }
   }, [])
 
   return (
     <canvas
       ref={canvasRef}
+      aria-hidden="true"
       style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none' }}
     />
   )

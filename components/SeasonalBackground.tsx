@@ -101,9 +101,12 @@ export function SeasonalBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
+    // Respect user preference — no animation for reduced-motion devices
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+
     const canvas = canvasRef.current
     if (!canvas) return
-    const ctx = canvas.getContext('2d')
+    const ctx = canvas.getContext('2d', { alpha: true, willReadFrequently: false })
     if (!ctx) return
 
     const month  = new Date().getMonth() + 1 // 1–12
@@ -115,21 +118,30 @@ export function SeasonalBackground() {
       canvas.height = window.innerHeight
     }
     resize()
-    window.addEventListener('resize', resize)
+    window.addEventListener('resize', resize, { passive: true })
 
-    const MAX_PARTICLES = 40
+    // Reduce particle count on low-memory devices (deviceMemory is Chrome-only)
+    const memory = (navigator as { deviceMemory?: number }).deviceMemory ?? 4
+    const MAX_PARTICLES = memory <= 2 ? 12 : 20
+
     const particles: Particle[] = []
-
     let animId: number
     let lastSpawn = 0
+    let paused = false
 
     const c = canvas
     const x = ctx
 
+    const handleVisibility = () => { paused = document.hidden }
+    document.addEventListener('visibilitychange', handleVisibility)
+
     function tick(now: number) {
+      animId = requestAnimationFrame(tick)
+      if (paused) return
+
       x.clearRect(0, 0, c.width, c.height)
 
-      if (particles.length < MAX_PARTICLES && now - lastSpawn > 400) {
+      if (particles.length < MAX_PARTICLES && now - lastSpawn > 500) {
         particles.push(createParticle(c, colors))
         lastSpawn = now
       }
@@ -146,8 +158,6 @@ export function SeasonalBackground() {
           particles.splice(i, 1)
         }
       }
-
-      animId = requestAnimationFrame(tick)
     }
 
     animId = requestAnimationFrame(tick)
@@ -155,12 +165,14 @@ export function SeasonalBackground() {
     return () => {
       cancelAnimationFrame(animId)
       window.removeEventListener('resize', resize)
+      document.removeEventListener('visibilitychange', handleVisibility)
     }
   }, [])
 
   return (
     <canvas
       ref={canvasRef}
+      aria-hidden="true"
       style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none' }}
     />
   )
