@@ -124,8 +124,6 @@ export default function LibraryPage() {
                       </motion.a>
                       <a
                         href={`/license/${lic.id}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
                         style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '7px 10px', background: 'rgba(74,186,255,0.08)', border: '1px solid rgba(74,186,255,0.15)', borderRadius: 8, color: '#4ABAFF' }}
                         title="Ver licencia"
                       >

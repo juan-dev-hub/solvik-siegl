@@ -133,7 +133,7 @@ export default function NewCertPage() {
             {result.arweave_tx_id}
           </p>
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <a href={result.verify_url} target="_blank" rel="noopener noreferrer" className="btn-secondary">{t.new_cert.view_cert}</a>
+            <a href={result.verify_url} className="btn-secondary">{t.new_cert.view_cert}</a>
             <button className="btn-primary" onClick={downloadPDF}>{t.new_cert.download_pdf}</button>
           </div>
           <button onClick={reset} style={{ marginTop: 24, background: 'none', border: 'none', color: 'rgba(180,210,255,0.35)', cursor: 'pointer', fontSize: 13 }}>

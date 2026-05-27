@@ -138,7 +138,7 @@ export default function GalleryPage() {
                   <p style={{ fontSize: 11, color: 'rgba(180,210,255,0.3)', marginBottom: 12 }}>
                     {new Date(c.issued_at).toLocaleDateString('es-ES')}
                   </p>
-                  <a href={`/verify/${c.arweave_tx_id}`} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 4, color: '#4ABAFF', fontSize: 12, textDecoration: 'none' }}>
+                  <a href={`/verify/${c.arweave_tx_id}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, color: '#4ABAFF', fontSize: 12, textDecoration: 'none' }}>
                     <ExternalLink size={12} /> Ver QR
                   </a>
                 </div>

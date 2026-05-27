@@ -177,15 +177,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div style={{ borderTop: '1px solid rgba(100,200,255,0.08)', margin: '10px 0' }} />
 
         <Accordion label="Ver en público" icon={<ExternalLink size={15} />}>
-          <a href="/store" target="_blank" rel="noopener noreferrer" style={linkStyle}>
+          <a href="/store" style={linkStyle}>
             <Store size={15} />
             Tienda pública
             <ExternalLink size={9} style={{ marginLeft: 'auto', opacity: 0.35 }} />
           </a>
           <a
             href={slug ? `/i/${slug}` : undefined}
-            target="_blank"
-            rel="noopener noreferrer"
             style={{ ...linkStyle, opacity: slug ? 1 : 0.38, pointerEvents: slug ? 'auto' : 'none' }}
           >
             <Home size={15} />

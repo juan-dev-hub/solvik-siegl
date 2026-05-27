@@ -83,8 +83,6 @@ export default function NewProductPage() {
               {productId && (
                 <motion.a
                   href={`/store/${productId}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.97 }}
                   className="btn-primary"

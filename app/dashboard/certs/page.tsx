@@ -92,7 +92,7 @@ export default function CertsPage() {
                   </td>
                   <td style={{ padding: '12px 20px' }}>
                     <div style={{ display: 'flex', gap: 12 }}>
-                      <a href={`/verify/${cert.arweave_tx_id}`} target="_blank" rel="noopener noreferrer" style={{ color: '#4ABAFF', fontSize: 12, display: 'inline-flex', alignItems: 'center', gap: 4, textDecoration: 'none' }}>
+                      <a href={`/verify/${cert.arweave_tx_id}`} style={{ color: '#4ABAFF', fontSize: 12, display: 'inline-flex', alignItems: 'center', gap: 4, textDecoration: 'none' }}>
                         <ExternalLink size={13} />{t.certs.view_qr}
                       </a>
                       <button onClick={() => downloadPDF(cert)} disabled={downloadingId === cert.id} style={{ background: 'none', border: 'none', color: 'rgba(180,210,255,0.6)', fontSize: 12, display: 'inline-flex', alignItems: 'center', gap: 4, cursor: 'pointer', fontFamily: 'Luna, sans-serif' }}>

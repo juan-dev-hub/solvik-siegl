@@ -110,8 +110,6 @@ export default function PageSettingsPage() {
         {slug && (
           <a
             href={`/i/${slug}`}
-            target="_blank"
-            rel="noopener noreferrer"
             className="btn-secondary"
             style={{ fontSize: 13, display: 'inline-flex', alignItems: 'center', gap: 6 }}
           >
@@ -190,8 +188,6 @@ export default function PageSettingsPage() {
         {settings.page_active && slug && (
           <a
             href={`/i/${slug}`}
-            target="_blank"
-            rel="noopener noreferrer"
             style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 14, color: '#4ABAFF', fontSize: 13, textDecoration: 'none' }}
           >
             <ExternalLink size={12} /> {APP_URL}/i/{slug}

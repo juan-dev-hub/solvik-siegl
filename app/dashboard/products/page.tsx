@@ -120,8 +120,6 @@ export default function ProductsPage() {
                   </button>
                   <a
                     href={`/store/${p.id}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
                     style={{ color: 'rgba(180,210,255,0.4)', padding: 4, display: 'flex' }}
                     title="Ver en tienda"
                   >

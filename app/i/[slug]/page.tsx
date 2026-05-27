@@ -486,8 +486,6 @@ export default function IssuerPage() {
                         </p>
                         <a
                           href={`/verify/${c.arweave_tx_id}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
                           style={{ display: 'inline-flex', alignItems: 'center', gap: 5, color: '#4ABAFF', fontSize: 12, textDecoration: 'none', fontWeight: 600 }}
                         >
                           <ExternalLink size={12} /> Verificar

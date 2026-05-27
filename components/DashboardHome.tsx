@@ -230,7 +230,7 @@ export function DashboardHome({ wallet, issuer, totalCerts, recentCerts, monthVe
                     {new Date(c.issued_at).toLocaleDateString(dateLocale)}
                   </td>
                   <td style={{ padding: '10px 0', textAlign: 'right' }}>
-                    <a href={`/verify/${c.arweave_tx_id}`} target="_blank" rel="noopener noreferrer" style={{ color: '#00D4FF', display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, textDecoration: 'none' }}>
+                    <a href={`/verify/${c.arweave_tx_id}`} style={{ color: '#00D4FF', display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, textDecoration: 'none' }}>
                       <ExternalLink size={12} /> QR
                     </a>
                   </td>
