@@ -1,5 +1,6 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
+import { useSessionGuard } from '@/hooks/useSessionGuard'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTranslation } from '@/components/LanguageProvider'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
@@ -68,6 +69,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const pathname = usePathname()
   const router = useRouter()
   const [slug, setSlug] = useState<string | null>(null)
+  const [wallet, setWallet] = useState<string | null>(null)
   const [showWidgetModal, setShowWidgetModal] = useState(false)
   const [copied, setCopied] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
@@ -85,6 +87,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return () => window.removeEventListener('resize', check)
   }, [])
 
+  const logout = useCallback(() => {
+    fetch('/api/auth/logout', { method: 'POST' }).finally(() => router.push('/'))
+  }, [router])
+
+  // WebSocket en tiempo real: si se crea una nueva sesión desde otro dispositivo → logout inmediato
+  useSessionGuard(wallet, logout)
+
   useEffect(() => {
     const checkSession = () => {
       fetch('/api/me')
@@ -92,16 +101,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           if (r.status === 401) { router.push('/'); return null }
           return r.json()
         })
-        .then(d => { if (d) setSlug(d.issuer?.slug ?? null) })
+        .then(d => {
+          if (d?.issuer) {
+            setSlug(d.issuer.slug ?? null)
+            setWallet(d.issuer.wallet_address ?? null)
+          }
+        })
         .catch(() => {})
     }
 
     checkSession()
 
-    // Verificar cada 20 segundos
-    const interval = setInterval(checkSession, 20_000)
-
-    // Verificar inmediatamente al volver al tab
+    // Fallback por si el WebSocket falla: verificar cada 30s y al volver al tab
+    const interval = setInterval(checkSession, 30_000)
     const onVisible = () => { if (document.visibilityState === 'visible') checkSession() }
     document.addEventListener('visibilitychange', onVisible)
 

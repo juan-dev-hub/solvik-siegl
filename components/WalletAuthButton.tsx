@@ -1,5 +1,6 @@
 'use client'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
+import { useSessionGuard } from '@/hooks/useSessionGuard'
 import { Loader2, ShieldCheck, AlertTriangle, ScanQrCode } from 'lucide-react'
 import { useTranslation } from '@/components/LanguageProvider'
 import { useToast } from '@/components/ToastProvider'
@@ -339,13 +340,16 @@ export function WalletAuthButton({ showWidget = false }: { showWidget?: boolean 
     }
   }
 
-  const handleLogout = async () => {
+  const handleLogout = useCallback(async () => {
     await fetch('/api/auth/logout', { method: 'POST' })
     try { await getProvider()?.disconnect() } catch { /* ignore */ }
     setHasSession(false)
     setWalletAddress(null)
     window.location.href = '/'
-  }
+  }, [])
+
+  // WebSocket: si otro dispositivo inicia sesión, cerrar aquí también
+  useSessionGuard(hasSession ? walletAddress : null, handleLogout)
 
   const handleQrResult = (url: string) => {
     setShowQrScanner(false)

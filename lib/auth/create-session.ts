@@ -14,6 +14,12 @@ export async function createSessionToken(walletAddress: string): Promise<string>
     .from('issuers')
     .update({ session_nonce: nonce })
     .eq('wallet_address', walletAddress)
+
+  // Notifica en tiempo real a todos los dispositivos conectados con esta wallet
+  await supabaseAdmin
+    .channel(`session:${walletAddress}`)
+    .send({ type: 'broadcast', event: 'invalidated', payload: {} })
+
   return new SignJWT({ wallet: walletAddress, nonce })
     .setProtectedHeader({ alg: 'HS256' })
     .setExpirationTime('8h')
