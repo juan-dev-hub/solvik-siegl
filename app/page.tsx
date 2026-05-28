@@ -161,12 +161,6 @@ export default function LandingPage() {
           ))}
         </div>
 
-        {/* First payment note */}
-        <div style={{ background: 'rgba(0,212,255,0.06)', border: '1px solid rgba(0,212,255,0.15)', borderRadius: 12, padding: '14px 20px', textAlign: 'center' }}>
-          <p style={{ fontSize: 13, color: 'rgba(0,212,255,0.8)', fontFamily: 'Luna, sans-serif', lineHeight: 1.6 }}>
-            ℹ️ {t.landing.first_payment_note}
-          </p>
-        </div>
       </div>
 
       {/* Footer */}
