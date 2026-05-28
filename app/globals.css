@@ -296,6 +296,9 @@ select option { background: #0a1a3a; color: white; }
   to   { opacity: 1; transform: translateX(0)    scale(1);    }
 }
 
+/* Mobile hamburger — oculto en desktop */
+.mobile-menu { display: none; }
+
 /* ── Responsive ── */
 @media (max-width: 768px) {
   .hero-title {
@@ -322,6 +325,10 @@ select option { background: #0a1a3a; color: white; }
 
   .nav-links {
     display: none;
+  }
+
+  .mobile-menu {
+    display: block;
   }
 
   /* Dashboard mobile */

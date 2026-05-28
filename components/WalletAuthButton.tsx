@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useSessionGuard } from '@/hooks/useSessionGuard'
-import { Loader2, ShieldCheck, AlertTriangle, ScanQrCode } from 'lucide-react'
+import { Loader2, ShieldCheck, AlertTriangle, ScanQrCode, Info } from 'lucide-react'
 import { useTranslation } from '@/components/LanguageProvider'
 import { useToast } from '@/components/ToastProvider'
 
@@ -52,6 +52,52 @@ function getAddress(publicKey: unknown): string | null {
 
 function truncate(addr: string) {
   return `${addr.slice(0, 4)}...${addr.slice(-4)}`
+}
+
+// ---------------------------------------------------------------------------
+// Tooltip de ayuda para el botón QR
+// ---------------------------------------------------------------------------
+function QrInfoTooltip() {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    const handler = (e: MouseEvent | TouchEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', handler)
+    document.addEventListener('touchstart', handler)
+    return () => {
+      document.removeEventListener('mousedown', handler)
+      document.removeEventListener('touchstart', handler)
+    }
+  }, [open])
+
+  return (
+    <div ref={ref} style={{ position: 'relative', display: 'inline-flex' }}>
+      <button
+        onClick={() => setOpen(v => !v)}
+        style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: 'rgba(74,186,255,0.5)', display: 'flex', alignItems: 'center' }}
+      >
+        <Info size={16} />
+      </button>
+      {open && (
+        <div style={{
+          position: 'absolute', bottom: 'calc(100% + 10px)', left: '50%', transform: 'translateX(-50%)',
+          width: 240, background: 'rgba(5,15,50,0.97)',
+          border: '1px solid rgba(74,186,255,0.2)', borderRadius: 10,
+          padding: '12px 14px', zIndex: 600,
+          boxShadow: '0 8px 28px rgba(0,0,0,0.55)',
+        }}>
+          <p style={{ fontWeight: 700, fontSize: 12, color: '#4ABAFF', marginBottom: 6 }}>¿Cómo funciona?</p>
+          <p style={{ fontSize: 12, color: 'rgba(180,210,255,0.75)', lineHeight: 1.6, margin: 0 }}>
+            Iniciá sesión desde tu computadora, entrá al dashboard y usá el botón <strong style={{ color: '#F0F8FF' }}>Abrir en móvil</strong> para obtener el código QR.
+          </p>
+        </div>
+      )}
+    </div>
+  )
 }
 
 // ---------------------------------------------------------------------------
@@ -377,7 +423,7 @@ export function WalletAuthButton({ showWidget = false }: { showWidget?: boolean 
             onResult={handleQrResult}
           />
         )}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, maxWidth: 300, textAlign: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <button
             className="btn-primary"
             onClick={() => setShowQrScanner(true)}
@@ -386,11 +432,7 @@ export function WalletAuthButton({ showWidget = false }: { showWidget?: boolean 
             <ScanQrCode size={18} />
             Escanear QR de sesión
           </button>
-          <p style={{ fontSize: 11, color: 'rgba(180,210,255,0.35)', lineHeight: 1.5 }}>
-            Iniciá sesión desde tu computadora y usá el botón{' '}
-            <strong style={{ color: 'rgba(180,210,255,0.55)' }}>Abrir en móvil</strong>{' '}
-            del dashboard para obtener el código QR.
-          </p>
+          <QrInfoTooltip />
         </div>
       </>
     )
