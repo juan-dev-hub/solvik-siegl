@@ -167,13 +167,6 @@ export default function PricingPage() {
           ))}
         </div>
 
-        {/* First payment note */}
-        <div style={{ background: 'rgba(0,212,255,0.06)', border: '1px solid rgba(0,212,255,0.15)', borderRadius: 12, padding: '14px 20px', textAlign: 'center', marginBottom: 32 }}>
-          <p style={{ fontSize: 13, color: 'rgba(0,212,255,0.8)', fontFamily: 'Luna, sans-serif', lineHeight: 1.6 }}>
-            ℹ️ {t.landing.first_payment_note}
-          </p>
-        </div>
-
         <div style={{ background: 'rgba(123,47,255,0.06)', border: '1px solid rgba(123,47,255,0.15)', borderRadius: 16, padding: '24px 32px', textAlign: 'center' }}>
           <p style={{ fontSize: 14, color: 'rgba(240,240,255,0.6)', fontFamily: 'Luna, sans-serif', lineHeight: 1.7 }}>
             {t.landing.disclaimer_card}

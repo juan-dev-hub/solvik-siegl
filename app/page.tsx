@@ -2,13 +2,22 @@
 import { useTranslation } from '@/components/LanguageProvider'
 import { WalletAuthButton } from '@/components/WalletAuthButton'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
-import { Shield, AlertTriangle, Clock, ShieldCheck, KeyRound, Globe, Zap } from 'lucide-react'
+import { Shield, AlertTriangle, Clock, ShieldCheck, KeyRound, Globe, Zap, CheckCircle } from 'lucide-react'
 import { HeroTitle } from '@/components/HeroTitle'
 
 const PLANS = [
-  { id: 'starter', price: 49,  storage: '1 GB',  bytes: 1_073_741_824  },
-  { id: 'pro',     price: 99,  storage: '5 GB',  bytes: 5_368_709_120,  popular: true },
-  { id: 'studio',  price: 249, storage: '20 GB', bytes: 21_474_836_480 },
+  {
+    id: 'starter', price: 49, storage: '1 GB',
+    features: ['1 GB almacenamiento permanente', 'PDF + QR verificable', 'Arweave permanente', 'Solana cNFT'],
+  },
+  {
+    id: 'pro', price: 99, storage: '5 GB', popular: true,
+    features: ['5 GB almacenamiento permanente', 'PDF + QR verificable', 'Arweave permanente', 'Solana cNFT', 'Attestation on-chain', 'Badge dominio SNS'],
+  },
+  {
+    id: 'studio', price: 249, storage: '20 GB',
+    features: ['20 GB almacenamiento permanente', 'PDF + QR verificable', 'Arweave permanente', 'Solana cNFT', 'Attestation on-chain', 'Badge dominio SNS', 'Batch ZIP', 'Página pública de issuer'],
+  },
 ]
 
 export default function LandingPage() {
@@ -139,22 +148,30 @@ export default function LandingPage() {
         <p style={{ textAlign: 'center', color: 'rgba(240,240,255,0.5)', fontSize: 15, fontFamily: 'Luna, sans-serif', marginBottom: 40 }}>
           {t.landing.pricing_sub}
         </p>
-        <div className="pricing-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20, marginBottom: 28 }}>
+        <div className="pricing-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 20, marginBottom: 28 }}>
           {PLANS.map(p => (
             <div key={p.id} className="glass-card" style={{ border: p.popular ? '1px solid #7B2FFF' : undefined, position: 'relative' }}>
               {p.popular && (
-                <div style={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)', background: 'linear-gradient(90deg, #7B2FFF, #00D4FF)', color: '#fff', borderRadius: 50, padding: '2px 16px', fontSize: 11, fontWeight: 700, fontFamily: 'Luna, sans-serif', whiteSpace: 'nowrap' }}>
+                <div style={{ position: 'absolute', top: -14, left: '50%', transform: 'translateX(-50%)', background: 'linear-gradient(90deg, #7B2FFF, #00D4FF)', color: '#fff', borderRadius: 50, padding: '3px 18px', fontSize: 11, fontWeight: 700, fontFamily: 'Luna, sans-serif', whiteSpace: 'nowrap' }}>
                   {t.landing.most_popular}
                 </div>
               )}
-              <p style={{ fontFamily: 'Luna, sans-serif', fontWeight: 800, fontSize: 20, color: '#F0F0FF', textTransform: 'capitalize', marginBottom: 8 }}>{p.id}</p>
-              <p style={{ fontSize: 36, fontFamily: 'Luna, sans-serif', fontWeight: 800, color: '#7B2FFF', marginBottom: 4 }}>
-                ${p.price}<span style={{ fontSize: 16, color: 'rgba(240,240,255,0.5)' }}>{t.landing.per_month}</span>
+              <p style={{ fontFamily: 'Luna, sans-serif', fontWeight: 800, fontSize: 22, color: '#F0F0FF', textTransform: 'capitalize', marginBottom: 6 }}>{p.id}</p>
+              <p style={{ fontSize: 40, fontFamily: 'Luna, sans-serif', fontWeight: 800, color: '#7B2FFF', lineHeight: 1 }}>
+                ${p.price}<span style={{ fontSize: 16, color: 'rgba(240,240,255,0.5)', fontWeight: 400 }}>{t.landing.per_month}</span>
               </p>
-              <p style={{ fontSize: 14, color: '#00D4FF', fontFamily: 'Luna, sans-serif', marginBottom: 24, fontWeight: 600 }}>
+              <p style={{ fontSize: 14, color: '#00D4FF', fontFamily: 'Luna, sans-serif', marginBottom: 24, marginTop: 6, fontWeight: 600 }}>
                 {p.storage} {t.landing.credits}
               </p>
-              <a href="/" className="btn-primary" style={{ width: '100%', justifyContent: 'center' }}>
+              <div style={{ marginBottom: 28 }}>
+                {p.features.map(f => (
+                  <div key={f} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                    <CheckCircle size={14} color="#00FFB3" />
+                    <span style={{ fontSize: 13, color: 'rgba(240,240,255,0.7)', fontFamily: 'Luna, sans-serif' }}>{f}</span>
+                  </div>
+                ))}
+              </div>
+              <a href="/pricing" className="btn-primary" style={{ width: '100%', justifyContent: 'center' }}>
                 {t.landing.get_plan} ${p.price}/mes
               </a>
             </div>
