@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
-import { Loader2, ShieldCheck, AlertTriangle, Copy, Check } from 'lucide-react'
+import { Loader2, ShieldCheck, AlertTriangle, ScanQrCode } from 'lucide-react'
 import { useTranslation } from '@/components/LanguageProvider'
 import { useToast } from '@/components/ToastProvider'
 
@@ -25,9 +25,9 @@ function getProvider(): SolanaProvider | null {
   return null
 }
 
-function isIOS(): boolean {
+function isMobileDevice(): boolean {
   if (typeof navigator === 'undefined') return false
-  return /iPhone|iPad|iPod/.test(navigator.userAgent)
+  return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)
 }
 
 function isValidSolanaAddress(s: string): boolean {
@@ -53,6 +53,159 @@ function truncate(addr: string) {
   return `${addr.slice(0, 4)}...${addr.slice(-4)}`
 }
 
+// ---------------------------------------------------------------------------
+// QR Scanner (mobile only)
+// ---------------------------------------------------------------------------
+function QrScannerModal({ onClose, onResult }: { onClose: () => void; onResult: (url: string) => void }) {
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const streamRef = useRef<MediaStream | null>(null)
+  const [cameraError, setCameraError] = useState<string | null>(null)
+  const [manualUrl, setManualUrl] = useState('')
+  const hasBarcodeDetector = typeof window !== 'undefined' && 'BarcodeDetector' in window
+
+  // Start camera stream
+  useEffect(() => {
+    if (!hasBarcodeDetector) return
+    let cancelled = false
+    navigator.mediaDevices
+      .getUserMedia({ video: { facingMode: 'environment' } })
+      .then(stream => {
+        if (cancelled) { stream.getTracks().forEach(t => t.stop()); return }
+        streamRef.current = stream
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream
+          videoRef.current.play().catch(() => {})
+        }
+      })
+      .catch(() => setCameraError('No se pudo acceder a la cámara. Permitile el acceso e intentá de nuevo.'))
+    return () => {
+      cancelled = true
+      streamRef.current?.getTracks().forEach(t => t.stop())
+    }
+  }, [hasBarcodeDetector])
+
+  // Scan loop
+  useEffect(() => {
+    if (!hasBarcodeDetector) return
+    const video = videoRef.current
+    if (!video) return
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const detector = new (window as any).BarcodeDetector({ formats: ['qr_code'] })
+    let rafId: number
+    let done = false
+
+    const scan = async () => {
+      if (done) return
+      if (video.readyState >= 2) {
+        try {
+          const results = await detector.detect(video)
+          if (results.length > 0 && results[0].rawValue) {
+            done = true
+            streamRef.current?.getTracks().forEach(t => t.stop())
+            onResult(results[0].rawValue)
+            return
+          }
+        } catch { /* keep scanning */ }
+      }
+      rafId = requestAnimationFrame(scan)
+    }
+
+    const onPlay = () => { rafId = requestAnimationFrame(scan) }
+    video.addEventListener('playing', onPlay)
+    return () => {
+      done = true
+      cancelAnimationFrame(rafId)
+      video.removeEventListener('playing', onPlay)
+    }
+  }, [hasBarcodeDetector, onResult])
+
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.92)',
+      zIndex: 300, display: 'flex', flexDirection: 'column',
+      alignItems: 'center', justifyContent: 'center', padding: 20,
+    }}>
+      <div style={{
+        background: 'rgba(10,5,30,0.98)', border: '1px solid rgba(74,186,255,0.25)',
+        borderRadius: 16, padding: 24, maxWidth: 340, width: '100%',
+      }}>
+        <p style={{ fontWeight: 700, fontSize: 16, color: '#F0F8FF', marginBottom: 4 }}>
+          Escanear QR de sesión
+        </p>
+        <p style={{ fontSize: 12, color: 'rgba(180,210,255,0.45)', marginBottom: 16, lineHeight: 1.5 }}>
+          Apuntá la cámara al código QR que aparece en el dashboard de tu computadora.
+        </p>
+
+        {hasBarcodeDetector ? (
+          cameraError ? (
+            <p style={{ color: '#FF6B6B', fontSize: 13, lineHeight: 1.5 }}>{cameraError}</p>
+          ) : (
+            <div style={{ position: 'relative', borderRadius: 10, overflow: 'hidden', background: '#000' }}>
+              <video
+                ref={videoRef}
+                playsInline
+                muted
+                style={{ width: '100%', display: 'block', aspectRatio: '1', objectFit: 'cover' }}
+              />
+              {/* Viewfinder corners */}
+              <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+                {['top-left', 'top-right', 'bottom-left', 'bottom-right'].map(corner => {
+                  const isTop = corner.includes('top')
+                  const isLeft = corner.includes('left')
+                  return (
+                    <div key={corner} style={{
+                      position: 'absolute',
+                      [isTop ? 'top' : 'bottom']: 20,
+                      [isLeft ? 'left' : 'right']: 20,
+                      width: 28, height: 28,
+                      borderTop: isTop ? '3px solid #4ABAFF' : 'none',
+                      borderBottom: !isTop ? '3px solid #4ABAFF' : 'none',
+                      borderLeft: isLeft ? '3px solid #4ABAFF' : 'none',
+                      borderRight: !isLeft ? '3px solid #4ABAFF' : 'none',
+                    }} />
+                  )
+                })}
+              </div>
+            </div>
+          )
+        ) : (
+          <div>
+            <p style={{ fontSize: 12, color: 'rgba(255,200,100,0.85)', marginBottom: 12, lineHeight: 1.5 }}>
+              Tu navegador no soporta el escáner automático. Pegá la URL del código QR de tu computadora:
+            </p>
+            <input
+              value={manualUrl}
+              onChange={e => setManualUrl(e.target.value)}
+              placeholder="https://www.solvikstudio.com/api/auth/..."
+              style={{ fontSize: 13, marginBottom: 10 }}
+            />
+            <button
+              className="btn-primary"
+              style={{ width: '100%', fontSize: 13, justifyContent: 'center' }}
+              onClick={() => manualUrl.trim() && onResult(manualUrl.trim())}
+            >
+              Continuar
+            </button>
+          </div>
+        )}
+
+        <button
+          onClick={onClose}
+          style={{
+            marginTop: 16, width: '100%', background: 'none', border: 'none',
+            color: 'rgba(180,210,255,0.4)', cursor: 'pointer', fontSize: 13, padding: '8px 0',
+          }}
+        >
+          Cancelar
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Main component
+// ---------------------------------------------------------------------------
 export function WalletAuthButton() {
   const { t } = useTranslation()
   const toast = useToast()
@@ -61,9 +214,9 @@ export function WalletAuthButton() {
   const [walletAddress, setWalletAddress] = useState<string | null>(null)
   const [altchaToken, setAltchaToken]     = useState<string | null>(null)
   const [altchaReady, setAltchaReady]     = useState(false)
-  const [iosNoProvider, setIosNoProvider] = useState(false)
+  const [showQrScanner, setShowQrScanner] = useState(false)
+  const [mobileNoWallet, setMobileNoWallet] = useState(false)
   const [showTooltip, setShowTooltip]     = useState(false)
-  const [urlCopied, setUrlCopied]         = useState(false)
   const tooltipRef = useRef<HTMLDivElement>(null)
   const widgetRef  = useRef<HTMLElement | null>(null)
 
@@ -74,7 +227,8 @@ export function WalletAuthButton() {
       const p = getProvider()
       if (p?.publicKey) setWalletAddress(getAddress(p.publicKey))
     }
-    if (isIOS() && !getProvider()) setIosNoProvider(true)
+    // Mobile without any injected wallet provider → use QR flow
+    if (isMobileDevice() && !getProvider()) setMobileNoWallet(true)
   }, [])
 
   // Close tooltip when clicking outside
@@ -93,8 +247,9 @@ export function WalletAuthButton() {
     }
   }, [showTooltip])
 
+  // Load ALTCHA only for wallet flow (not QR flow)
   useEffect(() => {
-    if (hasSession) return
+    if (hasSession || mobileNoWallet) return
     const scriptId = 'altcha-script'
     if (!document.getElementById(scriptId)) {
       const script = document.createElement('script')
@@ -116,7 +271,7 @@ export function WalletAuthButton() {
       }
     }, 500)
     return () => clearInterval(poll)
-  }, [hasSession])
+  }, [hasSession, mobileNoWallet])
 
   const handleConnect = async () => {
     if (!altchaToken) {
@@ -163,7 +318,7 @@ export function WalletAuthButton() {
       clearTimeout(timeoutId)
       if (e instanceof Error) {
         if (e.name === 'AbortError') {
-          toast.error('Tiempo de espera agotado', 'El servidor no respondió en 30 segundos. Verifica tu conexión e inténtalo de nuevo.')
+          toast.error('Tiempo de espera agotado', 'El servidor no respondió en 30 segundos.')
         } else if (e.message.toLowerCase().includes('rejected') || e.message.toLowerCase().includes('cancel')) {
           toast.info('Cancelado', 'Rechazaste la firma en tu wallet.')
         } else {
@@ -183,13 +338,12 @@ export function WalletAuthButton() {
     window.location.href = '/'
   }
 
-  const handleCopyUrl = () => {
-    navigator.clipboard.writeText(window.location.href).then(() => {
-      setUrlCopied(true)
-      setTimeout(() => setUrlCopied(false), 2000)
-    })
+  const handleQrResult = (url: string) => {
+    setShowQrScanner(false)
+    window.location.href = url
   }
 
+  // Logged in
   if (hasSession) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -200,29 +354,36 @@ export function WalletAuthButton() {
     )
   }
 
-  // iOS Safari: wallet extensions are not supported — must open from within the wallet's browser
-  if (iosNoProvider) {
+  // Mobile without wallet — QR flow
+  if (mobileNoWallet) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, maxWidth: 300, textAlign: 'center' }}>
-        <div style={{ background: 'rgba(255,200,50,0.08)', border: '1px solid rgba(255,200,50,0.25)', borderRadius: 12, padding: '14px 16px' }}>
-          <p style={{ fontSize: 13, color: 'rgba(255,220,120,0.9)', lineHeight: 1.6, marginBottom: 10 }}>
-            En iOS, las wallets solo funcionan desde su propio navegador integrado. Copiá esta URL y abrila desde el navegador de tu wallet Solana.
-          </p>
+      <>
+        {showQrScanner && (
+          <QrScannerModal
+            onClose={() => setShowQrScanner(false)}
+            onResult={handleQrResult}
+          />
+        )}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, maxWidth: 300, textAlign: 'center' }}>
           <button
-            onClick={handleCopyUrl}
-            className="btn-secondary"
-            style={{ width: '100%', justifyContent: 'center', fontSize: 13 }}
+            className="btn-primary"
+            onClick={() => setShowQrScanner(true)}
+            style={{ display: 'flex', alignItems: 'center', gap: 8 }}
           >
-            {urlCopied ? <><Check size={14} /> URL copiada</> : <><Copy size={14} /> Copiar URL</>}
+            <ScanQrCode size={18} />
+            Escanear QR de sesión
           </button>
+          <p style={{ fontSize: 11, color: 'rgba(180,210,255,0.35)', lineHeight: 1.5 }}>
+            Iniciá sesión desde tu computadora y usá el botón{' '}
+            <strong style={{ color: 'rgba(180,210,255,0.55)' }}>Abrir en móvil</strong>{' '}
+            del dashboard para obtener el código QR.
+          </p>
         </div>
-        <p style={{ fontSize: 11, color: 'rgba(180,210,255,0.3)', lineHeight: 1.4 }}>
-          Una vez dentro del navegador de la wallet, la conexión funciona normalmente.
-        </p>
-      </div>
+      </>
     )
   }
 
+  // Desktop / mobile with wallet — normal flow
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
       {/* @ts-expect-error — altcha is a custom web component */}
@@ -269,8 +430,7 @@ export function WalletAuthButton() {
             style={{
               background: 'none', border: 'none', cursor: 'pointer',
               color: 'rgba(255,200,50,0.7)', padding: 4, display: 'flex',
-              alignItems: 'center', borderRadius: 6,
-              transition: 'color 0.15s',
+              alignItems: 'center', borderRadius: 6, transition: 'color 0.15s',
             }}
           >
             <AlertTriangle size={18} />
@@ -294,7 +454,6 @@ export function WalletAuthButton() {
               <p style={{ color: 'rgba(255,100,100,0.8)', fontSize: 11 }}>
                 ⛔ Sin excepciones. No realizamos devoluciones bajo ninguna circunstancia.
               </p>
-              {/* Tooltip arrow */}
               <div style={{
                 position: 'absolute', bottom: -6, right: 14,
                 width: 10, height: 10,

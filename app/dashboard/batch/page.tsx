@@ -153,7 +153,7 @@ export default function BatchPage() {
             </div>
           )}
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16, marginBottom: 24 }}>
             <div>
               <label style={{ display: 'block', fontSize: 12, color: 'rgba(180,210,255,0.5)', marginBottom: 6, fontFamily: 'Luna, sans-serif', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{t.batch.doc_type_label}</label>
               <select value={docType} onChange={e => setDocType(e.target.value)}>

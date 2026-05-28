@@ -191,7 +191,7 @@ export default function NewProductPage() {
             </div>
 
             {/* Price + copies */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 32 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 16, marginBottom: 32 }}>
               <div>
                 <label style={{ display: 'block', fontSize: 13, color: 'rgba(180,210,255,0.6)', fontFamily: 'Luna, sans-serif', marginBottom: 8 }}>
                   Precio (USDC) *

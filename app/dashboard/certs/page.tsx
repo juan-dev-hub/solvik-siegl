@@ -18,6 +18,14 @@ export default function CertsPage() {
   const [total, setTotal]           = useState(0)
   const [loading, setLoading]       = useState(false)
   const [downloadingId, setDownloadingId] = useState<string | null>(null)
+  const [isMobile, setIsMobile]     = useState(false)
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 640)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
 
   const fetchCerts = useCallback(async () => {
     setLoading(true)
@@ -72,7 +80,31 @@ export default function CertsPage() {
           <div style={{ textAlign: 'center', padding: 48, color: 'rgba(180,210,255,0.4)', fontFamily: 'Luna, sans-serif', fontSize: 14 }}>
             {search ? t.certs.no_results : t.certs.empty}
           </div>
+        ) : isMobile ? (
+          // Mobile: card list
+          <div>
+            {certs.map(cert => (
+              <div key={cert.id} style={{ padding: '14px 16px', borderBottom: '1px solid rgba(100,200,255,0.06)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8, marginBottom: 4 }}>
+                  <p style={{ color: '#F0F8FF', fontWeight: 600, fontSize: 14, fontFamily: 'Luna, sans-serif', flex: 1 }}>{cert.issued_to}</p>
+                  <div style={{ display: 'flex', gap: 10, flexShrink: 0 }}>
+                    <a href={`/verify/${cert.arweave_tx_id}`} style={{ color: '#4ABAFF', fontSize: 12, display: 'inline-flex', alignItems: 'center', gap: 3, textDecoration: 'none' }}>
+                      <ExternalLink size={12} />{t.certs.view_qr}
+                    </a>
+                    <button onClick={() => downloadPDF(cert)} disabled={downloadingId === cert.id} style={{ background: 'none', border: 'none', color: 'rgba(180,210,255,0.55)', fontSize: 12, display: 'inline-flex', alignItems: 'center', gap: 3, cursor: 'pointer', fontFamily: 'Luna, sans-serif' }}>
+                      {downloadingId === cert.id ? <Loader2 size={12} className="animate-spin" /> : <Download size={12} />}PDF
+                    </button>
+                  </div>
+                </div>
+                <p style={{ fontSize: 11, color: 'rgba(180,210,255,0.4)', fontFamily: 'Luna, sans-serif' }}>
+                  {cert.doc_type} · {new Date(cert.issued_at).toLocaleDateString(dateLocale)}
+                  {cert.expires_at ? ` · vence ${new Date(cert.expires_at).toLocaleDateString(dateLocale)}` : ''}
+                </p>
+              </div>
+            ))}
+          </div>
         ) : (
+          // Desktop: table
           <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'Luna, sans-serif', fontSize: 14 }}>
             <thead>
               <tr style={{ borderBottom: '1px solid rgba(100,200,255,0.1)' }}>

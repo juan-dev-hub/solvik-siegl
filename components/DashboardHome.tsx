@@ -121,7 +121,7 @@ export function DashboardHome({ wallet, issuer, totalCerts, recentCerts, monthVe
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35, ease: 'easeOut' }}
-          style={{ background: 'rgba(255,215,0,0.08)', border: '1px solid rgba(255,215,0,0.3)', borderRadius: 12, padding: '14px 20px', marginBottom: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+          style={{ background: 'rgba(255,215,0,0.08)', border: '1px solid rgba(255,215,0,0.3)', borderRadius: 12, padding: '14px 20px', marginBottom: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}
         >
           <div>
             <p style={{ color: '#FFD700', fontFamily: 'Luna, sans-serif', fontWeight: 700, fontSize: 15 }}>⚠ {t.dashboard.low_credits}</p>
@@ -140,7 +140,7 @@ export function DashboardHome({ wallet, issuer, totalCerts, recentCerts, monthVe
       )}
 
       {/* Stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 32 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 16, marginBottom: 32 }}>
         {stats.map((s, i) => (
           <motion.div
             key={s.label}
@@ -220,24 +220,19 @@ export function DashboardHome({ wallet, issuer, totalCerts, recentCerts, monthVe
         {recentCerts.length === 0 ? (
           <p style={{ color: 'rgba(240,240,255,0.35)', fontFamily: 'Luna, sans-serif', fontSize: 14 }}>{t.dashboard.no_certs}</p>
         ) : (
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'Luna, sans-serif', fontSize: 14 }}>
-            <tbody>
-              {recentCerts.map(c => (
-                <tr key={c.id} style={{ borderBottom: '1px solid rgba(123,47,255,0.08)' }}>
-                  <td style={{ padding: '10px 0', color: '#F0F0FF', fontWeight: 500 }}>{c.issued_to}</td>
-                  <td style={{ padding: '10px 0', color: 'rgba(240,240,255,0.5)', fontSize: 12 }}>{c.doc_type}</td>
-                  <td style={{ padding: '10px 0', color: 'rgba(240,240,255,0.4)', fontSize: 12 }}>
-                    {new Date(c.issued_at).toLocaleDateString(dateLocale)}
-                  </td>
-                  <td style={{ padding: '10px 0', textAlign: 'right' }}>
-                    <a href={`/verify/${c.arweave_tx_id}`} style={{ color: '#00D4FF', display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, textDecoration: 'none' }}>
-                      <ExternalLink size={12} /> QR
-                    </a>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <div>
+            {recentCerts.map(c => (
+              <div key={c.id} style={{ borderBottom: '1px solid rgba(123,47,255,0.08)', padding: '10px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                <div style={{ minWidth: 0 }}>
+                  <p style={{ color: '#F0F0FF', fontWeight: 500, fontFamily: 'Luna, sans-serif', fontSize: 14, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '40vw' }}>{c.issued_to}</p>
+                  <p style={{ color: 'rgba(240,240,255,0.4)', fontSize: 11, fontFamily: 'Luna, sans-serif' }}>{c.doc_type} · {new Date(c.issued_at).toLocaleDateString(dateLocale)}</p>
+                </div>
+                <a href={`/verify/${c.arweave_tx_id}`} style={{ color: '#00D4FF', display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, textDecoration: 'none', flexShrink: 0 }}>
+                  <ExternalLink size={12} /> QR
+                </a>
+              </div>
+            ))}
+          </div>
         )}
       </motion.div>
     </div>

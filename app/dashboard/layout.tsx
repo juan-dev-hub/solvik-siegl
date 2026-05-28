@@ -4,10 +4,11 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useTranslation } from '@/components/LanguageProvider'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { usePathname, useRouter } from 'next/navigation'
+import QRCode from 'qrcode'
 import {
   Award, FolderOpen, List, CreditCard, Globe, LayoutDashboard,
   Image, LogOut, ExternalLink, Code2, ShoppingBag, Library,
-  Home, Store, ChevronRight, Settings, Menu, X, Monitor,
+  Home, Store, ChevronRight, Settings, Menu, X, Monitor, Smartphone,
 } from 'lucide-react'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://www.solvikstudio.com'
@@ -71,6 +72,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [copied, setCopied] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [showMobileQr, setShowMobileQr] = useState(false)
+  const [mobileQrDataUrl, setMobileQrDataUrl] = useState<string | null>(null)
+  const [mobileQrSeconds, setMobileQrSeconds] = useState(300)
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768)
@@ -101,6 +105,31 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       setTimeout(() => setCopied(false), 2000)
     })
   }
+
+  const handleOpenMobileQr = async () => {
+    try {
+      const res = await fetch('/api/auth/mobile-token', { method: 'POST' })
+      const data = (await res.json()) as { token?: string; error?: string }
+      if (!data.token) return
+      const url = `${APP_URL}/api/auth/mobile-redeem?token=${data.token}`
+      const dataUrl = await QRCode.toDataURL(url, { width: 280, margin: 2, color: { dark: '#0a0015', light: '#ffffff' } })
+      setMobileQrDataUrl(dataUrl)
+      setMobileQrSeconds(300)
+      setShowMobileQr(true)
+    } catch { /* ignore */ }
+  }
+
+  // Countdown timer for mobile QR
+  useEffect(() => {
+    if (!showMobileQr) return
+    const id = setInterval(() => {
+      setMobileQrSeconds(s => {
+        if (s <= 1) { setShowMobileQr(false); clearInterval(id); return 0 }
+        return s - 1
+      })
+    }, 1000)
+    return () => clearInterval(id)
+  }, [showMobileQr])
 
   const nav = [
     { label: t.dashboard.overview,   href: '/dashboard',               icon: <LayoutDashboard size={16} /> },
@@ -196,6 +225,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           >
             <Code2 size={15} />
             Obtener widget
+          </button>
+          <button
+            onClick={handleOpenMobileQr}
+            style={linkStyle}
+          >
+            <Smartphone size={15} />
+            Abrir en móvil
           </button>
         </Accordion>
 
@@ -314,6 +350,67 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   {copied ? '✓ Copiado' : 'Copiar código'}
                 </motion.button>
                 <motion.button onClick={() => setShowWidgetModal(false)} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} className="btn-secondary" style={{ fontSize: 13 }}>
+                  Cerrar
+                </motion.button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Mobile QR modal */}
+      <AnimatePresence>
+        {showMobileQr && mobileQrDataUrl && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}
+            onClick={() => setShowMobileQr(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.92 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.92 }}
+              transition={{ duration: 0.3, ease: 'easeOut' }}
+              onClick={e => e.stopPropagation()}
+              style={{ background: 'rgba(5,20,60,0.97)', backdropFilter: 'blur(24px)', border: '1px solid rgba(74,186,255,0.2)', borderRadius: 16, padding: 32, maxWidth: 360, width: '100%', textAlign: 'center' }}
+            >
+              <Smartphone size={22} color="#4ABAFF" style={{ marginBottom: 12 }} />
+              <h3 style={{ fontWeight: 800, fontSize: 20, color: '#F0F8FF', marginBottom: 6 }}>
+                Abrir en móvil
+              </h3>
+              <p style={{ fontSize: 13, color: 'rgba(180,210,255,0.5)', marginBottom: 20, lineHeight: 1.5 }}>
+                Escaneá este código con la cámara de tu celular para transferir la sesión a la PWA.
+              </p>
+              <img
+                src={mobileQrDataUrl}
+                alt="QR de sesión móvil"
+                style={{ width: 200, height: 200, borderRadius: 12, display: 'block', margin: '0 auto 16px' }}
+              />
+              <p style={{
+                fontSize: 13,
+                color: mobileQrSeconds < 60 ? '#FF6B6B' : 'rgba(180,210,255,0.4)',
+                marginBottom: 20, fontVariantNumeric: 'tabular-nums',
+              }}>
+                Expira en {Math.floor(mobileQrSeconds / 60)}:{String(mobileQrSeconds % 60).padStart(2, '0')}
+              </p>
+              <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+                <motion.button
+                  onClick={handleOpenMobileQr}
+                  whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+                  className="btn-secondary"
+                  style={{ fontSize: 13 }}
+                >
+                  Nuevo QR
+                </motion.button>
+                <motion.button
+                  onClick={() => setShowMobileQr(false)}
+                  whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+                  className="btn-secondary"
+                  style={{ fontSize: 13 }}
+                >
                   Cerrar
                 </motion.button>
               </div>
