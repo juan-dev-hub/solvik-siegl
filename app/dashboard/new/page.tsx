@@ -3,6 +3,7 @@ import { useState, useRef, DragEvent } from 'react'
 import { Upload, CheckCircle, Loader2 } from 'lucide-react'
 import { useTranslation } from '@/components/LanguageProvider'
 import { useToast } from '@/components/ToastProvider'
+import { InfoTip } from '@/components/InfoTip'
 
 type Step = 'idle' | 'uploading_arweave' | 'minting_cnft' | 'attestation' | 'done' | 'error'
 
@@ -169,15 +170,24 @@ export default function NewCertPage() {
             </div>
             <input ref={inputRef} type="file" accept=".pdf,.webp,.webm,application/pdf,image/webp,video/webm" style={{ display: 'none' }} onChange={e => { const f = e.target.files?.[0]; if (f && validate(f)) setFile(f) }} />
 
-            <label style={{ display: 'block', fontSize: 12, color: 'rgba(180,210,255,0.5)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{t.new_cert.recipient_label}</label>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+              <label style={{ fontSize: 12, color: 'rgba(180,210,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{t.new_cert.recipient_label}</label>
+              <InfoTip title="Destinatario" text="Nombre completo de quien recibe el certificado. Este nombre aparecerá en el QR de verificación pública." position="right" />
+            </div>
             <input value={issuedTo} onChange={e => setIssuedTo(e.target.value)} placeholder={t.new_cert.recipient_placeholder} disabled={step !== 'idle' && step !== 'error'} />
 
-            <label style={{ display: 'block', fontSize: 12, color: 'rgba(180,210,255,0.5)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{t.new_cert.doc_type_label}</label>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+              <label style={{ fontSize: 12, color: 'rgba(180,210,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{t.new_cert.doc_type_label}</label>
+              <InfoTip title="Tipo de documento" text="Categoriza el certificado. Sirve para filtrar y organizar tu historial. No afecta la verificación." position="right" />
+            </div>
             <select value={docType} onChange={e => setDocType(e.target.value)} disabled={step !== 'idle' && step !== 'error'}>
               {t.doc_types.map(d => <option key={d.value} value={d.value}>{d.label}</option>)}
             </select>
 
-            <label style={{ display: 'block', fontSize: 12, color: 'rgba(180,210,255,0.5)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{t.new_cert.expiry_label}</label>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+              <label style={{ fontSize: 12, color: 'rgba(180,210,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{t.new_cert.expiry_label}</label>
+              <InfoTip title="Vencimiento (opcional)" text="Si el certificado tiene vigencia limitada (ej: habilitación anual), ponés la fecha acá. Sin fecha = permanente." position="right" />
+            </div>
             <input type="date" value={expiresAt} onChange={e => setExpiresAt(e.target.value)} disabled={step !== 'idle' && step !== 'error'} style={{ colorScheme: 'dark' }} />
 
             <div style={{ background: 'rgba(74,186,255,0.06)', border: '1px solid rgba(74,186,255,0.12)', borderRadius: 10, padding: '10px 14px', marginBottom: 16, fontSize: 13, color: 'rgba(180,210,255,0.55)' }}>

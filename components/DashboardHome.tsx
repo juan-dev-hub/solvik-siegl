@@ -5,6 +5,8 @@ import { animate } from 'framer-motion'
 import { useTranslation } from '@/components/LanguageProvider'
 import { LOCALE_DATE } from '@/lib/i18n'
 import { HardDrive, TrendingUp, BarChart2, ExternalLink } from 'lucide-react'
+import { OnboardingCard } from '@/components/OnboardingCard'
+import { InfoTip } from '@/components/InfoTip'
 
 type Issuer = {
   wallet_address: string
@@ -115,6 +117,8 @@ export function DashboardHome({ wallet, issuer, totalCerts, recentCerts, monthVe
 
       {updateNameSlot}
 
+      <OnboardingCard />
+
       {/* Low storage warning */}
       {lowStorage && (
         <motion.div
@@ -216,7 +220,10 @@ export function DashboardHome({ wallet, issuer, totalCerts, recentCerts, monthVe
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: 'easeOut', delay: 0.32 }}
       >
-        <p style={{ fontFamily: 'Luna, sans-serif', fontWeight: 700, fontSize: 16, color: '#F0F0FF', marginBottom: 20 }}>{t.dashboard.recent}</p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
+          <p style={{ fontFamily: 'Luna, sans-serif', fontWeight: 700, fontSize: 16, color: '#F0F0FF', margin: 0 }}>{t.dashboard.recent}</p>
+          <InfoTip title="Certificados recientes" text="Los últimos 5 certificados que emitiste. Hacé click en 'QR' para ver la página pública de verificación de cada uno." position="right" />
+        </div>
         {recentCerts.length === 0 ? (
           <p style={{ color: 'rgba(240,240,255,0.35)', fontFamily: 'Luna, sans-serif', fontSize: 14 }}>{t.dashboard.no_certs}</p>
         ) : (

@@ -11,6 +11,7 @@ import {
   Image, LogOut, ExternalLink, Code2, ShoppingBag, Library,
   Home, Store, ChevronRight, Settings, Menu, X, Monitor, Smartphone,
 } from 'lucide-react'
+import { InfoTip } from '@/components/InfoTip'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://www.solvikstudio.com'
 
@@ -167,14 +168,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }, [showMobileQr])
 
   const nav = [
-    { label: t.dashboard.overview,   href: '/dashboard',               icon: <LayoutDashboard size={16} /> },
-    { label: t.dashboard.new_cert,   href: '/dashboard/new',           icon: <Award size={16} /> },
-    { label: t.dashboard.batch,      href: '/dashboard/batch',         icon: <FolderOpen size={16} /> },
-    { label: t.dashboard.my_certs,   href: '/dashboard/certs',         icon: <List size={16} /> },
-    { label: t.dashboard.gallery,    href: '/dashboard/gallery',       icon: <Image size={16} /> },
-    { label: 'Mis productos',         href: '/dashboard/products',      icon: <ShoppingBag size={16} /> },
-    { label: 'Mis compras',           href: '/dashboard/library',       icon: <Library size={16} /> },
-    { label: 'Mi página',             href: '/dashboard/page-settings', icon: <Monitor size={16} /> },
+    { label: t.dashboard.overview,   href: '/dashboard',               icon: <LayoutDashboard size={16} />, tip: 'Resumen de tu cuenta: certificados recientes, almacenamiento usado y verificaciones del mes.' },
+    { label: t.dashboard.new_cert,   href: '/dashboard/new',           icon: <Award size={16} />,          tip: 'Emitir un certificado individual. Subís un PDF, WebP o WebM y completás el nombre del destinatario.' },
+    { label: t.dashboard.batch,      href: '/dashboard/batch',         icon: <FolderOpen size={16} />,     tip: 'Emisión en lote. Subís un ZIP con múltiples archivos y se emiten todos los certificados de una vez.' },
+    { label: t.dashboard.my_certs,   href: '/dashboard/certs',         icon: <List size={16} />,           tip: 'Todos los certificados que emitiste. Podés buscar, descargar el PDF original y ver el QR público.' },
+    { label: t.dashboard.gallery,    href: '/dashboard/gallery',       icon: <Image size={16} />,          tip: 'Controlá cuáles certificados son visibles públicamente y ve cuántas verificaciones tuvo cada uno.' },
+    { label: 'Mis productos',         href: '/dashboard/products',      icon: <ShoppingBag size={16} />,    tip: 'Creá y gestioná productos digitales que tus alumnos pueden comprar directamente con USDC.' },
+    { label: 'Mis compras',           href: '/dashboard/library',       icon: <Library size={16} />,        tip: 'Productos digitales que compraste de otros issuers. Desde acá los podés descargar.' },
+    { label: 'Mi página',             href: '/dashboard/page-settings', icon: <Monitor size={16} />,        tip: 'Tu página pública de issuer. Configurá el título, descripción y activala para que cualquiera pueda verla.' },
   ]
 
   const embedCode = `<a href="${APP_URL}/i/${slug}" target="_blank">\n  <img src="${APP_URL}/api/widget/${slug}" alt="Verificado con Solvik Studio" />\n</a>`
@@ -233,7 +234,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               }}
             >
               {item.icon}
-              {item.label}
+              <span style={{ flex: 1 }}>{item.label}</span>
+              <InfoTip text={item.tip} position="right" size={11} />
             </motion.a>
           )
         })}
