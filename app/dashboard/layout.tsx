@@ -113,7 +113,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       const res = await fetch('/api/auth/mobile-token', { method: 'POST' })
       const data = (await res.json()) as { token?: string; error?: string }
       if (!data.token) return
-      const url = `${APP_URL}/api/auth/mobile-redeem?token=${data.token}`
+      const url = `${window.location.origin}/api/auth/mobile-redeem?token=${data.token}`
       const dataUrl = await QRCode.toDataURL(url, { width: 280, margin: 2, color: { dark: '#0a0015', light: '#ffffff' } })
       setMobileQrDataUrl(dataUrl)
       setMobileQrUrl(url)
