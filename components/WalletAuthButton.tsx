@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
-import { Loader2, ShieldCheck } from 'lucide-react'
+import { Loader2, ShieldCheck, AlertTriangle, Copy, Check } from 'lucide-react'
 import { useTranslation } from '@/components/LanguageProvider'
 import { useToast } from '@/components/ToastProvider'
 
@@ -62,7 +62,10 @@ export function WalletAuthButton() {
   const [altchaToken, setAltchaToken]     = useState<string | null>(null)
   const [altchaReady, setAltchaReady]     = useState(false)
   const [iosNoProvider, setIosNoProvider] = useState(false)
-  const widgetRef = useRef<HTMLElement | null>(null)
+  const [showTooltip, setShowTooltip]     = useState(false)
+  const [urlCopied, setUrlCopied]         = useState(false)
+  const tooltipRef = useRef<HTMLDivElement>(null)
+  const widgetRef  = useRef<HTMLElement | null>(null)
 
   useEffect(() => {
     const active = document.cookie.includes('session_active=1')
@@ -71,13 +74,27 @@ export function WalletAuthButton() {
       const p = getProvider()
       if (p?.publicKey) setWalletAddress(getAddress(p.publicKey))
     }
-    // On iOS Safari, wallet extensions don't exist — need wallet's in-app browser
     if (isIOS() && !getProvider()) setIosNoProvider(true)
   }, [])
 
+  // Close tooltip when clicking outside
+  useEffect(() => {
+    if (!showTooltip) return
+    const handler = (e: MouseEvent | TouchEvent) => {
+      if (tooltipRef.current && !tooltipRef.current.contains(e.target as Node)) {
+        setShowTooltip(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    document.addEventListener('touchstart', handler)
+    return () => {
+      document.removeEventListener('mousedown', handler)
+      document.removeEventListener('touchstart', handler)
+    }
+  }, [showTooltip])
+
   useEffect(() => {
     if (hasSession) return
-
     const scriptId = 'altcha-script'
     if (!document.getElementById(scriptId)) {
       const script = document.createElement('script')
@@ -86,22 +103,18 @@ export function WalletAuthButton() {
       script.type = 'module'
       document.head.appendChild(script)
     }
-
     const poll = setInterval(() => {
       const el = document.getElementById('altcha-widget-main')
       if (el) {
         widgetRef.current = el as HTMLElement
         el.addEventListener('statechange', (e: Event) => {
           const detail = (e as CustomEvent<{ state: string; payload?: string }>).detail
-          if (detail?.state === 'verified' && detail.payload) {
-            setAltchaToken(detail.payload)
-          }
+          if (detail?.state === 'verified' && detail.payload) setAltchaToken(detail.payload)
         })
         setAltchaReady(true)
         clearInterval(poll)
       }
     }, 500)
-
     return () => clearInterval(poll)
   }, [hasSession])
 
@@ -110,18 +123,15 @@ export function WalletAuthButton() {
       toast.error('Verificación requerida', 'Completa el captcha antes de conectar tu wallet.')
       return
     }
-
     setLoading(true)
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), 30_000)
-
     try {
       const provider = getProvider()
       if (!provider) {
         toast.error('Wallet no encontrada', t.common.install_wallet)
         return
       }
-
       const connectResult = await provider.connect()
       const rawKey = (connectResult as { publicKey?: unknown })?.publicKey ?? provider.publicKey
       const address = getAddress(rawKey)
@@ -130,40 +140,30 @@ export function WalletAuthButton() {
         return
       }
       setWalletAddress(address)
-
       const timestamp = Date.now()
       const message = `Autenticar en Solvik Studio: ${address} ${timestamp}`
       const encoded = new TextEncoder().encode(message)
       const result = await provider.signMessage(encoded, 'utf8')
       const sigBytes = result instanceof Uint8Array ? result : (result as { signature: Uint8Array }).signature
-
       const res = await fetch('/api/auth/wallet', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-altcha-payload': altchaToken,
-        },
+        headers: { 'Content-Type': 'application/json', 'x-altcha-payload': altchaToken },
         body: JSON.stringify({ wallet_address: address, message, signature: Array.from(sigBytes) }),
         signal: controller.signal,
       })
       clearTimeout(timeoutId)
-
       const data = (await res.json()) as { ok?: boolean; error?: string }
       if (!res.ok) {
         toast.error('Error de autenticación', data.error ?? t.common.server_error)
         return
       }
-
       setHasSession(true)
       window.location.href = '/dashboard'
     } catch (e: unknown) {
       clearTimeout(timeoutId)
       if (e instanceof Error) {
         if (e.name === 'AbortError') {
-          toast.error(
-            'Tiempo de espera agotado',
-            'El servidor no respondió en 30 segundos. Verifica tu conexión e inténtalo de nuevo.'
-          )
+          toast.error('Tiempo de espera agotado', 'El servidor no respondió en 30 segundos. Verifica tu conexión e inténtalo de nuevo.')
         } else if (e.message.toLowerCase().includes('rejected') || e.message.toLowerCase().includes('cancel')) {
           toast.info('Cancelado', 'Rechazaste la firma en tu wallet.')
         } else {
@@ -183,6 +183,13 @@ export function WalletAuthButton() {
     window.location.href = '/'
   }
 
+  const handleCopyUrl = () => {
+    navigator.clipboard.writeText(window.location.href).then(() => {
+      setUrlCopied(true)
+      setTimeout(() => setUrlCopied(false), 2000)
+    })
+  }
+
   if (hasSession) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -193,32 +200,24 @@ export function WalletAuthButton() {
     )
   }
 
-  // iOS Safari: wallet extensions don't exist — must open from inside the wallet browser
+  // iOS Safari: wallet extensions are not supported — must open from within the wallet's browser
   if (iosNoProvider) {
-    const url = typeof window !== 'undefined' ? encodeURIComponent(window.location.href) : ''
-    const solflareDeepLink = `https://solflare.com/ul/v1/browse/${url}?ref=${url}`
-    const phantomDeepLink  = `https://phantom.app/ul/browse/${url}?ref=${url}`
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, maxWidth: 300, textAlign: 'center' }}>
-        <p style={{ fontSize: 13, color: 'rgba(180,210,255,0.6)', lineHeight: 1.5 }}>
-          En iOS, abrí esta página desde el navegador de tu wallet:
-        </p>
-        <a
-          href={solflareDeepLink}
-          className="btn-primary"
-          style={{ width: '100%', justifyContent: 'center', fontSize: 14 }}
-        >
-          Abrir en Solflare
-        </a>
-        <a
-          href={phantomDeepLink}
-          className="btn-primary"
-          style={{ width: '100%', justifyContent: 'center', fontSize: 14, background: 'linear-gradient(180deg, rgba(171,105,255,0.95) 0%, rgba(103,47,255,1) 50%, rgba(64,0,204,1) 100%)' }}
-        >
-          Abrir en Phantom
-        </a>
-        <p style={{ fontSize: 11, color: 'rgba(180,210,255,0.35)', lineHeight: 1.4 }}>
-          Una vez dentro del navegador de la wallet, recargá la página y conectá normalmente.
+        <div style={{ background: 'rgba(255,200,50,0.08)', border: '1px solid rgba(255,200,50,0.25)', borderRadius: 12, padding: '14px 16px' }}>
+          <p style={{ fontSize: 13, color: 'rgba(255,220,120,0.9)', lineHeight: 1.6, marginBottom: 10 }}>
+            En iOS, las wallets solo funcionan desde su propio navegador integrado. Copiá esta URL y abrila desde el navegador de tu wallet Solana.
+          </p>
+          <button
+            onClick={handleCopyUrl}
+            className="btn-secondary"
+            style={{ width: '100%', justifyContent: 'center', fontSize: 13 }}
+          >
+            {urlCopied ? <><Check size={14} /> URL copiada</> : <><Copy size={14} /> Copiar URL</>}
+          </button>
+        </div>
+        <p style={{ fontSize: 11, color: 'rgba(180,210,255,0.3)', lineHeight: 1.4 }}>
+          Una vez dentro del navegador de la wallet, la conexión funciona normalmente.
         </p>
       </div>
     )
@@ -244,20 +243,70 @@ export function WalletAuthButton() {
         </p>
       ) : null}
 
-      {loading ? (
-        <button className="btn-primary" disabled>
-          <Loader2 size={16} className="animate-spin" />
-          {t.common.connecting}
-        </button>
-      ) : (
-        <button
-          className="btn-primary"
-          onClick={handleConnect}
-          style={{ opacity: altchaToken ? 1 : 0.6 }}
-        >
-          {t.common.connect}
-        </button>
-      )}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        {loading ? (
+          <button className="btn-primary" disabled>
+            <Loader2 size={16} className="animate-spin" />
+            {t.common.connecting}
+          </button>
+        ) : (
+          <button
+            className="btn-primary"
+            onClick={handleConnect}
+            style={{ opacity: altchaToken ? 1 : 0.6 }}
+          >
+            {t.common.connect}
+          </button>
+        )}
+
+        {/* Warning tooltip */}
+        <div ref={tooltipRef} style={{ position: 'relative' }}>
+          <button
+            onMouseEnter={() => setShowTooltip(true)}
+            onMouseLeave={() => setShowTooltip(false)}
+            onClick={() => setShowTooltip(v => !v)}
+            aria-label="Advertencia sobre wallets"
+            style={{
+              background: 'none', border: 'none', cursor: 'pointer',
+              color: 'rgba(255,200,50,0.7)', padding: 4, display: 'flex',
+              alignItems: 'center', borderRadius: 6,
+              transition: 'color 0.15s',
+            }}
+          >
+            <AlertTriangle size={18} />
+          </button>
+
+          {showTooltip && (
+            <div style={{
+              position: 'absolute', bottom: 'calc(100% + 10px)', right: 0,
+              width: 260, background: 'rgba(10,5,30,0.97)',
+              border: '1px solid rgba(255,200,50,0.3)', borderRadius: 12,
+              padding: '14px 16px', zIndex: 200,
+              boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
+              fontSize: 12, color: 'rgba(240,240,255,0.75)', lineHeight: 1.6,
+            }}>
+              <p style={{ fontWeight: 700, color: '#FFD580', marginBottom: 8, fontSize: 13 }}>
+                ⚠️ Usá una wallet de Solana
+              </p>
+              <p style={{ marginBottom: 8 }}>
+                Se recomienda <strong style={{ color: '#FFD580' }}>Solflare</strong> — la billetera oficial de Solana. Evitá wallets conectadas a Ethereum (como MetaMask), ya que los pagos enviados a la red incorrecta <strong style={{ color: '#FF6B6B' }}>no tienen devolución</strong>.
+              </p>
+              <p style={{ color: 'rgba(255,100,100,0.8)', fontSize: 11 }}>
+                ⛔ Sin excepciones. No realizamos devoluciones bajo ninguna circunstancia.
+              </p>
+              {/* Tooltip arrow */}
+              <div style={{
+                position: 'absolute', bottom: -6, right: 14,
+                width: 10, height: 10,
+                background: 'rgba(10,5,30,0.97)',
+                border: '1px solid rgba(255,200,50,0.3)',
+                borderTop: 'none', borderLeft: 'none',
+                transform: 'rotate(45deg)',
+              }} />
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   )
 }
