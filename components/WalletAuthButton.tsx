@@ -25,6 +25,11 @@ function getProvider(): SolanaProvider | null {
   return null
 }
 
+function isIOS(): boolean {
+  if (typeof navigator === 'undefined') return false
+  return /iPhone|iPad|iPod/.test(navigator.userAgent)
+}
+
 function isValidSolanaAddress(s: string): boolean {
   return /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(s)
 }
@@ -56,6 +61,7 @@ export function WalletAuthButton() {
   const [walletAddress, setWalletAddress] = useState<string | null>(null)
   const [altchaToken, setAltchaToken]     = useState<string | null>(null)
   const [altchaReady, setAltchaReady]     = useState(false)
+  const [iosNoProvider, setIosNoProvider] = useState(false)
   const widgetRef = useRef<HTMLElement | null>(null)
 
   useEffect(() => {
@@ -65,6 +71,8 @@ export function WalletAuthButton() {
       const p = getProvider()
       if (p?.publicKey) setWalletAddress(getAddress(p.publicKey))
     }
+    // On iOS Safari, wallet extensions don't exist — need wallet's in-app browser
+    if (isIOS() && !getProvider()) setIosNoProvider(true)
   }, [])
 
   useEffect(() => {
@@ -181,6 +189,37 @@ export function WalletAuthButton() {
         <a href="/dashboard" className="btn-primary">{t.common.dashboard}</a>
         {walletAddress && <span className="wallet-address">{truncate(walletAddress)}</span>}
         <button className="btn-secondary" onClick={handleLogout}>{t.common.disconnect}</button>
+      </div>
+    )
+  }
+
+  // iOS Safari: wallet extensions don't exist — must open from inside the wallet browser
+  if (iosNoProvider) {
+    const url = typeof window !== 'undefined' ? encodeURIComponent(window.location.href) : ''
+    const solflareDeepLink = `https://solflare.com/ul/v1/browse/${url}?ref=${url}`
+    const phantomDeepLink  = `https://phantom.app/ul/browse/${url}?ref=${url}`
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, maxWidth: 300, textAlign: 'center' }}>
+        <p style={{ fontSize: 13, color: 'rgba(180,210,255,0.6)', lineHeight: 1.5 }}>
+          En iOS, abrí esta página desde el navegador de tu wallet:
+        </p>
+        <a
+          href={solflareDeepLink}
+          className="btn-primary"
+          style={{ width: '100%', justifyContent: 'center', fontSize: 14 }}
+        >
+          Abrir en Solflare
+        </a>
+        <a
+          href={phantomDeepLink}
+          className="btn-primary"
+          style={{ width: '100%', justifyContent: 'center', fontSize: 14, background: 'linear-gradient(180deg, rgba(171,105,255,0.95) 0%, rgba(103,47,255,1) 50%, rgba(64,0,204,1) 100%)' }}
+        >
+          Abrir en Phantom
+        </a>
+        <p style={{ fontSize: 11, color: 'rgba(180,210,255,0.35)', lineHeight: 1.4 }}>
+          Una vez dentro del navegador de la wallet, recargá la página y conectá normalmente.
+        </p>
       </div>
     )
   }
