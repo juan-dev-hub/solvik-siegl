@@ -1,1 +1,1 @@
-export { createWalletSession, getWalletSession, verifyWalletSignature } from './create-session'
+export { createWalletSession, createSessionToken, getWalletSession, verifyWalletSignature } from './create-session'

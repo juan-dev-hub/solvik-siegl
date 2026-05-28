@@ -87,10 +87,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   useEffect(() => {
     fetch('/api/me')
-      .then(r => r.json())
-      .then(d => setSlug(d.issuer?.slug ?? null))
+      .then(r => {
+        if (r.status === 401) { router.push('/'); return null }
+        return r.json()
+      })
+      .then(d => { if (d) setSlug(d.issuer?.slug ?? null) })
       .catch(() => {})
-  }, [])
+  }, [router])
 
   // Close sidebar on route change (mobile)
   useEffect(() => { setSidebarOpen(false) }, [pathname])
