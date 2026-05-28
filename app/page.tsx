@@ -1,4 +1,5 @@
 'use client'
+import { useState, useEffect } from 'react'
 import { useTranslation } from '@/components/LanguageProvider'
 import { WalletAuthButton } from '@/components/WalletAuthButton'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
@@ -22,6 +23,19 @@ const PLANS = [
 
 export default function LandingPage() {
   const { t } = useTranslation()
+  const [hasSession, setHasSession] = useState(false)
+
+  useEffect(() => {
+    setHasSession(document.cookie.includes('session_active=1'))
+  }, [])
+
+  const handlePricingClick = () => {
+    if (hasSession) {
+      window.location.href = '/pricing'
+    } else {
+      document.getElementById('hero-connect')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+  }
 
   return (
     <div style={{ minHeight: '100vh' }}>
@@ -49,7 +63,9 @@ export default function LandingPage() {
         <p style={{ fontSize: 20, color: 'rgba(0,212,255,0.75)', fontFamily: 'var(--font-outfit), Outfit, Luna, sans-serif', lineHeight: 1.7, marginBottom: 40, maxWidth: 600, margin: '0 auto 40px' }}>
           {t.landing.hero_sub}
         </p>
-        <WalletAuthButton showWidget />
+        <div id="hero-connect">
+          <WalletAuthButton showWidget />
+        </div>
       </div>
 
       {/* Disclaimer card */}
@@ -171,9 +187,9 @@ export default function LandingPage() {
                   </div>
                 ))}
               </div>
-              <a href="/pricing" className="btn-primary" style={{ width: '100%', justifyContent: 'center' }}>
-                {t.landing.get_plan} ${p.price}/mes
-              </a>
+              <button onClick={handlePricingClick} className="btn-primary" style={{ width: '100%', justifyContent: 'center' }}>
+                {hasSession ? `${t.landing.get_plan} $${p.price}/mes` : t.common.connect}
+              </button>
             </div>
           ))}
         </div>
