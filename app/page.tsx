@@ -40,7 +40,7 @@ export default function LandingPage() {
         <p style={{ fontSize: 20, color: 'rgba(0,212,255,0.75)', fontFamily: 'var(--font-outfit), Outfit, Luna, sans-serif', lineHeight: 1.7, marginBottom: 40, maxWidth: 600, margin: '0 auto 40px' }}>
           {t.landing.hero_sub}
         </p>
-        <WalletAuthButton />
+        <WalletAuthButton showWidget />
       </div>
 
       {/* Disclaimer card */}

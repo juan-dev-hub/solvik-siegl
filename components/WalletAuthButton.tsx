@@ -206,7 +206,7 @@ function QrScannerModal({ onClose, onResult }: { onClose: () => void; onResult: 
 // ---------------------------------------------------------------------------
 // Main component
 // ---------------------------------------------------------------------------
-export function WalletAuthButton() {
+export function WalletAuthButton({ showWidget = false }: { showWidget?: boolean }) {
   const { t } = useTranslation()
   const toast = useToast()
   const [loading, setLoading]             = useState(false)
@@ -247,9 +247,9 @@ export function WalletAuthButton() {
     }
   }, [showTooltip])
 
-  // Load ALTCHA only for wallet flow (not QR flow)
+  // Load ALTCHA script only when this instance owns the widget
   useEffect(() => {
-    if (hasSession || mobileNoWallet) return
+    if (hasSession || mobileNoWallet || !showWidget) return
     const scriptId = 'altcha-script'
     if (!document.getElementById(scriptId)) {
       const script = document.createElement('script')
@@ -258,19 +258,28 @@ export function WalletAuthButton() {
       script.type = 'module'
       document.head.appendChild(script)
     }
+  }, [hasSession, mobileNoWallet, showWidget])
+
+  // Both instances listen to the same widget (rendered by the hero button)
+  useEffect(() => {
+    if (hasSession || mobileNoWallet) return
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<{ state: string; payload?: string }>).detail
+      if (detail?.state === 'verified' && detail.payload) setAltchaToken(detail.payload)
+    }
     const poll = setInterval(() => {
       const el = document.getElementById('altcha-widget-main')
       if (el) {
         widgetRef.current = el as HTMLElement
-        el.addEventListener('statechange', (e: Event) => {
-          const detail = (e as CustomEvent<{ state: string; payload?: string }>).detail
-          if (detail?.state === 'verified' && detail.payload) setAltchaToken(detail.payload)
-        })
+        el.addEventListener('statechange', handler)
         setAltchaReady(true)
         clearInterval(poll)
       }
     }, 500)
-    return () => clearInterval(poll)
+    return () => {
+      clearInterval(poll)
+      widgetRef.current?.removeEventListener('statechange', handler)
+    }
   }, [hasSession, mobileNoWallet])
 
   const handleConnect = async () => {
@@ -386,23 +395,26 @@ export function WalletAuthButton() {
   // Desktop / mobile with wallet — normal flow
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
-      {/* @ts-expect-error — altcha is a custom web component */}
-      <altcha-widget
-        id="altcha-widget-main"
-        challengeurl="/api/altcha"
-        style={{ '--altcha-max-width': '280px' } as React.CSSProperties}
-      />
-
-      {altchaToken ? (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#00FFB3' }}>
-          <ShieldCheck size={14} />
-          Verificado
-        </div>
-      ) : altchaReady ? (
-        <p style={{ fontSize: 11, color: 'rgba(240,240,255,0.4)' }}>
-          Completa la verificación para continuar
-        </p>
-      ) : null}
+      {showWidget && (
+        <>
+          {/* @ts-expect-error — altcha is a custom web component */}
+          <altcha-widget
+            id="altcha-widget-main"
+            challengeurl="/api/altcha"
+            style={{ '--altcha-max-width': '280px' } as React.CSSProperties}
+          />
+          {altchaToken ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#00FFB3' }}>
+              <ShieldCheck size={14} />
+              Verificado
+            </div>
+          ) : altchaReady ? (
+            <p style={{ fontSize: 11, color: 'rgba(240,240,255,0.4)' }}>
+              Completa la verificación para continuar
+            </p>
+          ) : null}
+        </>
+      )}
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         {loading ? (
