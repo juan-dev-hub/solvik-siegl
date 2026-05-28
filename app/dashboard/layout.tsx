@@ -86,13 +86,29 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }, [])
 
   useEffect(() => {
-    fetch('/api/me')
-      .then(r => {
-        if (r.status === 401) { router.push('/'); return null }
-        return r.json()
-      })
-      .then(d => { if (d) setSlug(d.issuer?.slug ?? null) })
-      .catch(() => {})
+    const checkSession = () => {
+      fetch('/api/me')
+        .then(r => {
+          if (r.status === 401) { router.push('/'); return null }
+          return r.json()
+        })
+        .then(d => { if (d) setSlug(d.issuer?.slug ?? null) })
+        .catch(() => {})
+    }
+
+    checkSession()
+
+    // Verificar cada 20 segundos
+    const interval = setInterval(checkSession, 20_000)
+
+    // Verificar inmediatamente al volver al tab
+    const onVisible = () => { if (document.visibilityState === 'visible') checkSession() }
+    document.addEventListener('visibilitychange', onVisible)
+
+    return () => {
+      clearInterval(interval)
+      document.removeEventListener('visibilitychange', onVisible)
+    }
   }, [router])
 
   // Close sidebar on route change (mobile)
