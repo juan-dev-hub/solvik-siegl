@@ -438,13 +438,22 @@ export function WalletAuthButton() {
 
           {showTooltip && (
             <div style={{
-              position: 'absolute', bottom: 'calc(100% + 10px)', right: 0,
-              width: 260, background: 'rgba(10,5,30,0.97)',
+              position: 'absolute', top: 'calc(100% + 10px)', right: 0,
+              width: 300, background: 'rgba(10,5,30,0.97)',
               border: '1px solid rgba(255,200,50,0.3)', borderRadius: 12,
               padding: '14px 16px', zIndex: 200,
               boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
               fontSize: 12, color: 'rgba(240,240,255,0.75)', lineHeight: 1.6,
             }}>
+              {/* Flecha arriba */}
+              <div style={{
+                position: 'absolute', top: -6, right: 14,
+                width: 10, height: 10,
+                background: 'rgba(10,5,30,0.97)',
+                border: '1px solid rgba(255,200,50,0.3)',
+                borderBottom: 'none', borderRight: 'none',
+                transform: 'rotate(45deg)',
+              }} />
               <p style={{ fontWeight: 700, color: '#FFD580', marginBottom: 8, fontSize: 13 }}>
                 ⚠️ Usá una wallet de Solana
               </p>
@@ -454,14 +463,6 @@ export function WalletAuthButton() {
               <p style={{ color: 'rgba(255,100,100,0.8)', fontSize: 11 }}>
                 ⛔ Sin excepciones. No realizamos devoluciones bajo ninguna circunstancia.
               </p>
-              <div style={{
-                position: 'absolute', bottom: -6, right: 14,
-                width: 10, height: 10,
-                background: 'rgba(10,5,30,0.97)',
-                border: '1px solid rgba(255,200,50,0.3)',
-                borderTop: 'none', borderLeft: 'none',
-                transform: 'rotate(45deg)',
-              }} />
             </div>
           )}
         </div>
