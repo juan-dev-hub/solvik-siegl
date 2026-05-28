@@ -2,7 +2,7 @@
 import { useTranslation } from '@/components/LanguageProvider'
 import { WalletAuthButton } from '@/components/WalletAuthButton'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
-import { Shield, AlertTriangle, Clock } from 'lucide-react'
+import { Shield, AlertTriangle, Clock, ShieldCheck, KeyRound, Globe, Zap } from 'lucide-react'
 import { HeroTitle } from '@/components/HeroTitle'
 
 const PLANS = [
@@ -79,6 +79,55 @@ export default function LandingPage() {
           <p style={{ fontSize: 14, color: 'rgba(0,212,255,0.55)', fontStyle: 'italic' }}>
             {t.landing.urgency}
           </p>
+        </div>
+      </div>
+
+      {/* Trust / Security section */}
+      <div style={{ maxWidth: 900, margin: '0 auto 80px', padding: '0 40px' }}>
+        <p style={{ textAlign: 'center', fontSize: 12, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(180,210,255,0.35)', marginBottom: 32 }}>
+          {t.landing.trust_title}
+        </p>
+        <div className="pain-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 20 }}>
+          {[
+            {
+              icon: <ShieldCheck size={22} color="#00FFB3" />,
+              color: '#00FFB3',
+              title: t.landing.trust_altcha_title,
+              desc: t.landing.trust_altcha_desc,
+            },
+            {
+              icon: <KeyRound size={22} color="#4ABAFF" />,
+              color: '#4ABAFF',
+              title: t.landing.trust_wallet_title,
+              desc: t.landing.trust_wallet_desc,
+            },
+            {
+              icon: <Globe size={22} color="#B06FFF" />,
+              color: '#B06FFF',
+              title: t.landing.trust_arweave_title,
+              desc: t.landing.trust_arweave_desc,
+            },
+            {
+              icon: <Zap size={22} color="#FFD700" />,
+              color: '#FFD700',
+              title: t.landing.trust_payments_title,
+              desc: t.landing.trust_payments_desc,
+            },
+          ].map(item => (
+            <div key={item.title} style={{
+              display: 'flex', flexDirection: 'column', gap: 10,
+              padding: '20px 20px 22px',
+              background: 'rgba(255,255,255,0.025)',
+              border: '1px solid rgba(255,255,255,0.07)',
+              borderRadius: 14,
+            }}>
+              <div style={{ width: 40, height: 40, borderRadius: 10, background: `${item.color}14`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {item.icon}
+              </div>
+              <p style={{ fontWeight: 700, fontSize: 14, color: '#F0F8FF', lineHeight: 1.3 }}>{item.title}</p>
+              <p style={{ fontSize: 13, color: 'rgba(180,210,255,0.5)', lineHeight: 1.6 }}>{item.desc}</p>
+            </div>
+          ))}
         </div>
       </div>
 
