@@ -227,8 +227,8 @@ export function WalletAuthButton() {
       const p = getProvider()
       if (p?.publicKey) setWalletAddress(getAddress(p.publicKey))
     }
-    // Mobile without any injected wallet provider → use QR flow
-    if (isMobileDevice() && !getProvider()) setMobileNoWallet(true)
+    // Any mobile device → use QR flow (avoids wallet extension popups on Android/iOS)
+    if (isMobileDevice()) setMobileNoWallet(true)
   }, [])
 
   // Close tooltip when clicking outside

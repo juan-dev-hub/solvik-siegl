@@ -74,7 +74,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [showMobileQr, setShowMobileQr] = useState(false)
   const [mobileQrDataUrl, setMobileQrDataUrl] = useState<string | null>(null)
+  const [mobileQrUrl, setMobileQrUrl] = useState<string | null>(null)
   const [mobileQrSeconds, setMobileQrSeconds] = useState(300)
+  const [mobileUrlCopied, setMobileUrlCopied] = useState(false)
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768)
@@ -114,7 +116,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       const url = `${APP_URL}/api/auth/mobile-redeem?token=${data.token}`
       const dataUrl = await QRCode.toDataURL(url, { width: 280, margin: 2, color: { dark: '#0a0015', light: '#ffffff' } })
       setMobileQrDataUrl(dataUrl)
+      setMobileQrUrl(url)
       setMobileQrSeconds(300)
+      setMobileUrlCopied(false)
       setShowMobileQr(true)
     } catch { /* ignore */ }
   }
@@ -387,15 +391,34 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <img
                 src={mobileQrDataUrl}
                 alt="QR de sesión móvil"
-                style={{ width: 200, height: 200, borderRadius: 12, display: 'block', margin: '0 auto 16px' }}
+                style={{ width: 200, height: 200, borderRadius: 12, display: 'block', margin: '0 auto 12px' }}
               />
               <p style={{
                 fontSize: 13,
                 color: mobileQrSeconds < 60 ? '#FF6B6B' : 'rgba(180,210,255,0.4)',
-                marginBottom: 20, fontVariantNumeric: 'tabular-nums',
+                marginBottom: 12, fontVariantNumeric: 'tabular-nums',
               }}>
                 Expira en {Math.floor(mobileQrSeconds / 60)}:{String(mobileQrSeconds % 60).padStart(2, '0')}
               </p>
+              {/* iOS fallback: copy URL */}
+              <div style={{ marginBottom: 20 }}>
+                <p style={{ fontSize: 11, color: 'rgba(180,210,255,0.35)', marginBottom: 8 }}>
+                  ¿No podés escanear? Copiá el enlace y abrilo en tu celular:
+                </p>
+                <button
+                  onClick={() => {
+                    if (!mobileQrUrl) return
+                    navigator.clipboard.writeText(mobileQrUrl).then(() => {
+                      setMobileUrlCopied(true)
+                      setTimeout(() => setMobileUrlCopied(false), 2000)
+                    })
+                  }}
+                  className="btn-secondary"
+                  style={{ fontSize: 12, width: '100%', justifyContent: 'center' }}
+                >
+                  {mobileUrlCopied ? '✓ Copiado' : 'Copiar enlace'}
+                </button>
+              </div>
               <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
                 <motion.button
                   onClick={handleOpenMobileQr}
