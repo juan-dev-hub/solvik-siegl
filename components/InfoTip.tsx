@@ -64,7 +64,7 @@ export function InfoTip({ title, text, position = 'bottom', size = 13 }: InfoTip
         ref={btnRef}
         onMouseEnter={handleEnter}
         onMouseLeave={handleLeave}
-        onClick={e => { e.preventDefault(); e.stopPropagation(); open ? setOpen(false) : (calcCoords(), setOpen(true)) }}
+        onClick={e => { e.preventDefault(); e.stopPropagation(); if (open) { setOpen(false) } else { calcCoords(); setOpen(true) } }}
         style={{
           background: 'none', border: 'none', cursor: 'pointer', padding: 3,
           display: 'flex', alignItems: 'center',
