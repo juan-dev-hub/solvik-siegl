@@ -8,7 +8,7 @@ export default function TermsPage() {
 
   return (
     <div style={{ minHeight: '100vh' }}>
-      <nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 40px', borderBottom: '1px solid rgba(100,200,255,0.08)' }}>
+      <nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px clamp(16px,5vw,40px)', borderBottom: '1px solid rgba(100,200,255,0.08)' }}>
         <a href="/" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}>
           <img src="/logo.jpg" alt="Solvik Studio" style={{ height: 32, objectFit: 'contain', borderRadius: 6 }} />
           <span style={{ fontFamily: 'Luna, sans-serif', fontWeight: 800, fontSize: 18, color: '#F0F8FF' }}>Solvik Studio</span>
@@ -16,7 +16,7 @@ export default function TermsPage() {
         <LanguageSwitcher />
       </nav>
 
-      <div style={{ maxWidth: 720, margin: '0 auto', padding: '60px 40px' }}>
+      <div style={{ maxWidth: 720, margin: '0 auto', padding: 'clamp(32px,6vw,60px) clamp(16px,5vw,40px)' }}>
         <h1 style={{ fontFamily: 'Luna, sans-serif', fontWeight: 800, fontSize: 36, color: '#F0F8FF', marginBottom: 32 }}>
           {t.terms.title}
         </h1>

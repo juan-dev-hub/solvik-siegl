@@ -117,7 +117,7 @@ export default function ProductPage() {
 
   return (
     <div style={{ minHeight: '100vh' }}>
-      <nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 40px', borderBottom: '1px solid rgba(100,200,255,0.08)', backdropFilter: 'blur(12px)', background: 'rgba(8,14,28,0.7)', position: 'sticky', top: 0, zIndex: 50 }}>
+      <nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px clamp(16px,5vw,40px)', borderBottom: '1px solid rgba(100,200,255,0.08)', backdropFilter: 'blur(12px)', background: 'rgba(8,14,28,0.7)', position: 'sticky', top: 0, zIndex: 50 }}>
         <a href="/store" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}>
           <img src="/logo.jpg" alt="Solvik Studio" style={{ height: 28, borderRadius: 4 }} />
           <span style={{ fontFamily: 'Luna, sans-serif', fontWeight: 800, fontSize: 16, color: '#F0F8FF' }}>Solvik Studio</span>
@@ -125,12 +125,12 @@ export default function ProductPage() {
         <LanguageSwitcher />
       </nav>
 
-      <div style={{ maxWidth: 900, margin: '0 auto', padding: '48px 40px' }}>
+      <div style={{ maxWidth: 900, margin: '0 auto', padding: 'clamp(24px,6vw,48px) clamp(16px,5vw,40px)' }}>
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, ease: 'easeOut' }}
-          style={{ display: 'grid', gridTemplateColumns: '1fr 1.4fr', gap: 40, alignItems: 'start' }}
+          style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 32, alignItems: 'start' }}
         >
           {/* Cover */}
           <div>

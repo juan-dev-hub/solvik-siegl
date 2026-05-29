@@ -81,7 +81,7 @@ export default function GalleryPage() {
       <h1 style={{ fontWeight: 800, fontSize: 28, color: '#F0F8FF', marginBottom: 8 }}>{t.gallery.title}</h1>
 
       {/* Stats + widget */}
-      <div className="glass-card" style={{ marginBottom: 28, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div className="glass-card" style={{ marginBottom: 28, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
         <div>
           <p style={{ fontSize: 32, fontWeight: 800, color: '#4ABAFF' }}>{monthVerifs}</p>
           <p style={{ fontSize: 13, color: 'rgba(180,210,255,0.5)' }}>{t.gallery.verifications_month}</p>

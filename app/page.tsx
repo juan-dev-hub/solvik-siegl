@@ -90,7 +90,7 @@ export default function LandingPage() {
       </div>
 
       {/* Disclaimer card */}
-      <div style={{ maxWidth: 720, margin: '0 auto 60px', padding: '0 40px' }}>
+      <div style={{ maxWidth: 720, margin: '0 auto 60px', padding: '0 clamp(16px, 5vw, 40px)' }}>
         <div style={{ border: '1px solid rgba(255,215,0,0.4)', background: 'rgba(255,215,0,0.05)', borderRadius: 16, padding: '16px 24px' }}>
           <p style={{ fontSize: 13, color: 'rgba(255,215,0,0.8)', fontFamily: 'Luna, sans-serif', lineHeight: 1.7 }}>
             ⚠️ {t.landing.disclaimer_card}
@@ -99,7 +99,7 @@ export default function LandingPage() {
       </div>
 
       {/* Pain cards */}
-      <div className="pain-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24, maxWidth: 900, margin: '0 auto 80px', padding: '0 40px' }}>
+      <div className="pain-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 24, maxWidth: 900, margin: '0 auto 80px', padding: '0 clamp(16px, 5vw, 40px)' }}>
         {[
           { icon: <AlertTriangle size={28} color="#FF6B6B" />, title: t.landing.feat1_title, desc: t.landing.feat1_desc },
           { icon: <Shield size={28} color="#B06FFF" />, title: t.landing.feat2_title, desc: t.landing.feat2_desc },
@@ -114,8 +114,8 @@ export default function LandingPage() {
       </div>
 
       {/* Solution block */}
-      <div style={{ maxWidth: 700, margin: '0 auto 80px', padding: '0 40px', textAlign: 'center' }}>
-        <div style={{ borderLeft: '3px solid #7B2FFF', borderRight: '3px solid #00D4FF', background: 'linear-gradient(135deg, rgba(123,47,255,0.10) 0%, rgba(0,212,255,0.06) 100%)', borderRadius: 16, padding: '32px 40px' }}>
+      <div style={{ maxWidth: 700, margin: '0 auto 80px', padding: '0 clamp(16px, 5vw, 40px)', textAlign: 'center' }}>
+        <div style={{ borderLeft: '3px solid #7B2FFF', borderRight: '3px solid #00D4FF', background: 'linear-gradient(135deg, rgba(123,47,255,0.10) 0%, rgba(0,212,255,0.06) 100%)', borderRadius: 16, padding: 'clamp(20px,5vw,32px) clamp(16px,5vw,40px)' }}>
           <p style={{ fontWeight: 800, fontSize: 22, color: '#F0F0FF', marginBottom: 12 }}>
             {t.landing.solution_title}
           </p>
@@ -129,7 +129,7 @@ export default function LandingPage() {
       </div>
 
       {/* Trust / Security section */}
-      <div style={{ maxWidth: 900, margin: '0 auto 80px', padding: '0 40px' }}>
+      <div style={{ maxWidth: 900, margin: '0 auto 80px', padding: '0 clamp(16px, 5vw, 40px)' }}>
         <p style={{ textAlign: 'center', fontSize: 12, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(180,210,255,0.35)', marginBottom: 32 }}>
           {t.landing.trust_title}
         </p>
@@ -178,7 +178,7 @@ export default function LandingPage() {
       </div>
 
       {/* Pricing */}
-      <div style={{ maxWidth: 960, margin: '0 auto 80px', padding: '0 40px' }}>
+      <div style={{ maxWidth: 960, margin: '0 auto 80px', padding: '0 clamp(16px, 5vw, 40px)' }}>
         <h2 style={{ fontFamily: 'Luna, sans-serif', fontWeight: 800, fontSize: 32, color: '#F0F0FF', textAlign: 'center', marginBottom: 8 }}>
           {t.pricing.title}
         </h2>

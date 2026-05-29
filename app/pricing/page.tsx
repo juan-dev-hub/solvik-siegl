@@ -107,7 +107,7 @@ export default function PricingPage() {
 
   return (
     <div style={{ minHeight: '100vh' }}>
-      <nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 40px', borderBottom: '1px solid rgba(123,47,255,0.1)' }}>
+      <nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid rgba(123,47,255,0.1)', flexWrap: 'wrap', gap: 10 }}>
         <a href="/" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}>
           <img src="/logo.jpg" alt="Solvik Studio" style={{ height: 32, objectFit: 'contain', borderRadius: 6 }} />
           <span style={{ fontFamily: 'Luna, sans-serif', fontWeight: 800, fontSize: 18, color: '#F0F0FF' }}>Solvik Studio</span>
@@ -126,7 +126,7 @@ export default function PricingPage() {
           {t.pricing.sub}
         </p>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24, marginBottom: 40 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 24, marginBottom: 40 }}>
           {PLANS.map(p => (
             <div key={p.id} className="glass-card" style={{ border: p.popular ? '1px solid #7B2FFF' : undefined, position: 'relative' }}>
               {p.popular && (

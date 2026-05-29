@@ -330,6 +330,11 @@ select option { background: #0a1a3a; color: white; }
   .nav-desktop { display: none; }
   .mobile-menu { display: block; }
 
+  /* Reducir paddings en móvil */
+  .page-container {
+    padding: 24px 16px !important;
+  }
+
   /* Dashboard mobile */
   .glass-card {
     padding: var(--space-md);
