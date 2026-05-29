@@ -296,8 +296,11 @@ select option { background: #0a1a3a; color: white; }
   to   { opacity: 1; transform: translateX(0)    scale(1);    }
 }
 
-/* Mobile hamburger — oculto en desktop */
-.mobile-menu { display: none; }
+/* Nav desktop — oculto en móvil */
+.nav-desktop { display: flex; align-items: center; gap: 24px; }
+
+/* Nav hamburger — oculto en desktop */
+.mobile-menu { display: none; position: relative; }
 
 /* ── Responsive ── */
 @media (max-width: 768px) {
@@ -323,13 +326,9 @@ select option { background: #0a1a3a; color: white; }
     gap: 12px;
   }
 
-  .nav-links {
-    display: none;
-  }
-
-  .mobile-menu {
-    display: block;
-  }
+  .nav-links { display: none; }
+  .nav-desktop { display: none; }
+  .mobile-menu { display: block; }
 
   /* Dashboard mobile */
   .glass-card {
