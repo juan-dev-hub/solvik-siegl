@@ -82,7 +82,7 @@ async function processBatch(params: {
 
   // Dynamic import to avoid heavy bundling
   const { default: PQueue } = await import('p-queue')
-  const { uploadToArweave } = await import('@/lib/arweave')
+  const { uploadToShdwDrive } = await import('@/lib/shdwdrive')
   const { createAttestation } = await import('@/lib/sas')
 
   const queue = new PQueue({ concurrency: 3 })
@@ -99,7 +99,7 @@ async function processBatch(params: {
       const fileData = await zip.files[entryKey].async('nodebuffer')
       const mime = EXT_MIME[ext]
 
-      const arweave = await uploadToArweave(fileData, mime, {
+      const arweave = await uploadToShdwDrive(fileData, mime, {
         doc_type: docType,
         issuer_wallet: wallet,
         issued_to: name,

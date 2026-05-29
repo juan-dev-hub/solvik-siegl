@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getWalletSession } from '@/lib/wallet-auth'
 import { supabaseAdmin } from '@/lib/supabase'
-import { uploadToArweave } from '@/lib/arweave'
+import { uploadToShdwDrive } from '@/lib/shdwdrive'
 
 export async function POST(req: NextRequest) {
   const wallet = await getWalletSession()
@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
     }
 
     const fileBuffer = Buffer.from(await file.arrayBuffer())
-    const uploadResult = await uploadToArweave(fileBuffer, file.type, {
+    const uploadResult = await uploadToShdwDrive(fileBuffer, file.type, {
       'Product-Title': title,
     })
     const arweaveTxId = uploadResult.id
@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
     let coverArweaveId: string | null = null
     if (cover && cover.size > 0) {
       const coverBuffer = Buffer.from(await cover.arrayBuffer())
-      const coverResult = await uploadToArweave(coverBuffer, cover.type, {})
+      const coverResult = await uploadToShdwDrive(coverBuffer, cover.type, {})
       coverArweaveId = coverResult.id
     }
 

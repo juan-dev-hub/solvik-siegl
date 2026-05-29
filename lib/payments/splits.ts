@@ -10,28 +10,32 @@ export const PLAN_PRICES_USDC: Record<string, bigint> = {
   studio:  249_000_000n,  // $249
 }
 
-// First payment split — backend does this ONCE only
-export function calculateFirstPaymentSplit() {
+// Mes 1 (primer pago): Owner 50% | Gas/Trees 20% | Shadow Drive 20% | Contract 10%
+// Owner keeps the remaining 50% in OWNER_WALLET — no transfer needed for that share
+export function calculateFirstPaymentSplit(totalAmount: bigint): {
+  gas_amount: bigint
+  shadow_amount: bigint
+  contract_amount: bigint
+} {
   return {
-    contractAmount: BigInt(20_000_000), // $20 USDC → deploy + activation
-    merkleAmount:   BigInt(10_000_000), // $10 → Merkle tree
-    solanaBuffer:   BigInt(3_000_000),  // $3  → Solana fees buffer
-    feePoolTotal:   BigInt(13_000_000), // $13 total → FEE_POOL_WALLET
+    gas_amount:      (totalAmount * 20n) / 100n,
+    shadow_amount:   (totalAmount * 20n) / 100n,
+    contract_amount: (totalAmount * 10n) / 100n,
   }
 }
 
-// Subsequent payments — the contract handles these via Pyth oracle.
-// These are fixed fallback amounts used until the contract is live.
+// Mes 2+: Owner 50% | Gas/Trees 30% | Contract 20% | Shadow Drive 0%
 export function calculateRenewalSplit(totalAmount: bigint): {
-  owner_amount: bigint
-  fee_pool_amount: bigint
+  gas_amount: bigint
+  contract_amount: bigint
 } {
-  const fee_pool_amount = (totalAmount * 15n) / 100n
-  const owner_amount = totalAmount - fee_pool_amount
-  return { owner_amount, fee_pool_amount }
+  return {
+    gas_amount:      (totalAmount * 30n) / 100n,
+    contract_amount: (totalAmount * 20n) / 100n,
+  }
 }
 
-// Book purchase split: 5% Solvik + 15% fee pool + 10% contract + 70% issuer
+// Book purchase: 5% Solvik | 15% fee pool | 10% contract | 70% issuer
 export function calculateBookSplit(totalAmount: bigint): {
   comision_solvik: bigint
   fee_pool_amount: bigint
@@ -44,4 +48,3 @@ export function calculateBookSplit(totalAmount: bigint): {
   const issuer_amount = totalAmount - fee_pool_amount - contract_amount - comision_solvik
   return { comision_solvik, fee_pool_amount, contract_amount, issuer_amount }
 }
-

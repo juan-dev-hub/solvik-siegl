@@ -23,8 +23,8 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  title: 'Solvik Studio — Certificación inmutable en Arweave',
-  description: 'Emite certificados digitales permanentes en Arweave, verificables con QR, firmados con tu wallet de Solana.',
+  title: 'Solvik Studio — Certificación blockchain en Solana',
+  description: 'Emite certificados digitales verificables con QR, almacenados en Shadow Drive, firmados con tu wallet de Solana.',
   manifest: '/manifest.json',
   icons: {
     icon: '/icon-192.png',
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: 'Solvik Studio',
-    description: 'Certificación inmutable en Arweave',
+    description: 'Certificación blockchain en Solana',
     type: 'website',
     images: [{ url: '/logo.jpg', width: 512, height: 512 }],
   },

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getWalletSession } from '@/lib/auth'
 import { supabaseAdmin } from '@/lib/supabase'
-import { uploadToArweave } from '@/lib/arweave'
+import { uploadToShdwDrive } from '@/lib/shdwdrive'
 import { mintCNFT } from '@/lib/cnft'
 import { generateCertificatePDF, createAttestation, validateFileAndAccess, updateStorageUsed } from '@/lib/certificates'
 
@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
 
     const buffer = Buffer.from(await file.arrayBuffer())
 
-    const arweave = await uploadToArweave(buffer, file.type, {
+    const arweave = await uploadToShdwDrive(buffer, file.type, {
       doc_type: docType,
       issuer_wallet: wallet,
       issued_to: issuedTo,

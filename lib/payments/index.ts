@@ -28,20 +28,35 @@ export async function processSubscription(
   if (!valid) return { ok: false, error: 'Pago no verificado.' }
 
   const supabase = getSupabase()
-  const { data: existing } = await supabase
-    .from('issuers')
-    .select('registered_at')
-    .eq('wallet_address', walletAddress)
-    .single()
 
-  const isFirstPayment = !existing
+  const [configResult, existingResult] = await Promise.all([
+    supabase.from('system_config').select('key, value'),
+    supabase.from('issuers').select('registered_at').eq('wallet_address', walletAddress).single(),
+  ])
 
-  if (isFirstPayment) {
-    const split = calculateFirstPaymentSplit()
-    await executeUSDCSplit([
-      { recipient: process.env.CONTRACT_WALLET!, amount: split.contractAmount },
-      { recipient: process.env.FEE_POOL_WALLET!, amount: split.feePoolTotal },
-    ])
+  const contractActive = configResult.data?.find(c => c.key === 'contract_active')?.value === 'true'
+  const isNewIssuer = !existingResult.data
+
+  if (!contractActive) {
+    // Backend handles all splits until CONTRACT_WALLET accumulates enough for activation
+    if (isNewIssuer) {
+      const split = calculateFirstPaymentSplit(actualAmount)
+      await executeUSDCSplit([
+        { recipient: process.env.GAS_WALLET!,      amount: split.gas_amount },
+        { recipient: process.env.SHADOW_WALLET!,   amount: split.shadow_amount },
+        { recipient: process.env.CONTRACT_WALLET!, amount: split.contract_amount },
+      ])
+    } else {
+      const split = calculateRenewalSplit(actualAmount)
+      await executeUSDCSplit([
+        { recipient: process.env.GAS_WALLET!,      amount: split.gas_amount },
+        { recipient: process.env.CONTRACT_WALLET!, amount: split.contract_amount },
+      ])
+    }
+  }
+  // When contract is active it handles on-chain splits automatically — backend only updates records
+
+  if (isNewIssuer) {
     await registerIssuer(walletAddress, planId)
     await supabase.from('issuers').insert({
       wallet_address: walletAddress,
@@ -50,11 +65,6 @@ export async function processSubscription(
       storage_limit_bytes: PLAN_STORAGE[planId],
     })
   } else {
-    // Renewal: contract handles split via Pyth. Backend only updates storage limit.
-    const { fee_pool_amount } = calculateRenewalSplit(actualAmount)
-    await executeUSDCSplit([
-      { recipient: process.env.FEE_POOL_WALLET!, amount: fee_pool_amount },
-    ])
     await supabase
       .from('issuers')
       .update({ storage_limit_bytes: PLAN_STORAGE[planId] })

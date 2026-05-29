@@ -9,15 +9,15 @@ import { HeroTitle } from '@/components/HeroTitle'
 const PLANS = [
   {
     id: 'starter', price: 49, storage: '1 GB',
-    features: ['1 GB almacenamiento permanente', 'PDF + QR verificable', 'Arweave permanente', 'Solana cNFT'],
+    features: ['1 GB en Shadow Drive', 'PDF + QR verificable', 'Solana cNFT'],
   },
   {
     id: 'pro', price: 99, storage: '5 GB', popular: true,
-    features: ['5 GB almacenamiento permanente', 'PDF + QR verificable', 'Arweave permanente', 'Solana cNFT', 'Attestation on-chain', 'Badge dominio SNS'],
+    features: ['5 GB en Shadow Drive', 'PDF + QR verificable', 'Solana cNFT', 'Attestation on-chain', 'Badge dominio SNS'],
   },
   {
     id: 'studio', price: 249, storage: '20 GB',
-    features: ['20 GB almacenamiento permanente', 'PDF + QR verificable', 'Arweave permanente', 'Solana cNFT', 'Attestation on-chain', 'Badge dominio SNS', 'Batch ZIP', 'Página pública de issuer'],
+    features: ['20 GB en Shadow Drive', 'PDF + QR verificable', 'Solana cNFT', 'Attestation on-chain', 'Badge dominio SNS', 'Batch ZIP', 'Página pública de issuer'],
   },
 ]
 
