@@ -25,9 +25,14 @@ export default function LandingPage() {
   const { t } = useTranslation()
   const [hasSession, setHasSession] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
     setHasSession(document.cookie.includes('session_active=1'))
+    const check = () => setIsMobile(window.innerWidth <= 768)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
   }, [])
 
   const handlePricingClick = () => {
@@ -41,46 +46,39 @@ export default function LandingPage() {
   return (
     <div style={{ minHeight: '100vh' }}>
       {/* Navbar */}
-      <nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 40px', borderBottom: '1px solid rgba(123,47,255,0.12)', backdropFilter: 'blur(12px)', position: 'sticky', top: 0, zIndex: 50, background: 'rgba(10,0,21,0.7)' }}>
+      <nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: isMobile ? '14px 20px' : '20px 40px', borderBottom: '1px solid rgba(123,47,255,0.12)', backdropFilter: 'blur(12px)', position: 'sticky', top: 0, zIndex: 50, background: 'rgba(10,0,21,0.7)' }}>
         {/* Logo */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <img src="/logo.jpg" alt="Solvik Studio" style={{ height: 32, objectFit: 'contain', borderRadius: 6 }} />
-          <span style={{ fontFamily: 'Luna, sans-serif', fontWeight: 800, fontSize: 18, color: '#F0F0FF' }}>Solvik Studio</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <img src="/logo.jpg" alt="Solvik Studio" style={{ height: 30, objectFit: 'contain', borderRadius: 6 }} />
+          <span style={{ fontFamily: 'Luna, sans-serif', fontWeight: 800, fontSize: isMobile ? 16 : 18, color: '#F0F0FF' }}>Solvik Studio</span>
         </div>
 
-        {/* Desktop nav */}
-        <div className="nav-links" style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
-          <a href="/pricing" style={{ color: 'rgba(240,240,255,0.65)', textDecoration: 'none', fontSize: 14 }}>{t.nav.pricing}</a>
-          <a href="/terms" style={{ color: 'rgba(240,240,255,0.65)', textDecoration: 'none', fontSize: 14 }}>{t.nav.terms}</a>
-          <LanguageSwitcher />
-          <WalletAuthButton />
-        </div>
-
-        {/* Mobile hamburger (solo visible en móvil via CSS) */}
-        <div className="mobile-menu" style={{ position: 'relative' }}>
-          <button
-            onClick={() => setMenuOpen(v => !v)}
-            style={{ background: 'rgba(74,186,255,0.08)', border: '1px solid rgba(74,186,255,0.2)', borderRadius: 8, padding: '8px 10px', cursor: 'pointer', color: '#4ABAFF', display: 'flex', alignItems: 'center' }}
-          >
-            {menuOpen ? <X size={18} /> : <Menu size={18} />}
-          </button>
-
-          {menuOpen && (
-            <div style={{
-              position: 'absolute', top: 'calc(100% + 8px)', right: 0,
-              background: 'rgba(5,10,40,0.97)', backdropFilter: 'blur(20px)',
-              border: '1px solid rgba(74,186,255,0.15)', borderRadius: 12,
-              padding: '8px 0', minWidth: 180, zIndex: 200,
-              boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
-            }}>
-              <a href="/pricing" onClick={() => setMenuOpen(false)} style={{ display: 'block', padding: '11px 18px', color: 'rgba(240,240,255,0.7)', textDecoration: 'none', fontSize: 14, borderBottom: '1px solid rgba(74,186,255,0.08)' }}>{t.nav.pricing}</a>
-              <a href="/terms" onClick={() => setMenuOpen(false)} style={{ display: 'block', padding: '11px 18px', color: 'rgba(240,240,255,0.7)', textDecoration: 'none', fontSize: 14, borderBottom: '1px solid rgba(74,186,255,0.08)' }}>{t.nav.terms}</a>
-              <div style={{ padding: '10px 18px' }}>
-                <LanguageSwitcher />
+        {isMobile ? (
+          /* ── Móvil: solo hamburger ── */
+          <div style={{ position: 'relative' }}>
+            <button
+              onClick={() => setMenuOpen(v => !v)}
+              style={{ background: 'rgba(74,186,255,0.08)', border: '1px solid rgba(74,186,255,0.2)', borderRadius: 8, padding: '8px 10px', cursor: 'pointer', color: '#4ABAFF', display: 'flex', alignItems: 'center' }}
+            >
+              {menuOpen ? <X size={18} /> : <Menu size={18} />}
+            </button>
+            {menuOpen && (
+              <div style={{ position: 'absolute', top: 'calc(100% + 8px)', right: 0, background: 'rgba(5,10,40,0.97)', backdropFilter: 'blur(20px)', border: '1px solid rgba(74,186,255,0.15)', borderRadius: 12, padding: '8px 0', minWidth: 180, zIndex: 200, boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}>
+                <a href="/pricing" onClick={() => setMenuOpen(false)} style={{ display: 'block', padding: '12px 18px', color: 'rgba(240,240,255,0.7)', textDecoration: 'none', fontSize: 14, borderBottom: '1px solid rgba(74,186,255,0.08)' }}>{t.nav.pricing}</a>
+                <a href="/terms" onClick={() => setMenuOpen(false)} style={{ display: 'block', padding: '12px 18px', color: 'rgba(240,240,255,0.7)', textDecoration: 'none', fontSize: 14, borderBottom: '1px solid rgba(74,186,255,0.08)' }}>{t.nav.terms}</a>
+                <div style={{ padding: '10px 18px' }}><LanguageSwitcher /></div>
               </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        ) : (
+          /* ── Desktop: links + wallet ── */
+          <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+            <a href="/pricing" style={{ color: 'rgba(240,240,255,0.65)', textDecoration: 'none', fontSize: 14 }}>{t.nav.pricing}</a>
+            <a href="/terms" style={{ color: 'rgba(240,240,255,0.65)', textDecoration: 'none', fontSize: 14 }}>{t.nav.terms}</a>
+            <LanguageSwitcher />
+            <WalletAuthButton />
+          </div>
+        )}
       </nav>
 
       {/* Hero */}
