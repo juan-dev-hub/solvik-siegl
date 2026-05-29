@@ -42,14 +42,14 @@ export async function processSubscription(
     if (isNewIssuer) {
       const split = calculateFirstPaymentSplit(actualAmount)
       await executeUSDCSplit([
-        { recipient: process.env.GAS_WALLET!,      amount: split.gas_amount },
+        { recipient: process.env.FEE_POOL_WALLET!,      amount: split.gas_amount },
         { recipient: process.env.SHADOW_WALLET!,   amount: split.shadow_amount },
         { recipient: process.env.CONTRACT_WALLET!, amount: split.contract_amount },
       ])
     } else {
       const split = calculateRenewalSplit(actualAmount)
       await executeUSDCSplit([
-        { recipient: process.env.GAS_WALLET!,      amount: split.gas_amount },
+        { recipient: process.env.FEE_POOL_WALLET!,      amount: split.gas_amount },
         { recipient: process.env.CONTRACT_WALLET!, amount: split.contract_amount },
       ])
     }
