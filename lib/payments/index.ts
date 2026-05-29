@@ -6,7 +6,7 @@ import { calculateFirstPaymentSplit, calculateRenewalSplit, PLAN_STORAGE, PLAN_P
 
 export { calculateFirstPaymentSplit, calculateRenewalSplit, PLAN_STORAGE, PLAN_PRICES_USDC }
 export { executeUSDCSplit }
-export { calculateSplit, calculateBookSplit } from './splits'
+export { calculateBookSplit } from './splits'
 
 function getSupabase() {
   return createClient(

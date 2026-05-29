@@ -45,21 +45,3 @@ export function calculateBookSplit(totalAmount: bigint): {
   return { comision_solvik, fee_pool_amount, contract_amount, issuer_amount }
 }
 
-// Kept for backward compatibility
-export function calculateSplit(
-  totalAmount: bigint,
-  contractActive: boolean
-): { owner_amount: bigint; fee_pool_amount: bigint; contract_amount: bigint } {
-  if (contractActive) {
-    return {
-      owner_amount: (totalAmount * 85n) / 100n,
-      fee_pool_amount: (totalAmount * 15n) / 100n,
-      contract_amount: 0n,
-    }
-  }
-  return {
-    owner_amount: (totalAmount * 75n) / 100n,
-    fee_pool_amount: (totalAmount * 15n) / 100n,
-    contract_amount: (totalAmount * 10n) / 100n,
-  }
-}

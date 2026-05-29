@@ -15,7 +15,7 @@ type Stats = {
   contract_active: boolean
   issuers: Array<{
     wallet_address: string; institution_name: string; plan: string
-    credits: number; cert_count: number; registered_at: string; sns_verified: boolean
+    cert_count: number; registered_at: string; sns_verified: boolean
   }>
 }
 
@@ -136,7 +136,7 @@ export default function AdminPage() {
         <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'Luna, sans-serif', fontSize: 13 }}>
           <thead>
             <tr style={{ borderBottom: '1px solid rgba(100,200,255,0.1)' }}>
-              {[t.admin.col_institution, t.admin.col_wallet, t.admin.col_plan, t.admin.col_credits, t.admin.col_certs, t.admin.col_sns].map(h => (
+              {[t.admin.col_institution, t.admin.col_wallet, t.admin.col_plan, t.admin.col_certs, t.admin.col_sns].map(h => (
                 <th key={h} style={{ padding: '12px 20px', textAlign: 'left', fontSize: 11, fontWeight: 500, color: 'rgba(180,210,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{h}</th>
               ))}
             </tr>
@@ -149,7 +149,6 @@ export default function AdminPage() {
                   <span className="wallet-address" style={{ fontSize: 11 }}>{iss.wallet_address.slice(0, 8)}...</span>
                 </td>
                 <td style={{ padding: '12px 20px', color: 'rgba(180,210,255,0.7)', textTransform: 'capitalize' }}>{iss.plan}</td>
-                <td style={{ padding: '12px 20px', color: 'rgba(180,210,255,0.7)' }}>{iss.credits}</td>
                 <td style={{ padding: '12px 20px', color: 'rgba(180,210,255,0.7)' }}>{iss.cert_count}</td>
                 <td style={{ padding: '12px 20px' }}>
                   {iss.sns_verified ? <span className="badge-verified" style={{ fontSize: 10 }}>✓</span> : <span style={{ color: 'rgba(180,210,255,0.2)', fontSize: 12 }}>—</span>}

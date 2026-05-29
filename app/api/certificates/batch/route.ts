@@ -38,11 +38,6 @@ export async function POST(req: NextRequest) {
     })
 
     if (validFiles.length === 0) return NextResponse.json({ error: 'No valid files in ZIP' }, { status: 400 })
-    if (issuer.credits < validFiles.length) {
-      return NextResponse.json({
-        error: `Insufficient credits. Have ${issuer.credits}, need ${validFiles.length}`,
-      }, { status: 402 })
-    }
 
     // Create batch job
     const { data: job } = await supabaseAdmin
@@ -131,16 +126,6 @@ async function processBatch(params: {
         expires_at: expiresAt ?? null,
         attestation_pda: attestationPda,
       })
-
-      // Decrement credit
-      const { data: issuer } = await supabaseAdmin
-        .from('issuers').select('credits').eq('wallet_address', wallet).single()
-      if (issuer) {
-        await supabaseAdmin
-          .from('issuers')
-          .update({ credits: Math.max(0, issuer.credits - 1) })
-          .eq('wallet_address', wallet)
-      }
 
       succeeded++
     } catch (e) {
