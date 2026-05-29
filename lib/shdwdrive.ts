@@ -1,11 +1,8 @@
-// Storage provider: Shadow Drive (GenesysGo)
-// TODO: replace the body of uploadToShdwDrive with the actual @shadow-drive/sdk call
-// once you have a storage account and SHADOW_WALLET_SECRET configured.
-// Current fallback uses Arweave via Turbo SDK so uploads keep working in the meantime.
-import { uploadToArweave } from './arweave'
+import { ShdwDrive } from '@shadow-drive/sdk'
+import { Connection, Keypair, PublicKey } from '@solana/web3.js'
 
 export type ShdwUploadResult = {
-  id: string  // will be the ShdwDrive file URL once the real implementation is in place
+  id: string  // full Shadow Drive URL: https://shdw-drive.genesysgo.net/{account}/{filename}
 }
 
 export async function uploadToShdwDrive(
@@ -13,5 +10,25 @@ export async function uploadToShdwDrive(
   contentType: string,
   tags: Record<string, string>
 ): Promise<ShdwUploadResult> {
-  return uploadToArweave(data, contentType, tags)
+  const secret = JSON.parse(process.env.FEE_POOL_WALLET_SECRET!) as number[]
+  const keypair = Keypair.fromSecretKey(Uint8Array.from(secret))
+  const connection = new Connection(process.env.NEXT_PUBLIC_SOLANA_RPC!, 'confirmed')
+
+  const drive = await new ShdwDrive(connection, keypair).init()
+  const storageAccount = new PublicKey(process.env.SHADOW_DRIVE_ACCOUNT!)
+
+  const ext = contentType.split('/').pop() ?? 'bin'
+  const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+
+  const file = new File([data], filename, { type: contentType })
+  const result = await drive.uploadFile(storageAccount, file)
+
+  if (result.upload_errors?.length) {
+    throw new Error(`Shadow Drive upload failed: ${result.upload_errors[0]}`)
+  }
+
+  const url = result.finalized_locations?.[0] ?? result.message
+  if (!url) throw new Error('Shadow Drive upload returned no URL')
+
+  return { id: url }
 }
