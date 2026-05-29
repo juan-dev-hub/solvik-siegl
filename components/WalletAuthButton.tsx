@@ -1,5 +1,6 @@
 'use client'
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import { useSessionGuard } from '@/hooks/useSessionGuard'
 import { Loader2, ShieldCheck, AlertTriangle, ScanQrCode, Info } from 'lucide-react'
 import { useTranslation } from '@/components/LanguageProvider'
@@ -55,46 +56,62 @@ function truncate(addr: string) {
 }
 
 // ---------------------------------------------------------------------------
-// Tooltip de ayuda para el botón QR
+// Tooltip de ayuda para el botón QR — usa portal para evitar overflow
 // ---------------------------------------------------------------------------
 function QrInfoTooltip() {
   const [open, setOpen] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
+  const [coords, setCoords] = useState({ top: 0, left: 0 })
+  const btnRef = useRef<HTMLButtonElement>(null)
+
+  const handleClick = () => {
+    if (open) { setOpen(false); return }
+    if (btnRef.current) {
+      const r = btnRef.current.getBoundingClientRect()
+      const tipW = 240
+      const left = Math.max(8, Math.min(r.left + r.width / 2 - tipW / 2, window.innerWidth - tipW - 8))
+      setCoords({ top: r.top - 8, left })
+    }
+    setOpen(true)
+  }
 
   useEffect(() => {
     if (!open) return
-    const handler = (e: MouseEvent | TouchEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    const close = (e: MouseEvent | TouchEvent) => {
+      if (!btnRef.current?.contains(e.target as Node)) setOpen(false)
     }
-    document.addEventListener('mousedown', handler)
-    document.addEventListener('touchstart', handler)
+    document.addEventListener('mousedown', close)
+    document.addEventListener('touchstart', close)
     return () => {
-      document.removeEventListener('mousedown', handler)
-      document.removeEventListener('touchstart', handler)
+      document.removeEventListener('mousedown', close)
+      document.removeEventListener('touchstart', close)
     }
   }, [open])
 
   return (
-    <div ref={ref} style={{ position: 'relative', display: 'inline-flex' }}>
+    <div style={{ display: 'inline-flex' }}>
       <button
-        onClick={() => setOpen(v => !v)}
+        ref={btnRef}
+        onClick={handleClick}
         style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: 'rgba(74,186,255,0.5)', display: 'flex', alignItems: 'center' }}
       >
         <Info size={16} />
       </button>
-      {open && (
+      {open && typeof window !== 'undefined' && createPortal(
         <div style={{
-          position: 'absolute', bottom: 'calc(100% + 10px)', left: '50%', transform: 'translateX(-50%)',
-          width: 240, background: 'rgba(5,15,50,0.97)',
+          position: 'fixed', top: coords.top, left: coords.left,
+          transform: 'translateY(-100%)',
+          width: 240, background: 'rgba(5,15,50,0.98)',
           border: '1px solid rgba(74,186,255,0.2)', borderRadius: 10,
-          padding: '12px 14px', zIndex: 600,
-          boxShadow: '0 8px 28px rgba(0,0,0,0.55)',
+          padding: '12px 14px', zIndex: 99999,
+          boxShadow: '0 8px 28px rgba(0,0,0,0.6)',
+          pointerEvents: 'none',
         }}>
           <p style={{ fontWeight: 700, fontSize: 12, color: '#4ABAFF', marginBottom: 6 }}>¿Cómo funciona?</p>
           <p style={{ fontSize: 12, color: 'rgba(180,210,255,0.75)', lineHeight: 1.6, margin: 0 }}>
             Iniciá sesión desde tu computadora, entrá al dashboard y usá el botón <strong style={{ color: '#F0F8FF' }}>Abrir en móvil</strong> para obtener el código QR.
           </p>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   )
