@@ -3,6 +3,7 @@ import { verifyUSDCPayment } from '../solana'
 import { registerIssuer } from '../contract'
 import { executeUSDCSplit } from './execute-split'
 import { calculateFirstPaymentSplit, calculateRenewalSplit, PLAN_STORAGE, PLAN_PRICES_USDC } from './splits'
+import { provisionShadowStorage } from '../storage/provision'
 
 export { calculateFirstPaymentSplit, calculateRenewalSplit, PLAN_STORAGE, PLAN_PRICES_USDC }
 export { executeUSDCSplit }
@@ -42,10 +43,12 @@ export async function processSubscription(
     if (isNewIssuer) {
       const split = calculateFirstPaymentSplit(actualAmount)
       await executeUSDCSplit([
-        { recipient: process.env.FEE_POOL_WALLET!,      amount: split.gas_amount },
-        { recipient: process.env.SHADOW_WALLET!,   amount: split.shadow_amount },
+        { recipient: process.env.FEE_POOL_WALLET!,  amount: split.gas_amount },
+        { recipient: process.env.SHADOW_WALLET!,    amount: split.shadow_amount },
         { recipient: process.env.CONTRACT_WALLET!, amount: split.contract_amount },
       ])
+      // Swap USDC → SHDW y provisiona el storage en Shadow Drive
+      await provisionShadowStorage(split.shadow_amount, planId)
     } else {
       const split = calculateRenewalSplit(actualAmount)
       await executeUSDCSplit([

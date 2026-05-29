@@ -1,8 +1,20 @@
 import { ShdwDrive } from '@shadow-drive/sdk'
 import { Connection, Keypair, PublicKey } from '@solana/web3.js'
+import { supabaseAdmin } from './supabase'
 
 export type ShdwUploadResult = {
   id: string  // full Shadow Drive URL: https://shdw-drive.genesysgo.net/{account}/{filename}
+}
+
+async function getStorageAccount(): Promise<PublicKey> {
+  if (process.env.SHADOW_DRIVE_ACCOUNT) return new PublicKey(process.env.SHADOW_DRIVE_ACCOUNT)
+  const { data } = await supabaseAdmin
+    .from('system_config')
+    .select('value')
+    .eq('key', 'shadow_drive_account')
+    .single()
+  if (!data?.value) throw new Error('Shadow Drive account not configured. Run a subscription first or set SHADOW_DRIVE_ACCOUNT.')
+  return new PublicKey(data.value)
 }
 
 export async function uploadToShdwDrive(
@@ -15,7 +27,7 @@ export async function uploadToShdwDrive(
   const connection = new Connection(process.env.NEXT_PUBLIC_SOLANA_RPC!, 'confirmed')
 
   const drive = await new ShdwDrive(connection, keypair).init()
-  const storageAccount = new PublicKey(process.env.SHADOW_DRIVE_ACCOUNT!)
+  const storageAccount = await getStorageAccount()
 
   const ext = contentType.split('/').pop() ?? 'bin'
   const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
