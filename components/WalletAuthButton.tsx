@@ -60,7 +60,7 @@ function truncate(addr: string) {
 // ---------------------------------------------------------------------------
 function QrInfoTooltip() {
   const [open, setOpen] = useState(false)
-  const [coords, setCoords] = useState({ top: 0, left: 0 })
+  const [coords, setCoords] = useState({ top: 0, left: 0, below: false })
   const btnRef = useRef<HTMLButtonElement>(null)
 
   const handleClick = () => {
@@ -69,7 +69,9 @@ function QrInfoTooltip() {
       const r = btnRef.current.getBoundingClientRect()
       const tipW = 240
       const left = Math.max(8, Math.min(r.left + r.width / 2 - tipW / 2, window.innerWidth - tipW - 8))
-      setCoords({ top: r.top - 8, left })
+      // If button is near the top of the screen, show tooltip below instead of above
+      const below = r.top < 160
+      setCoords({ top: below ? r.bottom + 8 : r.top - 8, left, below })
     }
     setOpen(true)
   }
@@ -99,7 +101,7 @@ function QrInfoTooltip() {
       {open && typeof window !== 'undefined' && createPortal(
         <div style={{
           position: 'fixed', top: coords.top, left: coords.left,
-          transform: 'translateY(-100%)',
+          transform: coords.below ? 'none' : 'translateY(-100%)',
           width: 240, background: 'rgba(5,15,50,0.98)',
           border: '1px solid rgba(74,186,255,0.2)', borderRadius: 10,
           padding: '12px 14px', zIndex: 99999,
