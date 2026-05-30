@@ -136,7 +136,7 @@ export default function ProductPage() {
           <div>
             {product.cover_arweave_id ? (
               <img
-                src={`https://arweave.net/${product.cover_arweave_id}`}
+                src={`/api/media/proxy?url=${encodeURIComponent(`https://arweave.net/${product.cover_arweave_id}`)}`}
                 alt={product.title}
                 style={{ width: '100%', borderRadius: 16, boxShadow: '0 20px 60px rgba(0,0,0,0.5)' }}
               />

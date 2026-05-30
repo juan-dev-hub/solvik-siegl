@@ -36,6 +36,7 @@
     "react": "^18",
     "react-dom": "^18",
     "sas-lib": "^1.0.10",
+    "sharp": "^0.34.5",
     "tweetnacl": "^1.0.3"
   },
   "devDependencies": {

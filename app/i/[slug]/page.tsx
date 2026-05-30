@@ -538,7 +538,7 @@ export default function IssuerPage() {
                   }}>
                     {p.cover_arweave_id && (
                       <img
-                        src={`https://arweave.net/${p.cover_arweave_id}`}
+                        src={`/api/media/proxy?url=${encodeURIComponent(`https://arweave.net/${p.cover_arweave_id}`)}`}
                         alt={p.title}
                         style={{ width: '100%', height: 170, objectFit: 'cover', display: 'block' }}
                       />
