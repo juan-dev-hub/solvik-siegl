@@ -1,13 +1,15 @@
 export const PLAN_STORAGE: Record<string, number> = {
-  starter:  1_073_741_824,  // 1 GB
-  pro:      5_368_709_120,  // 5 GB
-  studio:  21_474_836_480,  // 20 GB
+  verk:    524_288_000,    // 500 MB
+  starter: 1_073_741_824,  // 1 GB
+  pro:     5_368_709_120,  // 5 GB
+  studio:  21_474_836_480, // 20 GB
 }
 
 export const PLAN_PRICES_USDC: Record<string, bigint> = {
-  starter:  49_000_000n,  // $49
-  pro:      99_000_000n,  // $99
-  studio:  249_000_000n,  // $249
+  verk:    10_000_000n,  // $10
+  starter: 49_000_000n,  // $49
+  pro:     99_000_000n,  // $99
+  studio:  249_000_000n, // $249
 }
 
 // Mes 1 (primer pago): Owner 50% | Gas/Trees 20% | Shadow Drive 20% | Contract 10%

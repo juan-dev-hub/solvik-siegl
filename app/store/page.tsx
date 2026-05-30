@@ -121,10 +121,14 @@ export default function StorePage() {
   )
 }
 
+function scarcityThreshold(total: number) { return Math.max(5, Math.ceil(total * 0.1)) }
+
 function ProductCard({ product: p }: { product: Product }) {
   const glowRef = useRef<HTMLDivElement>(null)
   const tween = useRef<gsap.core.Tween | null>(null)
-  const available = p.total_copies - p.sold_copies
+  const available  = p.total_copies - p.sold_copies
+  const isScarce   = available > 0 && available <= scarcityThreshold(p.total_copies)
+  const isSoldOut  = available <= 0
 
   const handleEnter = () => {
     if (!glowRef.current) return
@@ -145,17 +149,32 @@ function ProductCard({ product: p }: { product: Product }) {
     >
       <div ref={glowRef} style={{ position: 'absolute', inset: -6, borderRadius: 20, background: 'radial-gradient(circle, rgba(74,186,255,0.12) 0%, transparent 70%)', opacity: 0, pointerEvents: 'none', zIndex: 0 }} />
       <div style={{ position: 'relative', zIndex: 1 }}>
-        {p.cover_arweave_id ? (
-          <img
-            src={`/api/media/proxy?url=${encodeURIComponent(`https://arweave.net/${p.cover_arweave_id}`)}`}
-            alt={p.title}
-            style={{ width: '100%', height: 180, objectFit: 'cover' }}
-          />
-        ) : (
-          <div style={{ width: '100%', height: 180, background: 'linear-gradient(135deg, rgba(0,50,130,0.4) 0%, rgba(0,180,140,0.2) 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <ShoppingBag size={40} color="rgba(74,186,255,0.3)" />
-          </div>
-        )}
+        <div style={{ position: 'relative' }}>
+          {p.cover_arweave_id ? (
+            <img
+              src={`/api/media/proxy?url=${encodeURIComponent(`https://arweave.net/${p.cover_arweave_id}`)}`}
+              alt={p.title}
+              style={{ width: '100%', height: 180, objectFit: 'cover' }}
+            />
+          ) : (
+            <div style={{ width: '100%', height: 180, background: 'linear-gradient(135deg, rgba(0,50,130,0.4) 0%, rgba(0,180,140,0.2) 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <ShoppingBag size={40} color="rgba(74,186,255,0.3)" />
+            </div>
+          )}
+          {isSoldOut && (
+            <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ fontFamily: 'Luna, sans-serif', fontWeight: 800, fontSize: 14, color: 'rgba(240,240,255,0.5)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Agotado</span>
+            </div>
+          )}
+          {isScarce && !isSoldOut && (
+            <div style={{ position: 'absolute', top: 10, right: 10, background: 'rgba(255,80,50,0.92)', backdropFilter: 'blur(6px)', borderRadius: 20, padding: '4px 12px', display: 'flex', alignItems: 'center', gap: 5 }}>
+              <span style={{ fontSize: 12 }}>🔥</span>
+              <span style={{ fontFamily: 'Luna, sans-serif', fontWeight: 700, fontSize: 11, color: '#fff' }}>
+                {available === 1 ? 'Última copia' : `Solo quedan ${available}`}
+              </span>
+            </div>
+          )}
+        </div>
         <div style={{ padding: 20 }}>
           <p style={{ fontFamily: 'Luna, sans-serif', fontWeight: 800, fontSize: 16, color: '#F0F8FF', marginBottom: 6 }}>{p.title}</p>
           {p.issuers && (

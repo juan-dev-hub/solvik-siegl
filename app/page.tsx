@@ -8,6 +8,10 @@ import { HeroTitle } from '@/components/HeroTitle'
 
 const PLANS = [
   {
+    id: 'verk', price: 10, storage: '500 MB',
+    features: ['500 MB en Shadow Drive', 'Galería global de obras', 'Precio y copias por obra', 'Licencia cNFT por compra'],
+  },
+  {
     id: 'starter', price: 49, storage: '1 GB',
     features: ['1 GB en Shadow Drive', 'PDF + QR verificable', 'Solana cNFT'],
   },

@@ -112,8 +112,9 @@ export default function ProductPage() {
     </div>
   )
 
-  const available = product.total_copies - product.sold_copies
-  const soldOut   = available <= 0
+  const available  = product.total_copies - product.sold_copies
+  const soldOut    = available <= 0
+  const isScarce   = available > 0 && available <= Math.max(5, Math.ceil(product.total_copies * 0.1))
 
   return (
     <div style={{ minHeight: '100vh' }}>
@@ -133,7 +134,7 @@ export default function ProductPage() {
           style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 32, alignItems: 'start' }}
         >
           {/* Cover */}
-          <div>
+          <div style={{ position: 'relative' }}>
             {product.cover_arweave_id ? (
               <img
                 src={`/api/media/proxy?url=${encodeURIComponent(`https://arweave.net/${product.cover_arweave_id}`)}`}
@@ -143,6 +144,14 @@ export default function ProductPage() {
             ) : (
               <div style={{ width: '100%', aspectRatio: '3/4', background: 'linear-gradient(135deg, rgba(0,50,130,0.5), rgba(0,180,140,0.3))', borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <ShoppingBag size={60} color="rgba(74,186,255,0.4)" />
+              </div>
+            )}
+            {isScarce && !soldOut && (
+              <div style={{ position: 'absolute', top: 14, right: 14, background: 'rgba(255,80,50,0.92)', backdropFilter: 'blur(6px)', borderRadius: 20, padding: '5px 14px', display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ fontSize: 14 }}>🔥</span>
+                <span style={{ fontFamily: 'Luna, sans-serif', fontWeight: 700, fontSize: 12, color: '#fff' }}>
+                  {available === 1 ? 'Última copia' : `Solo quedan ${available}`}
+                </span>
               </div>
             )}
           </div>

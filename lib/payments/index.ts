@@ -98,6 +98,7 @@ export async function processSubscription(
         institution_name:    'Sin nombre',
         slug:                walletAddress.slice(0, 8).toLowerCase(),
         storage_limit_bytes: PLAN_STORAGE[planId],
+        plan:                planId,
       })
 
       return { ok: true, shadowSetupTx }
@@ -114,7 +115,7 @@ export async function processSubscription(
   if (!isNewIssuer) {
     await supabase
       .from('issuers')
-      .update({ storage_limit_bytes: PLAN_STORAGE[planId] })
+      .update({ storage_limit_bytes: PLAN_STORAGE[planId], plan: planId })
       .eq('wallet_address', walletAddress)
   }
 

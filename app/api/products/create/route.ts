@@ -7,6 +7,12 @@ export async function POST(req: NextRequest) {
   const wallet = await getWalletSession()
   if (!wallet) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+  const { data: issuer } = await supabaseAdmin
+    .from('issuers').select('plan').eq('wallet_address', wallet).single()
+  if (!issuer?.plan || issuer.plan === 'free') {
+    return NextResponse.json({ error: 'Necesitás un plan activo para publicar obras.' }, { status: 403 })
+  }
+
   try {
     const form = await req.formData()
     const file = form.get('file') as File | null
