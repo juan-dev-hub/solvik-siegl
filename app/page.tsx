@@ -6,10 +6,17 @@ import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { Shield, AlertTriangle, Clock, ShieldCheck, KeyRound, Globe, Zap, CheckCircle, Menu, X } from 'lucide-react'
 import { HeroTitle } from '@/components/HeroTitle'
 
+const VERK_SECTIONS = [
+  { title: 'Bóveda Descentralizada', desc: 'Shadow Drive · WebP, M4A, WebM, PDF · Máx. 5 MB por archivo.' },
+  { title: 'Zero-Gas Experience', desc: 'La plataforma absorbe el gas. Operás sin necesidad de SOL.' },
+  { title: 'Escasez Digital Controlada', desc: 'Ediciones limitadas. Árbol de Merkle bloquea acuñación al agotar cupo.' },
+  { title: 'Pasarela USDC Directa', desc: '0% de comisión. Cobros directo a tu wallet.' },
+]
+
 const PLANS = [
   {
     id: 'verk', price: 10, storage: '500 MB',
-    features: ['500 MB en Shadow Drive', 'Galería global de obras', 'Precio y copias por obra', 'Página pública de creador', 'Licencia cNFT por compra'],
+    features: [] as string[],
   },
   {
     id: 'pro', price: 99, storage: '5 GB', popular: true,
@@ -193,7 +200,7 @@ export default function LandingPage() {
                   {t.landing.most_popular}
                 </div>
               )}
-              <p style={{ fontFamily: 'Luna, sans-serif', fontWeight: 800, fontSize: 22, color: '#F0F0FF', textTransform: 'capitalize', marginBottom: 6 }}>{p.id}</p>
+              <p style={{ fontFamily: 'Luna, sans-serif', fontWeight: 800, fontSize: 22, color: '#F0F0FF', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>{p.id}</p>
               <p style={{ fontSize: 40, fontFamily: 'Luna, sans-serif', fontWeight: 800, color: '#7B2FFF', lineHeight: 1 }}>
                 ${p.price}<span style={{ fontSize: 16, color: 'rgba(240,240,255,0.5)', fontWeight: 400 }}>{t.landing.per_month}</span>
               </p>
@@ -201,12 +208,24 @@ export default function LandingPage() {
                 {p.storage} {t.landing.credits}
               </p>
               <div style={{ marginBottom: 28 }}>
-                {p.features.map(f => (
-                  <div key={f} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-                    <CheckCircle size={14} color="#00FFB3" />
-                    <span style={{ fontSize: 13, color: 'rgba(240,240,255,0.7)', fontFamily: 'Luna, sans-serif' }}>{f}</span>
-                  </div>
-                ))}
+                {p.id === 'verk' ? (
+                  VERK_SECTIONS.map(s => (
+                    <div key={s.title} style={{ marginBottom: 14, paddingBottom: 14, borderBottom: '1px solid rgba(123,47,255,0.12)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
+                        <CheckCircle size={13} color="#00FFB3" />
+                        <span style={{ fontSize: 13, fontWeight: 700, color: '#F0F0FF', fontFamily: 'Luna, sans-serif' }}>{s.title}</span>
+                      </div>
+                      <p style={{ fontSize: 11, color: 'rgba(180,210,255,0.55)', fontFamily: 'Luna, sans-serif', lineHeight: 1.6, paddingLeft: 21, margin: 0 }}>{s.desc}</p>
+                    </div>
+                  ))
+                ) : (
+                  p.features.map(f => (
+                    <div key={f} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                      <CheckCircle size={14} color="#00FFB3" />
+                      <span style={{ fontSize: 13, color: 'rgba(240,240,255,0.7)', fontFamily: 'Luna, sans-serif' }}>{f}</span>
+                    </div>
+                  ))
+                )}
               </div>
               <button onClick={handlePricingClick} className="btn-primary" style={{ width: '100%', justifyContent: 'center' }}>
                 {hasSession ? `${t.landing.get_plan} $${p.price}/mes` : t.common.connect}
