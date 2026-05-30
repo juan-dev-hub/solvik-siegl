@@ -62,7 +62,7 @@ export async function processSubscription(
       ])
 
       // Swap USDC→SHDW (ExactOut), fund user ATA, build unsigned initializeAccount2 tx
-      const shadowSetupTx = await executeSwapAndBuildTx(walletAddress, planId, shdwLamports, quoteResponse)
+      const shadowSetupTx = await executeSwapAndBuildTx(walletAddress, shdwLamports, quoteResponse)
 
       await registerIssuer(walletAddress, planId)
       await supabase.from('issuers').insert({

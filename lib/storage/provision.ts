@@ -1,5 +1,5 @@
 import {
-  Connection, Keypair, PublicKey, Transaction,
+  Keypair, PublicKey, Transaction,
   SystemProgram, SYSVAR_RENT_PUBKEY, VersionedTransaction,
   TransactionInstruction,
 } from '@solana/web3.js'
@@ -105,7 +105,6 @@ export async function getShadowQuote(planId: string): Promise<ShadowQuote> {
 // Called after the split has been executed (SHADOW_WALLET already holds usdcNeeded).
 export async function executeSwapAndBuildTx(
   userWalletPubkey: string,
-  planId:           string,
   shdwLamports:     bigint,
   quoteResponse:    unknown,
 ): Promise<string> {
