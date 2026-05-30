@@ -35,7 +35,7 @@ export default function PricingPage() {
   const [hasSession, setHasSession] = useState(false)
   const [loading, setLoading]       = useState<string | null>(null)
   const [modal, setModal]           = useState<ModalState | null>(null)
-  const [pollStatus, setPollStatus] = useState<'waiting' | 'success'>('waiting')
+  const [pollStatus, setPollStatus] = useState<'waiting' | 'success' | 'shadow-setup'>('waiting')
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   useEffect(() => {
@@ -77,6 +77,38 @@ export default function PricingPage() {
     }
   }
 
+  async function handleShadowSetup(txBase64: string) {
+    try {
+      const w = window as unknown as Record<string, unknown>
+      const provider = (w.solflare ?? (w.phantom as Record<string,unknown>)?.solana ?? w.solana) as
+        { signTransaction: (tx: unknown) => Promise<{ serialize: (o?: object) => Uint8Array }> } | undefined
+      if (!provider) return
+
+      const { Transaction } = await import('@solana/web3.js')
+      const tx = Transaction.from(Buffer.from(txBase64, 'base64'))
+      const signed = await provider.signTransaction(tx)
+      const serialized = signed.serialize({ requireAllSignatures: false })
+
+      const shdwRes = await fetch('https://shadow-storage.genesysgo.net/storage-account', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ transaction: Buffer.from(serialized).toString('base64') }),
+      })
+      const shdwData = await shdwRes.json() as { shdw_bucket?: string }
+
+      if (shdwData.shdw_bucket) {
+        await fetch('/api/shadow/confirm', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ shdw_bucket: shdwData.shdw_bucket }),
+        })
+      }
+    } catch (e) {
+      // Shadow Drive setup failed — subscription is still active, can retry later
+      console.error('Shadow Drive setup error:', e)
+    }
+  }
+
   function startPolling(reference: string, endpoint: string, body: Record<string, string>) {
     if (pollRef.current) clearInterval(pollRef.current)
 
@@ -89,11 +121,17 @@ export default function PricingPage() {
         clearInterval(pollRef.current!)
         setPollStatus('success')
 
-        await fetch(endpoint, {
+        const subRes = await fetch(endpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ ...body, tx_hash: data.signature }),
         })
+        const subData = await subRes.json() as { shadowSetupTx?: string }
+
+        if (subData.shadowSetupTx) {
+          setPollStatus('shadow-setup')
+          await handleShadowSetup(subData.shadowSetupTx)
+        }
 
         setTimeout(() => { window.location.href = '/dashboard' }, 1500)
       } catch {
@@ -199,7 +237,16 @@ export default function PricingPage() {
                 <X size={20} />
               </button>
 
-              {pollStatus === 'success' ? (
+              {pollStatus === 'shadow-setup' ? (
+                <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }}>
+                  <CheckCircle size={40} color="#00FFB3" style={{ margin: '0 auto 12px' }} />
+                  <p style={{ fontFamily: 'Luna, sans-serif', fontWeight: 800, fontSize: 18, color: '#00FFB3', marginBottom: 8 }}>¡Pago confirmado!</p>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, color: 'rgba(240,240,255,0.6)', fontSize: 13, fontFamily: 'Luna, sans-serif', marginTop: 16 }}>
+                    <Loader2 size={14} className="animate-spin" />
+                    Configurando Shadow Drive — firmá en Phantom...
+                  </div>
+                </motion.div>
+              ) : pollStatus === 'success' ? (
                 <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }}>
                   <CheckCircle size={64} color="#00FFB3" style={{ margin: '0 auto 16px' }} />
                   <p style={{ fontFamily: 'Luna, sans-serif', fontWeight: 800, fontSize: 22, color: '#00FFB3', marginBottom: 8 }}>¡Pago confirmado!</p>
