@@ -7,6 +7,7 @@ import { executeUSDCSplit } from './execute-split'
 import { calculateFirstPaymentSplit, calculateRenewalSplit, PLAN_STORAGE, PLAN_PRICES_USDC } from './splits'
 import { getShadowQuote, executeSwapAndBuildTx } from '../storage/provision'
 import { solRefillNeeded, refillGasIfNeeded } from '../solana/ensure-gas'
+import { swapGasUsdcToSol, createMerkleTreeForUser } from '../cnft/create-tree'
 
 export { calculateFirstPaymentSplit, calculateRenewalSplit, PLAN_STORAGE, PLAN_PRICES_USDC }
 export { executeUSDCSplit }
@@ -31,8 +32,8 @@ export async function processSubscription(
   const { valid, actualAmount } = await verifyUSDCPayment(txHash, owner!, planPrice)
   if (!valid) return { ok: false, error: 'Pago no verificado.' }
 
-  const supabase    = getSupabase()
-  const connection  = getConnection()
+  const supabase   = getSupabase()
+  const connection = getConnection()
 
   const [configResult, existingResult] = await Promise.all([
     supabase.from('system_config').select('key, value'),
@@ -46,24 +47,15 @@ export async function processSubscription(
     if (isNewIssuer) {
       const split = calculateFirstPaymentSplit(actualAmount)
 
-      // ── Gas check: run before any on-chain ops ─────────────────────────────
-      const shadowWalletPubkey  = new PublicKey(process.env.SHADOW_WALLET!)
-      const feePoolWalletPubkey = new PublicKey(process.env.FEE_POOL_WALLET!)
-
-      const [shadowRefill, feePoolRefill] = await Promise.all([
-        solRefillNeeded(shadowWalletPubkey,  connection),
-        solRefillNeeded(feePoolWalletPubkey, connection),
-      ])
-      const totalRefill = shadowRefill + feePoolRefill
-
-      // Deduct refill USDC from gas allocation (FEE_POOL priority)
-      let gasAmount = split.gas_amount - totalRefill
-      if (gasAmount < 0n) gasAmount = 0n
+      // ── Gas check: SHADOW_WALLET only (FEE_POOL no longer centralized) ─────
+      const shadowWalletPubkey = new PublicKey(process.env.SHADOW_WALLET!)
+      const shadowRefill = await solRefillNeeded(shadowWalletPubkey, connection)
 
       // ── ExactOut quote for Shadow Drive ───────────────────────────────────
       const { shdwLamports, usdcNeeded, quoteResponse } = await getShadowQuote(planId)
 
       let shadowAmount = split.shadow_amount
+      let gasAmount    = split.gas_amount - shadowRefill
       if (usdcNeeded > shadowAmount) {
         const overflow = usdcNeeded - shadowAmount
         shadowAmount = usdcNeeded
@@ -71,23 +63,23 @@ export async function processSubscription(
         if (gasAmount < 0n) throw new Error('Insufficient funds to cover Shadow Drive swap cost')
       }
 
-      // ── Execute split (wallets receive their USDC) ────────────────────────
+      // ── Split: gas stays in OWNER_WALLET for tree creation ────────────────
+      // Only SHADOW_WALLET and CONTRACT_WALLET receive USDC transfers
       await executeUSDCSplit([
-        { recipient: process.env.FEE_POOL_WALLET!, amount: gasAmount + feePoolRefill },
-        { recipient: process.env.SHADOW_WALLET!,  amount: shadowAmount + shadowRefill },
+        { recipient: process.env.SHADOW_WALLET!,   amount: shadowAmount + shadowRefill },
         { recipient: process.env.CONTRACT_WALLET!, amount: split.contract_amount },
       ])
 
-      // ── Refill SOL gas for both wallets if needed ─────────────────────────
-      const shadowSecret   = JSON.parse(process.env.SHADOW_WALLET_SECRET!)  as number[]
-      const feePoolSecret  = JSON.parse(process.env.FEE_POOL_WALLET_SECRET!) as number[]
-      const shadowKeypair  = Keypair.fromSecretKey(Uint8Array.from(shadowSecret))
-      const feePoolKeypair = Keypair.fromSecretKey(Uint8Array.from(feePoolSecret))
+      // ── Refill SHADOW_WALLET SOL if needed ────────────────────────────────
+      if (shadowRefill > 0n) {
+        const shadowSecret  = JSON.parse(process.env.SHADOW_WALLET_SECRET!) as number[]
+        const shadowKeypair = Keypair.fromSecretKey(Uint8Array.from(shadowSecret))
+        await refillGasIfNeeded(shadowKeypair, connection)
+      }
 
-      await Promise.all([
-        shadowRefill  > 0n ? refillGasIfNeeded(shadowKeypair,  connection) : Promise.resolve(),
-        feePoolRefill > 0n ? refillGasIfNeeded(feePoolKeypair, connection) : Promise.resolve(),
-      ])
+      // ── Swap gas USDC → SOL in OWNER_WALLET, then create user's Merkle tree
+      await swapGasUsdcToSol(gasAmount)
+      const merkleTreeAddress = await createMerkleTreeForUser(planId)
 
       // ── Shadow Drive: swap USDC→SHDW, fund user ATA, build setup tx ───────
       const shadowSetupTx = await executeSwapAndBuildTx(walletAddress, shdwLamports, quoteResponse)
@@ -98,17 +90,19 @@ export async function processSubscription(
         institution_name:    'Sin nombre',
         slug:                walletAddress.slice(0, 8).toLowerCase(),
         storage_limit_bytes: PLAN_STORAGE[planId],
+        merkle_tree_address: merkleTreeAddress,
       })
 
       return { ok: true, shadowSetupTx }
     }
 
-    // ── Renewal ───────────────────────────────────────────────────────────────
+    // ── Renewal: gas stays in OWNER_WALLET → swap to SOL for user's ongoing fees
     const split = calculateRenewalSplit(actualAmount)
     await executeUSDCSplit([
-      { recipient: process.env.FEE_POOL_WALLET!, amount: split.gas_amount      },
       { recipient: process.env.CONTRACT_WALLET!, amount: split.contract_amount },
     ])
+    // Swap renewal gas USDC → SOL (funds future cNFT fees for this user)
+    await swapGasUsdcToSol(split.gas_amount)
   }
 
   if (!isNewIssuer) {

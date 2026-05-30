@@ -39,8 +39,9 @@ export async function POST(req: NextRequest) {
       cnftAddress = await mintCNFT({
         name: `Solvik Studio Certificate — ${issuedTo}`,
         symbol: 'SVKS',
-        uri: `https://arweave.net/${arweaveTxId}`,
+        uri: arweaveTxId,
         recipientAddress: wallet,
+        issuerWallet: wallet,
       })
     } catch (e) {
       console.error('cNFT mint error:', e)

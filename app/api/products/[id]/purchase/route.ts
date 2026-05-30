@@ -57,6 +57,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       symbol: 'SVKL',
       uri: `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://www.solvikstudio.com'}/license/${licenseId}`,
       recipientAddress: buyerWallet,
+      issuerWallet: product.issuer_wallet,
     }).catch(() => null)
 
     const { data: license, error } = await supabaseAdmin
