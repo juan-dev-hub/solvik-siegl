@@ -34,7 +34,7 @@ export async function uploadToShdwDrive(
   const ext = contentType.split('/').pop() ?? 'bin'
   const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
 
-  const file = new File([data], filename, { type: contentType })
+  const file = new File([data as unknown as BlobPart], filename, { type: contentType })
   const result = await drive.uploadFile(storageAccount, file)
 
   if (result.upload_errors?.length) {
