@@ -11,21 +11,23 @@ import {
 } from '@solana/spl-token'
 import { BN } from '@coral-xyz/anchor'
 import * as borsh from '@coral-xyz/borsh'
-import { UserInfo } from '@shadow-drive/sdk'
+import { UserInfo, StorageConfig } from '@shadow-drive/sdk'
 import { getConnection } from '../solana/connection'
 
-// ─── Shadow Drive constants (extracted from SDK internals) ────────────────────
-const SHDW_PROGRAM_ID  = new PublicKey('2e1wdyNhUvE76y6yUCvah2KaviavMJYKoRun8acMRBZZ')
-const SHDW_MINT        = new PublicKey('SHDWyBxihqiCj6YekG2GUr7wqKLeLAMK1gHZck9pL6y')
-const SHDW_UPLOADER    = new PublicKey('972oJTFyjmVNsWM4GHEGPWUomAiJf2qrVotLtwnKmWem')
-const SHDW_DRIVE_API   = 'https://shadow-storage.genesysgo.net'
-const SHDW_DECIMALS    = 9
+// ─── Shadow Drive constants ───────────────────────────────────────────────────
+const SHDW_PROGRAM_ID = new PublicKey('2e1wdyNhUvE76y6yUCvah2KaviavMJYKoRun8acMRBZZ')
+const SHDW_MINT       = new PublicKey('SHDWyBxihqiCj6YekG2GUr7wqKLeLAMK1gHZck9pL6y')
+const SHDW_UPLOADER   = new PublicKey('972oJTFyjmVNsWM4GHEGPWUomAiJf2qrVotLtwnKmWem')
+const SHDW_DECIMALS   = 9
+const USDC_MINT       = new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v')
 
-// initializeAccount2 discriminator: sha256("global:initialize_account2")[0..8]
-const INIT_ACCOUNT2_DISCRIMINATOR = Buffer.from([8, 182, 149, 144, 185, 31, 209, 105])
-const INIT_ACCOUNT2_LAYOUT = borsh.struct([borsh.str('identifier'), borsh.u64('storage')])
+export const SHDW_DRIVE_API = 'https://shadow-storage.genesysgo.net'
 
-function buildInitializeAccount2Ix(
+// ─── initializeAccount2 instruction builder ───────────────────────────────────
+const INIT2_DISCRIMINATOR = Buffer.from([8, 182, 149, 144, 185, 31, 209, 105])
+const INIT2_LAYOUT = borsh.struct([borsh.str('identifier'), borsh.u64('storage')])
+
+function buildInitAccount2Ix(
   args:     { identifier: string; storage: BN },
   accounts: {
     storageConfig: PublicKey; userInfo: PublicKey; storageAccount: PublicKey
@@ -33,9 +35,8 @@ function buildInitializeAccount2Ix(
   },
 ): TransactionInstruction {
   const buf = Buffer.alloc(1000)
-  const len = INIT_ACCOUNT2_LAYOUT.encode(args, buf)
-  const data = Buffer.concat([INIT_ACCOUNT2_DISCRIMINATOR, buf]).slice(0, 8 + len)
-
+  const len = INIT2_LAYOUT.encode(args, buf)
+  const data = Buffer.concat([INIT2_DISCRIMINATOR, buf]).slice(0, 8 + len)
   return new TransactionInstruction({
     programId: SHDW_PROGRAM_ID,
     keys: [
@@ -56,28 +57,70 @@ function buildInitializeAccount2Ix(
 }
 
 // ─── Plan storage sizes ───────────────────────────────────────────────────────
-const PLAN_STORAGE_BYTES: Record<string, number> = {
-  starter:  1  * 1024 * 1024 * 1024,
-  pro:      5  * 1024 * 1024 * 1024,
-  studio:   20 * 1024 * 1024 * 1024,
+const PLAN_STORAGE_GIB: Record<string, number> = {
+  starter:  1,
+  pro:      5,
+  studio:  20,
 }
 
-// ─── Jupiter: swap USDC → SHDW into shadow keypair ───────────────────────────
-const USDC_MINT = new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v')
+// ─── Step 1: get exact SHDW cost + ExactOut Jupiter quote ────────────────────
+// Must be called BEFORE executing the split so the caller can adjust amounts.
+export type ShadowQuote = {
+  shdwLamports: bigint       // exact SHDW needed for the storage account
+  usdcNeeded:   bigint       // exact USDC needed for the swap (ExactOut)
+  quoteResponse: unknown     // raw Jupiter quote — pass to executeSwapAndBuildTx
+}
 
-async function swapUsdcToShdw(amountMicro: bigint, keypair: Keypair): Promise<void> {
-  const quoteRes = await fetch(
-    `https://quote-api.jup.ag/v6/quote?inputMint=${USDC_MINT.toBase58()}&outputMint=${SHDW_MINT.toBase58()}&amount=${amountMicro}&slippageBps=100`
+export async function getShadowQuote(planId: string): Promise<ShadowQuote> {
+  const connection = getConnection()
+
+  // Read current price from storageConfig PDA
+  const [storageConfigPDA] = PublicKey.findProgramAddressSync(
+    [Buffer.from('storage-config')], SHDW_PROGRAM_ID,
   )
-  if (!quoteRes.ok) throw new Error(`Jupiter quote error: ${await quoteRes.text()}`)
-  const quote = await quoteRes.json() as Record<string, unknown>
+  const storageConfig = await StorageConfig.fetch(connection, storageConfigPDA)
+  if (!storageConfig) throw new Error('Could not fetch Shadow Drive storageConfig')
 
+  const gib = PLAN_STORAGE_GIB[planId] ?? 1
+  // shadesPerGib is already in SHDW lamports (shades = 10^-9 SHDW)
+  const shdwLamports = BigInt(storageConfig.shadesPerGib.toString()) * BigInt(gib)
+
+  // Jupiter ExactOut: how much USDC do we need to get exactly shdwLamports?
+  const quoteRes = await fetch(
+    `https://quote-api.jup.ag/v6/quote` +
+    `?inputMint=${USDC_MINT.toBase58()}` +
+    `&outputMint=${SHDW_MINT.toBase58()}` +
+    `&amount=${shdwLamports}` +
+    `&swapMode=ExactOut` +
+    `&slippageBps=100`,
+  )
+  if (!quoteRes.ok) throw new Error(`Jupiter ExactOut quote error: ${await quoteRes.text()}`)
+  const quoteResponse = await quoteRes.json() as Record<string, unknown>
+
+  const usdcNeeded = BigInt(quoteResponse.inAmount as string)
+  return { shdwLamports, usdcNeeded, quoteResponse }
+}
+
+// ─── Step 2: execute swap + transfer SHDW to user + build unsigned tx ─────────
+// Called after the split has been executed (SHADOW_WALLET already holds usdcNeeded).
+export async function executeSwapAndBuildTx(
+  userWalletPubkey: string,
+  planId:           string,
+  shdwLamports:     bigint,
+  quoteResponse:    unknown,
+): Promise<string> {
+  const secret = JSON.parse(process.env.SHADOW_WALLET_SECRET!) as number[]
+  const shadowKeypair = Keypair.fromSecretKey(Uint8Array.from(secret))
+  const connection = getConnection()
+  const userWallet = new PublicKey(userWalletPubkey)
+
+  // ExactOut swap: SHADOW_WALLET USDC → exactly shdwLamports SHDW
   const swapRes = await fetch('https://quote-api.jup.ag/v6/swap', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      quoteResponse: quote,
-      userPublicKey: keypair.publicKey.toBase58(),
+      quoteResponse,
+      userPublicKey: shadowKeypair.publicKey.toBase58(),
       wrapAndUnwrapSol: true,
       dynamicComputeUnitLimit: true,
       prioritizationFeeLamports: 'auto',
@@ -86,85 +129,54 @@ async function swapUsdcToShdw(amountMicro: bigint, keypair: Keypair): Promise<vo
   if (!swapRes.ok) throw new Error(`Jupiter swap error: ${await swapRes.text()}`)
   const { swapTransaction } = await swapRes.json() as { swapTransaction: string }
 
-  const connection = getConnection()
-  const tx = VersionedTransaction.deserialize(Buffer.from(swapTransaction, 'base64'))
-  tx.sign([keypair])
-  const sig = await connection.sendRawTransaction(tx.serialize(), { skipPreflight: false })
-  await connection.confirmTransaction(sig, 'confirmed')
-}
+  const swapTx = VersionedTransaction.deserialize(Buffer.from(swapTransaction, 'base64'))
+  swapTx.sign([shadowKeypair])
+  const swapSig = await connection.sendRawTransaction(swapTx.serialize(), { skipPreflight: false })
+  await connection.confirmTransaction(swapSig, 'confirmed')
 
-// ─── Transfer all SHDW from shadow wallet to user's ATA ──────────────────────
-async function fundUserShdwAta(
-  userWallet:    PublicKey,
-  shadowKeypair: Keypair,
-  connection:    Connection,
-): Promise<void> {
-  const shadowAta = await getAssociatedTokenAddress(SHDW_MINT, shadowKeypair.publicKey)
-  const userAta   = await getAssociatedTokenAddress(SHDW_MINT, userWallet)
-  const balInfo   = await connection.getTokenAccountBalance(shadowAta)
-  const amount    = BigInt(balInfo.value.amount)
-  if (amount === 0n) throw new Error('SHADOW_WALLET has no SHDW after swap')
+  // Transfer all SHDW from SHADOW_WALLET to user's ATA
+  const shadowShdwAta = await getAssociatedTokenAddress(SHDW_MINT, shadowKeypair.publicKey)
+  const userShdwAta   = await getAssociatedTokenAddress(SHDW_MINT, userWallet)
+  const balInfo = await connection.getTokenAccountBalance(shadowShdwAta)
+  const shdwBalance = BigInt(balInfo.value.amount)
 
-  const tx = new Transaction()
-  tx.add(createAssociatedTokenAccountIdempotentInstruction(
-    shadowKeypair.publicKey, userAta, userWallet, SHDW_MINT,
+  const fundTx = new Transaction()
+  fundTx.add(createAssociatedTokenAccountIdempotentInstruction(
+    shadowKeypair.publicKey, userShdwAta, userWallet, SHDW_MINT,
   ))
-  tx.add(createTransferCheckedInstruction(
-    shadowAta, SHDW_MINT, userAta, shadowKeypair.publicKey, amount, SHDW_DECIMALS,
+  fundTx.add(createTransferCheckedInstruction(
+    shadowShdwAta, SHDW_MINT, userShdwAta, shadowKeypair.publicKey, shdwBalance, SHDW_DECIMALS,
   ))
-  tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash
-  tx.feePayer = shadowKeypair.publicKey
-  tx.sign(shadowKeypair)
-  const sig = await connection.sendRawTransaction(tx.serialize(), { skipPreflight: false })
-  await connection.confirmTransaction(sig, 'confirmed')
-}
+  fundTx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash
+  fundTx.feePayer = shadowKeypair.publicKey
+  fundTx.sign(shadowKeypair)
+  const fundSig = await connection.sendRawTransaction(fundTx.serialize(), { skipPreflight: false })
+  await connection.confirmTransaction(fundSig, 'confirmed')
 
-// ─── Derive Shadow Drive PDAs for a given owner ──────────────────────────────
-async function deriveStoragePDAs(owner: PublicKey, connection: Connection) {
-  const [storageConfigPDA] = await PublicKey.findProgramAddress(
+  // Derive PDAs for user's new storage account
+  const [storageConfigPDA] = PublicKey.findProgramAddressSync(
     [Buffer.from('storage-config')], SHDW_PROGRAM_ID,
   )
-  const [userInfoPDA] = await PublicKey.findProgramAddress(
-    [Buffer.from('user-info'), owner.toBytes()], SHDW_PROGRAM_ID,
+  const [userInfoPDA] = PublicKey.findProgramAddressSync(
+    [Buffer.from('user-info'), userWallet.toBytes()], SHDW_PROGRAM_ID,
   )
   const userInfoAccount = await UserInfo.fetch(connection, userInfoPDA)
   const accountSeed = new BN(userInfoAccount?.accountCounter ?? 0)
 
-  const [storageAccount] = await PublicKey.findProgramAddress(
-    [Buffer.from('storage-account'), owner.toBytes(), accountSeed.toTwos(2).toArrayLike(Buffer, 'le', 4)],
+  const [storageAccount] = PublicKey.findProgramAddressSync(
+    [Buffer.from('storage-account'), userWallet.toBytes(), accountSeed.toTwos(2).toArrayLike(Buffer, 'le', 4)],
     SHDW_PROGRAM_ID,
   )
-  const [stakeAccount] = await PublicKey.findProgramAddress(
+  const [stakeAccount] = PublicKey.findProgramAddressSync(
     [Buffer.from('stake-account'), storageAccount.toBytes()], SHDW_PROGRAM_ID,
   )
-  return { storageConfigPDA, userInfoPDA, storageAccount, stakeAccount }
-}
 
-// ─── Public: swap + fund + build unsigned setup tx ───────────────────────────
-// Returns base64 tx → frontend signs with Phantom → POST to SHDW_DRIVE_API/storage-account
-export { SHDW_DRIVE_API }
-
-export async function buildShadowSetupTx(
-  userWalletPubkey: string,
-  shadowAmountMicro: bigint,
-  planId: string,
-): Promise<string> {
-  const secret = JSON.parse(process.env.SHADOW_WALLET_SECRET!) as number[]
-  const shadowKeypair = Keypair.fromSecretKey(Uint8Array.from(secret))
-  const connection = getConnection()
-  const userWallet = new PublicKey(userWalletPubkey)
-
-  await swapUsdcToShdw(shadowAmountMicro, shadowKeypair)
-  await fundUserShdwAta(userWallet, shadowKeypair, connection)
-
-  const { storageConfigPDA, userInfoPDA, storageAccount, stakeAccount } =
-    await deriveStoragePDAs(userWallet, connection)
-
-  const userShdwAta    = await getAssociatedTokenAddress(SHDW_MINT, userWallet)
-  const storageBytes   = PLAN_STORAGE_BYTES[planId] ?? PLAN_STORAGE_BYTES.starter
-
-  const ix = buildInitializeAccount2Ix(
-    { identifier: `solvik-${userWalletPubkey.slice(0, 8)}`, storage: new BN(storageBytes) },
+  // Build initializeAccount2 with user as owner1 (authority)
+  const ix = buildInitAccount2Ix(
+    {
+      identifier: `solvik-${userWalletPubkey.slice(0, 8)}`,
+      storage: new BN(shdwLamports.toString()),
+    },
     {
       storageConfig:      storageConfigPDA,
       userInfo:           userInfoPDA,
@@ -175,10 +187,11 @@ export async function buildShadowSetupTx(
     },
   )
 
-  const tx = new Transaction()
-  tx.add(ix)
-  tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash
-  tx.feePayer = userWallet
+  const setupTx = new Transaction()
+  setupTx.add(ix)
+  setupTx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash
+  setupTx.feePayer = userWallet
 
-  return tx.serialize({ requireAllSignatures: false, verifySignatures: false }).toString('base64')
+  // User signs with Phantom, Shadow Drive API adds uploader sig and broadcasts
+  return setupTx.serialize({ requireAllSignatures: false, verifySignatures: false }).toString('base64')
 }

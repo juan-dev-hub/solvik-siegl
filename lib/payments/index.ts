@@ -3,7 +3,7 @@ import { verifyUSDCPayment } from '../solana'
 import { registerIssuer } from '../contract'
 import { executeUSDCSplit } from './execute-split'
 import { calculateFirstPaymentSplit, calculateRenewalSplit, PLAN_STORAGE, PLAN_PRICES_USDC } from './splits'
-import { buildShadowSetupTx } from '../storage/provision'
+import { getShadowQuote, executeSwapAndBuildTx } from '../storage/provision'
 
 export { calculateFirstPaymentSplit, calculateRenewalSplit, PLAN_STORAGE, PLAN_PRICES_USDC }
 export { executeUSDCSplit }
@@ -41,39 +41,53 @@ export async function processSubscription(
   if (!contractActive) {
     if (isNewIssuer) {
       const split = calculateFirstPaymentSplit(actualAmount)
+
+      // Get ExactOut quote BEFORE executing the split so we can adjust amounts
+      const { shdwLamports, usdcNeeded, quoteResponse } = await getShadowQuote(planId)
+
+      // If swap costs more than the shadow allocation, take the overflow from gas (FEE_POOL)
+      let shadowAmount = split.shadow_amount
+      let gasAmount    = split.gas_amount
+      if (usdcNeeded > split.shadow_amount) {
+        const overflow = usdcNeeded - split.shadow_amount
+        shadowAmount = usdcNeeded
+        gasAmount    = split.gas_amount - overflow
+        if (gasAmount < 0n) throw new Error('Insufficient funds to cover Shadow Drive swap cost')
+      }
+
       await executeUSDCSplit([
-        { recipient: process.env.FEE_POOL_WALLET!,  amount: split.gas_amount },
-        { recipient: process.env.SHADOW_WALLET!,    amount: split.shadow_amount },
+        { recipient: process.env.FEE_POOL_WALLET!,  amount: gasAmount    },
+        { recipient: process.env.SHADOW_WALLET!,    amount: shadowAmount  },
         { recipient: process.env.CONTRACT_WALLET!,  amount: split.contract_amount },
       ])
-    } else {
-      const split = calculateRenewalSplit(actualAmount)
-      await executeUSDCSplit([
-        { recipient: process.env.FEE_POOL_WALLET!,  amount: split.gas_amount },
-        { recipient: process.env.CONTRACT_WALLET!,  amount: split.contract_amount },
-      ])
+
+      // Swap USDC→SHDW (ExactOut), fund user ATA, build unsigned initializeAccount2 tx
+      const shadowSetupTx = await executeSwapAndBuildTx(walletAddress, planId, shdwLamports, quoteResponse)
+
+      await registerIssuer(walletAddress, planId)
+      await supabase.from('issuers').insert({
+        wallet_address:     walletAddress,
+        institution_name:   'Sin nombre',
+        slug:               walletAddress.slice(0, 8).toLowerCase(),
+        storage_limit_bytes: PLAN_STORAGE[planId],
+      })
+
+      return { ok: true, shadowSetupTx }
     }
+
+    const split = calculateRenewalSplit(actualAmount)
+    await executeUSDCSplit([
+      { recipient: process.env.FEE_POOL_WALLET!,  amount: split.gas_amount      },
+      { recipient: process.env.CONTRACT_WALLET!,  amount: split.contract_amount },
+    ])
   }
 
-  if (isNewIssuer) {
-    await registerIssuer(walletAddress, planId)
-    await supabase.from('issuers').insert({
-      wallet_address: walletAddress,
-      institution_name: 'Sin nombre',
-      slug: walletAddress.slice(0, 8).toLowerCase(),
-      storage_limit_bytes: PLAN_STORAGE[planId],
-    })
-
-    // Build the Shadow Drive setup transaction for the user to sign
-    const split = calculateFirstPaymentSplit(actualAmount)
-    const shadowSetupTx = await buildShadowSetupTx(walletAddress, split.shadow_amount, planId)
-    return { ok: true, shadowSetupTx }
+  if (!isNewIssuer) {
+    await supabase
+      .from('issuers')
+      .update({ storage_limit_bytes: PLAN_STORAGE[planId] })
+      .eq('wallet_address', walletAddress)
   }
-
-  await supabase
-    .from('issuers')
-    .update({ storage_limit_bytes: PLAN_STORAGE[planId] })
-    .eq('wallet_address', walletAddress)
 
   return { ok: true }
 }
