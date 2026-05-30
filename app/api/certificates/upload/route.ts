@@ -16,6 +16,9 @@ export async function POST(req: NextRequest) {
     const docType   = fd.get('doc_type') as string
     const expiresAt = fd.get('expires_at') as string | null
 
+    const { data: issuer } = await supabaseAdmin.from('issuers').select('plan').eq('wallet_address', wallet).single()
+    if (issuer?.plan === 'verk') return NextResponse.json({ error: 'El plan VERK no incluye emisión de certificados.' }, { status: 403 })
+
     if (!file || !issuedTo) return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
 
     const validation = await validateFileAndAccess(wallet, file.size, file.type)

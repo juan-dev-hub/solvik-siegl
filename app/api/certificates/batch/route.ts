@@ -16,6 +16,7 @@ export async function POST(req: NextRequest) {
     const { data: issuer } = await supabaseAdmin
       .from('issuers').select('*').eq('wallet_address', wallet).single()
     if (!issuer) return NextResponse.json({ error: 'Issuer not found' }, { status: 404 })
+    if (issuer.plan === 'verk') return NextResponse.json({ error: 'El plan VERK no incluye emisión de certificados.' }, { status: 403 })
 
     const fd = await req.formData()
     const zipFile  = fd.get('zip') as File | null

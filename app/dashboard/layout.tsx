@@ -69,12 +69,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const { t } = useTranslation()
   const pathname = usePathname()
   const router = useRouter()
-  const [slug, setSlug]         = useState<string | null>(null)
-  const [wallet, setWallet]     = useState<string | null>(null)
-  const [plan, setPlan]         = useState<string | null>(null)
-  const [planExpires, setPlanExpires] = useState<string | null>(null)
-  const [autoRenew, setAutoRenew]    = useState<boolean>(true)
+  const [slug, setSlug]               = useState<string | null>(null)
+  const [wallet, setWallet]           = useState<string | null>(null)
+  const [plan, setPlan]               = useState<string | null>(null)
+  const [planExpires, setPlanExpires]  = useState<string | null>(null)
+  const [autoRenew, setAutoRenew]     = useState<boolean>(true)
   const [cancellingPlan, setCancellingPlan] = useState(false)
+  const [sessionLoaded, setSessionLoaded]   = useState(false)
   const [showWidgetModal, setShowWidgetModal] = useState(false)
   const [copied, setCopied] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
@@ -107,6 +108,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           return r.json()
         })
         .then(d => {
+          setSessionLoaded(true)
           if (d?.issuer) {
             setSlug(d.issuer.slug ?? null)
             setWallet(d.issuer.wallet_address ?? null)
@@ -115,6 +117,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             setAutoRenew(d.issuer.auto_renew ?? true)
           }
         })
+        .catch(() => setSessionLoaded(true))
         .catch(() => {})
     }
 
@@ -182,16 +185,26 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return () => clearInterval(id)
   }, [showMobileQr])
 
-  const nav = [
+  const isVerk = plan === 'verk'
+
+  const navCreator = [
+    { label: 'Resumen',       href: '/dashboard',           icon: <LayoutDashboard size={16} />, tip: 'Resumen de tu cuenta y almacenamiento usado.' },
+    { label: 'Mis obras',     href: '/dashboard/products',  icon: <ShoppingBag size={16} />,    tip: 'Subí y gestioná tus obras: música, arte, libros o videos.' },
+    { label: 'Mis compras',   href: '/dashboard/library',   icon: <Library size={16} />,        tip: 'Obras que compraste de otros creadores.' },
+  ]
+
+  const navFull = [
     { label: t.dashboard.overview,   href: '/dashboard',               icon: <LayoutDashboard size={16} />, tip: 'Resumen de tu cuenta: certificados recientes, almacenamiento usado y verificaciones del mes.' },
     { label: t.dashboard.new_cert,   href: '/dashboard/new',           icon: <Award size={16} />,          tip: 'Emitir un certificado individual. Subís un PDF, WebP o WebM y completás el nombre del destinatario.' },
     { label: t.dashboard.batch,      href: '/dashboard/batch',         icon: <FolderOpen size={16} />,     tip: 'Emisión en lote. Subís un ZIP con múltiples archivos y se emiten todos los certificados de una vez.' },
     { label: t.dashboard.my_certs,   href: '/dashboard/certs',         icon: <List size={16} />,           tip: 'Todos los certificados que emitiste. Podés buscar, descargar el PDF original y ver el QR público.' },
     { label: t.dashboard.gallery,    href: '/dashboard/gallery',       icon: <Image size={16} />,          tip: 'Controlá cuáles certificados son visibles públicamente y ve cuántas verificaciones tuvo cada uno.' },
-    { label: 'Mis productos',         href: '/dashboard/products',      icon: <ShoppingBag size={16} />,    tip: 'Creá y gestioná productos digitales que tus alumnos pueden comprar directamente con USDC.' },
-    { label: 'Mis compras',           href: '/dashboard/library',       icon: <Library size={16} />,        tip: 'Productos digitales que compraste de otros issuers. Desde acá los podés descargar.' },
-    { label: 'Mi página',             href: '/dashboard/page-settings', icon: <Monitor size={16} />,        tip: 'Tu página pública de issuer. Configurá el título, descripción y activala para que cualquiera pueda verla.' },
+    { label: 'Mis obras',            href: '/dashboard/products',      icon: <ShoppingBag size={16} />,    tip: 'Creá y gestioná productos digitales que tus alumnos pueden comprar directamente con USDC.' },
+    { label: 'Mis compras',          href: '/dashboard/library',       icon: <Library size={16} />,        tip: 'Productos digitales que compraste de otros issuers. Desde acá los podés descargar.' },
+    { label: 'Mi página',            href: '/dashboard/page-settings', icon: <Monitor size={16} />,        tip: 'Tu página pública de issuer. Configurá el título, descripción y activala para que cualquiera pueda verla.' },
   ]
+
+  const nav = isVerk ? navCreator : navFull
 
   const embedCode = `<a href="${APP_URL}/i/${slug}" target="_blank">\n  <img src="${APP_URL}/api/widget/${slug}" alt="Verificado con Solvik Studio" />\n</a>`
 
@@ -337,8 +350,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     </aside>
   )
 
+  // Wait until session is loaded to avoid flash of full dashboard
+  if (!sessionLoaded) return null
+
   // User authenticated but no active plan — show upgrade wall
-  if (wallet && !plan) {
+  if (!plan) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
         <div style={{ textAlign: 'center', maxWidth: 400 }}>
