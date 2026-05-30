@@ -12,9 +12,10 @@ export async function GET() {
     .eq('wallet_address', wallet)
     .single()
 
-  // Normalize: if plan column missing but storage > 0, treat as legacy active user
-  if (issuer && !issuer.plan && issuer.storage_limit_bytes > 0) {
-    issuer.plan = 'starter'
+  // Normalize legacy users: had storage but no plan column, or had old 'starter' plan
+  if (issuer) {
+    if (!issuer.plan && issuer.storage_limit_bytes > 0) issuer.plan = 'pro'
+    if (issuer.plan === 'starter') issuer.plan = 'pro'
   }
 
   return NextResponse.json({ issuer })

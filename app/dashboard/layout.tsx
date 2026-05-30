@@ -185,26 +185,37 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return () => clearInterval(id)
   }, [showMobileQr])
 
-  const isVerk = plan === 'verk'
+  const isVerk    = plan === 'verk'
+  const isExpired = plan && planExpires && new Date(planExpires) < new Date() && !autoRenew
 
-  const navCreator = [
-    { label: 'Resumen',       href: '/dashboard',           icon: <LayoutDashboard size={16} />, tip: 'Resumen de tu cuenta y almacenamiento usado.' },
-    { label: 'Mis obras',     href: '/dashboard/products',  icon: <ShoppingBag size={16} />,    tip: 'Subí y gestioná tus obras: música, arte, libros o videos.' },
-    { label: 'Mis compras',   href: '/dashboard/library',   icon: <Library size={16} />,        tip: 'Obras que compraste de otros creadores.' },
+  // Expired plan: read-only access (gallery + purchases only)
+  const navExpired = [
+    { label: 'Galería',     href: '/dashboard/gallery', icon: <Image size={16} />,   tip: 'Tus obras publicadas. Solo lectura.' },
+    { label: 'Mis compras', href: '/dashboard/library', icon: <Library size={16} />, tip: 'Obras que compraste. Podés descargarlas.' },
   ]
 
+  // VERK: creator tools + gallery + public page
+  const navVerk = [
+    { label: 'Resumen',    href: '/dashboard',               icon: <LayoutDashboard size={16} />, tip: 'Resumen de tu cuenta y almacenamiento.' },
+    { label: 'Mis obras',  href: '/dashboard/products',      icon: <ShoppingBag size={16} />,    tip: 'Subí y gestioná tus obras: música, arte, libros o videos.' },
+    { label: 'Galería',    href: '/dashboard/gallery',       icon: <Image size={16} />,           tip: 'Tu galería pública de obras.' },
+    { label: 'Mi página',  href: '/dashboard/page-settings', icon: <Monitor size={16} />,         tip: 'Tu página pública de creador.' },
+    { label: 'Mis compras',href: '/dashboard/library',       icon: <Library size={16} />,         tip: 'Obras que compraste de otros creadores.' },
+  ]
+
+  // Pro / Studio: full access
   const navFull = [
-    { label: t.dashboard.overview,   href: '/dashboard',               icon: <LayoutDashboard size={16} />, tip: 'Resumen de tu cuenta: certificados recientes, almacenamiento usado y verificaciones del mes.' },
-    { label: t.dashboard.new_cert,   href: '/dashboard/new',           icon: <Award size={16} />,          tip: 'Emitir un certificado individual. Subís un PDF, WebP o WebM y completás el nombre del destinatario.' },
-    { label: t.dashboard.batch,      href: '/dashboard/batch',         icon: <FolderOpen size={16} />,     tip: 'Emisión en lote. Subís un ZIP con múltiples archivos y se emiten todos los certificados de una vez.' },
-    { label: t.dashboard.my_certs,   href: '/dashboard/certs',         icon: <List size={16} />,           tip: 'Todos los certificados que emitiste. Podés buscar, descargar el PDF original y ver el QR público.' },
-    { label: t.dashboard.gallery,    href: '/dashboard/gallery',       icon: <Image size={16} />,          tip: 'Controlá cuáles certificados son visibles públicamente y ve cuántas verificaciones tuvo cada uno.' },
-    { label: 'Mis obras',            href: '/dashboard/products',      icon: <ShoppingBag size={16} />,    tip: 'Creá y gestioná productos digitales que tus alumnos pueden comprar directamente con USDC.' },
-    { label: 'Mis compras',          href: '/dashboard/library',       icon: <Library size={16} />,        tip: 'Productos digitales que compraste de otros issuers. Desde acá los podés descargar.' },
-    { label: 'Mi página',            href: '/dashboard/page-settings', icon: <Monitor size={16} />,        tip: 'Tu página pública de issuer. Configurá el título, descripción y activala para que cualquiera pueda verla.' },
+    { label: t.dashboard.overview,  href: '/dashboard',               icon: <LayoutDashboard size={16} />, tip: 'Resumen de tu cuenta.' },
+    { label: t.dashboard.new_cert,  href: '/dashboard/new',           icon: <Award size={16} />,           tip: 'Emitir un certificado individual.' },
+    { label: t.dashboard.batch,     href: '/dashboard/batch',         icon: <FolderOpen size={16} />,      tip: 'Emisión en lote con ZIP.' },
+    { label: t.dashboard.my_certs,  href: '/dashboard/certs',         icon: <List size={16} />,            tip: 'Todos tus certificados emitidos.' },
+    { label: t.dashboard.gallery,   href: '/dashboard/gallery',       icon: <Image size={16} />,           tip: 'Galería pública de certificados.' },
+    { label: 'Mis obras',           href: '/dashboard/products',      icon: <ShoppingBag size={16} />,     tip: 'Creá y gestioná productos digitales.' },
+    { label: 'Mis compras',         href: '/dashboard/library',       icon: <Library size={16} />,         tip: 'Productos que compraste.' },
+    { label: 'Mi página',           href: '/dashboard/page-settings', icon: <Monitor size={16} />,         tip: 'Tu página pública de issuer.' },
   ]
 
-  const nav = isVerk ? navCreator : navFull
+  const nav = isExpired ? navExpired : isVerk ? navVerk : navFull
 
   const embedCode = `<a href="${APP_URL}/i/${slug}" target="_blank">\n  <img src="${APP_URL}/api/widget/${slug}" alt="Verificado con Solvik Studio" />\n</a>`
 
@@ -412,9 +423,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
         )}
 
-        <div style={{ background: 'rgba(74,186,255,0.06)', border: '1px solid rgba(74,186,255,0.15)', borderRadius: 10, padding: '10px 18px', marginBottom: 32, fontSize: 12, color: 'rgba(180,210,255,0.5)' }}>
+        <div style={{ background: 'rgba(74,186,255,0.06)', border: '1px solid rgba(74,186,255,0.15)', borderRadius: 10, padding: '10px 18px', marginBottom: 16, fontSize: 12, color: 'rgba(180,210,255,0.5)' }}>
           ℹ️ {t.dashboard.disclaimer_banner}
         </div>
+        {isExpired && (
+          <div style={{ background: 'rgba(255,180,0,0.08)', border: '1px solid rgba(255,180,0,0.3)', borderRadius: 10, padding: '10px 18px', marginBottom: 16, fontSize: 13, color: 'rgba(255,200,50,0.9)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+            <span>⚠ Tu plan venció. Podés ver tu galería y descargar tus compras, pero no subir contenido nuevo.</span>
+            <a href="/pricing" className="btn-primary" style={{ fontSize: 12, padding: '6px 16px' }}>Renovar</a>
+          </div>
+        )}
         {children}
       </main>
 

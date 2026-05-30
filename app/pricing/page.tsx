@@ -10,19 +10,15 @@ import QRCode from 'qrcode'
 const PLANS = [
   {
     id: 'verk', price: 10, storage: '500 MB',
-    features: ['500 MB en Shadow Drive', 'Galería global de obras', 'Precio y copias por obra', 'Licencia cNFT por compra'],
-  },
-  {
-    id: 'starter', price: 49, storage: '1 GB',
-    features: ['1 GB en Shadow Drive', 'PDF + QR verificable', 'Solana cNFT'],
+    features: ['500 MB en Shadow Drive', 'Galería global de obras', 'Precio y copias por obra', 'Página pública de creador', 'Licencia cNFT por compra'],
   },
   {
     id: 'pro', price: 99, storage: '5 GB', popular: true,
-    features: ['5 GB en Shadow Drive', 'PDF + QR verificable', 'Solana cNFT', 'Attestation on-chain', 'Badge dominio SNS'],
+    features: ['5 GB en Shadow Drive', 'Todo VERK incluido', 'PDF + QR verificable', 'Solana cNFT', 'Attestation on-chain', 'Badge dominio SNS'],
   },
   {
     id: 'studio', price: 249, storage: '20 GB',
-    features: ['20 GB en Shadow Drive', 'PDF + QR verificable', 'Solana cNFT', 'Attestation on-chain', 'Badge dominio SNS', 'Batch ZIP', 'Página pública de issuer'],
+    features: ['20 GB en Shadow Drive', 'Todo Pro incluido', 'Batch ZIP', 'Página pública de issuer'],
   },
 ]
 
