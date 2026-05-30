@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
       doc_type: docType,
       issuer_wallet: wallet,
       issued_to: issuedTo,
-    })
+    }, wallet)
     const arweaveTxId = arweave.id
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://www.solvikstudio.com'
     const verifyUrl = `${appUrl}/verify/${arweaveTxId}`

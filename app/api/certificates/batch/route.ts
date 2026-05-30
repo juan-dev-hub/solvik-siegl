@@ -103,7 +103,7 @@ async function processBatch(params: {
         doc_type: docType,
         issuer_wallet: wallet,
         issued_to: name,
-      })
+      }, wallet)
 
       let attestationPda: string | null = null
       try {

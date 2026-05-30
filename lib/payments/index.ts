@@ -3,7 +3,7 @@ import { verifyUSDCPayment } from '../solana'
 import { registerIssuer } from '../contract'
 import { executeUSDCSplit } from './execute-split'
 import { calculateFirstPaymentSplit, calculateRenewalSplit, PLAN_STORAGE, PLAN_PRICES_USDC } from './splits'
-import { provisionShadowStorage } from '../storage/provision'
+import { buildShadowSetupTx } from '../storage/provision'
 
 export { calculateFirstPaymentSplit, calculateRenewalSplit, PLAN_STORAGE, PLAN_PRICES_USDC }
 export { executeUSDCSplit }
@@ -20,7 +20,7 @@ export async function processSubscription(
   walletAddress: string,
   planId: string,
   txHash: string
-): Promise<{ ok: boolean; error?: string }> {
+): Promise<{ ok: boolean; error?: string; shadowSetupTx?: string }> {
   const planPrice = PLAN_PRICES_USDC[planId]
   if (!planPrice) return { ok: false, error: 'Plan inválido.' }
 
@@ -39,25 +39,21 @@ export async function processSubscription(
   const isNewIssuer = !existingResult.data
 
   if (!contractActive) {
-    // Backend handles all splits until CONTRACT_WALLET accumulates enough for activation
     if (isNewIssuer) {
       const split = calculateFirstPaymentSplit(actualAmount)
       await executeUSDCSplit([
         { recipient: process.env.FEE_POOL_WALLET!,  amount: split.gas_amount },
         { recipient: process.env.SHADOW_WALLET!,    amount: split.shadow_amount },
-        { recipient: process.env.CONTRACT_WALLET!, amount: split.contract_amount },
+        { recipient: process.env.CONTRACT_WALLET!,  amount: split.contract_amount },
       ])
-      // Swap USDC → SHDW y provisiona el storage en Shadow Drive
-      await provisionShadowStorage(split.shadow_amount, planId)
     } else {
       const split = calculateRenewalSplit(actualAmount)
       await executeUSDCSplit([
-        { recipient: process.env.FEE_POOL_WALLET!,      amount: split.gas_amount },
-        { recipient: process.env.CONTRACT_WALLET!, amount: split.contract_amount },
+        { recipient: process.env.FEE_POOL_WALLET!,  amount: split.gas_amount },
+        { recipient: process.env.CONTRACT_WALLET!,  amount: split.contract_amount },
       ])
     }
   }
-  // When contract is active it handles on-chain splits automatically — backend only updates records
 
   if (isNewIssuer) {
     await registerIssuer(walletAddress, planId)
@@ -67,12 +63,17 @@ export async function processSubscription(
       slug: walletAddress.slice(0, 8).toLowerCase(),
       storage_limit_bytes: PLAN_STORAGE[planId],
     })
-  } else {
-    await supabase
-      .from('issuers')
-      .update({ storage_limit_bytes: PLAN_STORAGE[planId] })
-      .eq('wallet_address', walletAddress)
+
+    // Build the Shadow Drive setup transaction for the user to sign
+    const split = calculateFirstPaymentSplit(actualAmount)
+    const shadowSetupTx = await buildShadowSetupTx(walletAddress, split.shadow_amount, planId)
+    return { ok: true, shadowSetupTx }
   }
+
+  await supabase
+    .from('issuers')
+    .update({ storage_limit_bytes: PLAN_STORAGE[planId] })
+    .eq('wallet_address', walletAddress)
 
   return { ok: true }
 }

@@ -28,13 +28,13 @@ export async function POST(req: NextRequest) {
     const fileBuffer = Buffer.from(await file.arrayBuffer())
     const uploadResult = await uploadToShdwDrive(fileBuffer, file.type, {
       'Product-Title': title,
-    })
+    }, wallet)
     const arweaveTxId = uploadResult.id
 
     let coverArweaveId: string | null = null
     if (cover && cover.size > 0) {
       const coverBuffer = Buffer.from(await cover.arrayBuffer())
-      const coverResult = await uploadToShdwDrive(coverBuffer, cover.type, {})
+      const coverResult = await uploadToShdwDrive(coverBuffer, cover.type, {}, wallet)
       coverArweaveId = coverResult.id
     }
 
