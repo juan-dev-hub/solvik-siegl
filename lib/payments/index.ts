@@ -7,6 +7,7 @@ import { executeUSDCSplit } from './execute-split'
 import { calculateFirstPaymentSplit, calculateRenewalSplit, PLAN_STORAGE, PLAN_PRICES_USDC } from './splits'
 import { getShadowQuote, executeSwapAndBuildTx } from '../storage/provision'
 import { solRefillNeeded, refillGasIfNeeded } from '../solana/ensure-gas'
+import { buildRenewalDelegateTx, executeRenewal } from './subscription'
 
 export { calculateFirstPaymentSplit, calculateRenewalSplit, PLAN_STORAGE, PLAN_PRICES_USDC }
 export { executeUSDCSplit }
@@ -23,7 +24,7 @@ export async function processSubscription(
   walletAddress: string,
   planId: string,
   txHash: string
-): Promise<{ ok: boolean; error?: string; shadowSetupTx?: string }> {
+): Promise<{ ok: boolean; error?: string; shadowSetupTx?: string; renewalDelegateTx?: string }> {
   const planPrice = PLAN_PRICES_USDC[planId]
   if (!planPrice) return { ok: false, error: 'Plan inválido.' }
 
@@ -92,6 +93,10 @@ export async function processSubscription(
       // ── Shadow Drive: swap USDC→SHDW, fund user ATA, build setup tx ───────
       const shadowSetupTx = await executeSwapAndBuildTx(walletAddress, shdwLamports, quoteResponse)
 
+      const renewalDelegateTx = await buildRenewalDelegateTx(walletAddress, planId)
+      const renewalDate = new Date()
+      renewalDate.setDate(renewalDate.getDate() + 30)
+
       await registerIssuer(walletAddress, planId)
       await supabase.from('issuers').insert({
         wallet_address:      walletAddress,
@@ -99,9 +104,11 @@ export async function processSubscription(
         slug:                walletAddress.slice(0, 8).toLowerCase(),
         storage_limit_bytes: PLAN_STORAGE[planId],
         plan:                planId,
+        plan_expires_at:     renewalDate.toISOString(),
+        auto_renew:          true,
       })
 
-      return { ok: true, shadowSetupTx }
+      return { ok: true, shadowSetupTx, renewalDelegateTx }
     }
 
     // ── Renewal ───────────────────────────────────────────────────────────────
@@ -113,9 +120,11 @@ export async function processSubscription(
   }
 
   if (!isNewIssuer) {
+    const nextRenewal = new Date()
+    nextRenewal.setDate(nextRenewal.getDate() + 30)
     await supabase
       .from('issuers')
-      .update({ storage_limit_bytes: PLAN_STORAGE[planId], plan: planId })
+      .update({ storage_limit_bytes: PLAN_STORAGE[planId], plan: planId, plan_expires_at: nextRenewal.toISOString() })
       .eq('wallet_address', walletAddress)
   }
 

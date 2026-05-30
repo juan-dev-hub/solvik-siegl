@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/init-merkle-tree",
       "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/cron/process-renewals",
+      "schedule": "0 8 * * *"
     }
   ]
 }

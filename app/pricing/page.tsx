@@ -113,6 +113,27 @@ export default function PricingPage() {
     }
   }
 
+  async function handleRenewalDelegate(txBase64: string) {
+    try {
+      const w = window as unknown as Record<string, unknown>
+      const provider = (w.solflare ?? (w.phantom as Record<string,unknown>)?.solana ?? w.solana) as
+        { signTransaction: (tx: unknown) => Promise<{ serialize: (o?: object) => Uint8Array }> } | undefined
+      if (!provider) return
+      const { Transaction } = await import('@solana/web3.js')
+      const tx = Transaction.from(Buffer.from(txBase64, 'base64'))
+      const signed = await provider.signTransaction(tx)
+      const serialized = signed.serialize()
+      const rpc = process.env.NEXT_PUBLIC_SOLANA_RPC ?? 'https://api.mainnet-beta.solana.com'
+      await fetch(rpc, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'sendTransaction', params: [Buffer.from(serialized).toString('base64'), { encoding: 'base64' }] }),
+      })
+    } catch (e) {
+      console.error('Renewal delegate error:', e)
+    }
+  }
+
   function startPolling(reference: string, endpoint: string, body: Record<string, string>) {
     if (pollRef.current) clearInterval(pollRef.current)
 
@@ -130,11 +151,15 @@ export default function PricingPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ ...body, tx_hash: data.signature }),
         })
-        const subData = await subRes.json() as { shadowSetupTx?: string }
+        const subData = await subRes.json() as { shadowSetupTx?: string; renewalDelegateTx?: string }
 
         if (subData.shadowSetupTx) {
           setPollStatus('shadow-setup')
           await handleShadowSetup(subData.shadowSetupTx)
+        }
+
+        if (subData.renewalDelegateTx) {
+          await handleRenewalDelegate(subData.renewalDelegateTx)
         }
 
         setTimeout(() => { window.location.href = '/dashboard' }, 1500)

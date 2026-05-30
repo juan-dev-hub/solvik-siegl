@@ -69,8 +69,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const { t } = useTranslation()
   const pathname = usePathname()
   const router = useRouter()
-  const [slug, setSlug] = useState<string | null>(null)
-  const [wallet, setWallet] = useState<string | null>(null)
+  const [slug, setSlug]         = useState<string | null>(null)
+  const [wallet, setWallet]     = useState<string | null>(null)
+  const [plan, setPlan]         = useState<string | null>(null)
+  const [planExpires, setPlanExpires] = useState<string | null>(null)
+  const [autoRenew, setAutoRenew]    = useState<boolean>(true)
+  const [cancellingPlan, setCancellingPlan] = useState(false)
   const [showWidgetModal, setShowWidgetModal] = useState(false)
   const [copied, setCopied] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
@@ -106,6 +110,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           if (d?.issuer) {
             setSlug(d.issuer.slug ?? null)
             setWallet(d.issuer.wallet_address ?? null)
+            setPlan(d.issuer.plan ?? null)
+            setPlanExpires(d.issuer.plan_expires_at ?? null)
+            setAutoRenew(d.issuer.auto_renew ?? true)
           }
         })
         .catch(() => {})
@@ -130,6 +137,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const handleLogout = async () => {
     await fetch('/api/auth/logout', { method: 'POST' })
     router.push('/')
+  }
+
+  const handleCancelPlan = async () => {
+    if (!confirm('¿Cancelar la auto-renovación? Tu plan seguirá activo hasta la fecha de vencimiento.')) return
+    setCancellingPlan(true)
+    await fetch('/api/subscription/cancel', { method: 'POST' })
+    setAutoRenew(false)
+    setCancellingPlan(false)
   }
 
   const handleCopy = () => {
@@ -276,7 +291,23 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <a href="/pricing" style={linkStyle}>
             <CreditCard size={15} />
             {t.dashboard.my_plan}
+            {plan && <span style={{ marginLeft: 'auto', fontSize: 10, color: '#4ABAFF', fontWeight: 700, textTransform: 'uppercase' }}>{plan}</span>}
           </a>
+          {plan && planExpires && (
+            <div style={{ padding: '4px 12px 8px', fontSize: 11, color: 'rgba(180,210,255,0.4)', fontFamily: 'Luna, sans-serif' }}>
+              Vence: {new Date(planExpires).toLocaleDateString()}
+            </div>
+          )}
+          {plan && autoRenew && (
+            <button onClick={handleCancelPlan} disabled={cancellingPlan} style={{ ...linkStyle, color: 'rgba(255,100,100,0.6)', fontSize: 12 }}>
+              {cancellingPlan ? '...' : '✕ Cancelar auto-renovación'}
+            </button>
+          )}
+          {plan && !autoRenew && (
+            <div style={{ padding: '4px 12px 8px', fontSize: 11, color: 'rgba(255,150,50,0.6)', fontFamily: 'Luna, sans-serif' }}>
+              ⚠ Auto-renovación cancelada
+            </div>
+          )}
           <a
             href="/dashboard/sns"
             style={{
@@ -305,6 +336,32 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </div>
     </aside>
   )
+
+  // User authenticated but no active plan — show upgrade wall
+  if (wallet && !plan) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+        <div style={{ textAlign: 'center', maxWidth: 400 }}>
+          <p style={{ fontFamily: 'Luna, sans-serif', fontWeight: 800, fontSize: 28, color: '#F0F0FF', marginBottom: 12 }}>
+            Bienvenido a Solvik Studio
+          </p>
+          <p style={{ fontSize: 15, color: 'rgba(240,240,255,0.5)', fontFamily: 'Luna, sans-serif', marginBottom: 32, lineHeight: 1.6 }}>
+            Para acceder al dashboard necesitás activar un plan.
+          </p>
+          <a href="/pricing" className="btn-primary" style={{ fontSize: 16, padding: '14px 32px', display: 'inline-block' }}>
+            Ver planes →
+          </a>
+          <br />
+          <button
+            onClick={handleLogout}
+            style={{ marginTop: 20, background: 'none', border: 'none', color: 'rgba(180,210,255,0.4)', cursor: 'pointer', fontSize: 13, fontFamily: 'Luna, sans-serif' }}
+          >
+            Cerrar sesión
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh' }}>
