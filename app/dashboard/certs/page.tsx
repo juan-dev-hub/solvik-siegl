@@ -5,7 +5,7 @@ import { useTranslation } from '@/components/LanguageProvider'
 import { LOCALE_DATE } from '@/lib/i18n'
 
 type Certificate = {
-  id: string; arweave_tx_id: string; issued_to: string; doc_type: string; cert_id?: string
+  id: string; issued_to: string; doc_type: string
   file_name: string; issued_at: string; expires_at: string | null; cnft_address: string | null
 }
 
@@ -50,7 +50,7 @@ export default function CertsPage() {
       const res = await fetch('/api/certificates', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ arweave_tx_id: cert.arweave_tx_id }),
+        body: JSON.stringify({ cert_id: cert.id }),
       })
       if (!res.ok) return
       const blob = await res.blob()

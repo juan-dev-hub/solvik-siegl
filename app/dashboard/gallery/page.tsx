@@ -4,7 +4,7 @@ import { useTranslation } from '@/components/LanguageProvider'
 import { Copy, CheckCircle, ExternalLink, Eye, EyeOff } from 'lucide-react'
 
 type Cert = {
-  id: string; arweave_tx_id: string; issued_to: string; doc_type: string
+  id: string; issued_to: string; doc_type: string
   issued_at: string; is_public: boolean
 }
 

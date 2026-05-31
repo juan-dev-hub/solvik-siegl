@@ -72,18 +72,17 @@ export async function PATCH(req: NextRequest) {
   }
 }
 
-// POST: regenerate PDF from arweave_tx_id
 export async function POST(req: NextRequest) {
   try {
     const wallet = await getWalletSession()
     if (!wallet) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    const { arweave_tx_id } = (await req.json()) as { arweave_tx_id: string }
+    const { cert_id } = (await req.json()) as { cert_id: string }
 
     const { data: cert } = await supabaseAdmin
       .from('certificates')
       .select('*')
-      .eq('arweave_tx_id', arweave_tx_id)
+      .eq('id', cert_id)
       .eq('issuer_wallet', wallet)
       .single()
 

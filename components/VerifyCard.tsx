@@ -5,7 +5,7 @@ import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { LOCALE_DATE } from '@/lib/i18n'
 
 type CertData = {
-  arweave_tx_id: string
+  storage_url: string
   issued_to: string
   issuer_wallet: string
   issuer_name: string
@@ -106,12 +106,12 @@ export function VerifyCard({ cert }: { cert: CertData }) {
           <div style={{ marginBottom: 24 }}>
             <p className="section-title">{t.verify.storage_url}</p>
             <a
-              href={cert.arweave_tx_id}
+              href={cert.storage_url}
               target="_blank"
               rel="noopener noreferrer"
               style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: '#4ABAFF', fontSize: 12, fontFamily: 'SF Mono, Fira Code, monospace', textDecoration: 'none', wordBreak: 'break-all' }}
             >
-              {cert.arweave_tx_id.replace('https://shdw-drive.genesysgo.net/', 'shdw://')}
+              {cert.storage_url.replace('https://shdw-drive.genesysgo.net/', 'shdw://')}
               <ExternalLink size={12} />
             </a>
           </div>

@@ -109,7 +109,7 @@ async function processBatch(params: {
       const fileData = await zip.files[entryKey].async('nodebuffer')
       const mime = EXT_MIME[ext]
 
-      const arweave = await uploadToShdwDrive(fileData, mime, {
+      const upload = await uploadToShdwDrive(fileData, mime, {
         doc_type: docType,
         issuer_wallet: wallet,
         issued_to: name,
@@ -119,14 +119,14 @@ async function processBatch(params: {
       try {
         attestationPda = await createAttestation({
           subject: wallet,
-          arweave_tx_id: arweave.id,
+          storage_url: upload.id,
           doc_type: docType,
         })
       } catch {}
 
       await supabaseAdmin.from('certificates').insert({
         issuer_wallet: wallet,
-        arweave_tx_id: arweave.id,
+        arweave_tx_id: upload.id,
         file_name: `${name}.${ext}`,
         file_size_bytes: fileData.length,
         doc_type: docType,

@@ -59,6 +59,8 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       recipientAddress: buyerWallet,
     }).catch(() => null)
 
+    const storageUrl = product.arweave_tx_id
+
     const { data: license, error } = await supabaseAdmin
       .from('digital_licenses')
       .insert({
@@ -66,7 +68,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
         product_id: params.id,
         buyer_wallet: buyerWallet,
         cnft_address: cnftAddress,
-        arweave_tx_id: product.arweave_tx_id,
+        arweave_tx_id: storageUrl,
         solana_tx_hash: txHash,
       })
       .select()

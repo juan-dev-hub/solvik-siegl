@@ -40,13 +40,13 @@ export async function POST(req: NextRequest) {
     const uploadResult = await uploadToShdwDrive(fileBuffer, file.type, {
       'Product-Title': title,
     }, wallet)
-    const arweaveTxId = uploadResult.id
+    const storageUrl = uploadResult.id
 
-    let coverArweaveId: string | null = null
+    let coverUrl: string | null = null
     if (cover && cover.size > 0) {
       const coverBuffer = Buffer.from(await cover.arrayBuffer())
       const coverResult = await uploadToShdwDrive(coverBuffer, cover.type, {}, wallet)
-      coverArweaveId = coverResult.id
+      coverUrl = coverResult.id
     }
 
     const { data: product, error } = await supabaseAdmin
@@ -55,8 +55,8 @@ export async function POST(req: NextRequest) {
         issuer_wallet: wallet,
         title,
         description,
-        arweave_tx_id: arweaveTxId,
-        cover_arweave_id: coverArweaveId,
+        arweave_tx_id: storageUrl,
+        cover_arweave_id: coverUrl,
         price_usdc: priceUsdc,
         total_copies: parsedCopies,
       })

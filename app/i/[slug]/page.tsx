@@ -19,12 +19,12 @@ type Issuer = {
   page_cta: string | null
 }
 type Cert = {
-  id: string; arweave_tx_id: string; issued_to: string
+  id: string; issued_to: string
   doc_type: string; issued_at: string
 }
 type Product = {
   id: string; title: string; description: string | null
-  cover_arweave_id: string | null; price_usdc: number
+  cover_url: string | null; price_usdc: number
   total_copies: number; sold_copies: number
 }
 
@@ -536,9 +536,9 @@ export default function IssuerPage() {
                     border: '1px solid rgba(123,47,255,0.18)', borderRadius: 16,
                     overflow: 'hidden', display: 'flex', flexDirection: 'column',
                   }}>
-                    {p.cover_arweave_id && (
+                    {p.cover_url && (
                       <img
-                        src={`/api/media/proxy?url=${encodeURIComponent(p.cover_arweave_id)}`}
+                        src={`/api/media/proxy?url=${encodeURIComponent(p.cover_url)}`}
                         alt={p.title}
                         style={{ width: '100%', height: 170, objectFit: 'cover', display: 'block' }}
                       />

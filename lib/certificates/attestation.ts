@@ -2,13 +2,13 @@ import { createHash } from 'crypto'
 
 export async function createAttestation(params: {
   subject: string
-  arweave_tx_id: string
+  storage_url: string
   doc_type: string
 }): Promise<string> {
   try {
     const payload = JSON.stringify({
       subject: params.subject,
-      arweave_tx_id: params.arweave_tx_id,
+      storage_url: params.storage_url,
       doc_type: params.doc_type,
       platform: 'Solvik Studio',
     })

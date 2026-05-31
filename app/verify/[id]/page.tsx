@@ -68,7 +68,7 @@ export default async function VerifyPage({ params }: { params: { id: string } })
   return (
     <VerifyCard
       cert={{
-        arweave_tx_id:   cert.arweave_tx_id,
+        storage_url:     cert.arweave_tx_id,
         issued_to:       cert.issued_to,
         issuer_wallet:   cert.issuer_wallet,
         issuer_name:     cert.issuer_name,

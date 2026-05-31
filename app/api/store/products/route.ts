@@ -7,7 +7,7 @@ export async function GET() {
   const { data, error } = await supabaseAdmin
     .from('digital_products')
     .select(`
-      id, title, description, cover_arweave_id,
+      id, title, description, cover_url:cover_arweave_id,
       price_usdc, total_copies, sold_copies, issuer_wallet,
       issuers:issuer_wallet (institution_name, slug)
     `)

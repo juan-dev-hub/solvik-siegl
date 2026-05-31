@@ -157,8 +157,8 @@ export default function LandingPage() {
             {
               icon: <Globe size={22} color="#B06FFF" />,
               color: '#B06FFF',
-              title: t.landing.trust_arweave_title,
-              desc: t.landing.trust_arweave_desc,
+              title: t.landing.trust_storage_title,
+              desc: t.landing.trust_storage_desc,
             },
             {
               icon: <Zap size={22} color="#FFD700" />,

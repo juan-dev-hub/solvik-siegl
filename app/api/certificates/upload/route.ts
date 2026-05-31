@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
     try {
       attestationPda = await createAttestation({
         subject: issuerWallet,
-        arweave_tx_id: storageUrl,
+        storage_url: storageUrl,
         doc_type: docType,
       })
     } catch (e) {

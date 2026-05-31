@@ -11,7 +11,7 @@ export async function GET() {
     .select(`
       id, purchased_at, solana_tx_hash, cnft_address,
       digital_products (
-        id, title, cover_arweave_id,
+        id, title, cover_url:cover_arweave_id,
         issuers:issuer_wallet (institution_name, slug)
       )
     `)

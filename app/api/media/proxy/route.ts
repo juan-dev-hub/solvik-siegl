@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
   }
 
   // Only allow our own storage domains
-  const allowed = ['arweave.net', 'shdw-drive.genesysgo.net']
+  const allowed = ['shdw-drive.genesysgo.net']
   if (!allowed.some(d => imageUrl.includes(d))) {
     return new NextResponse('Forbidden', { status: 403 })
   }

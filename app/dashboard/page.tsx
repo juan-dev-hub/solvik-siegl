@@ -17,7 +17,7 @@ export default async function DashboardPage() {
 
   const { data: recentCerts } = await supabaseAdmin
     .from('certificates')
-    .select('id, arweave_tx_id, issued_to, doc_type, issued_at')
+    .select('id, issued_to, doc_type, issued_at')
     .eq('issuer_wallet', wallet)
     .order('issued_at', { ascending: false })
     .limit(5)

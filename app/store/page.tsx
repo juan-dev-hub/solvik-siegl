@@ -9,7 +9,7 @@ type Product = {
   id: string
   title: string
   description: string | null
-  cover_arweave_id: string | null
+  cover_url: string | null
   price_usdc: number
   total_copies: number
   sold_copies: number
@@ -150,9 +150,9 @@ function ProductCard({ product: p }: { product: Product }) {
       <div ref={glowRef} style={{ position: 'absolute', inset: -6, borderRadius: 20, background: 'radial-gradient(circle, rgba(74,186,255,0.12) 0%, transparent 70%)', opacity: 0, pointerEvents: 'none', zIndex: 0 }} />
       <div style={{ position: 'relative', zIndex: 1 }}>
         <div style={{ position: 'relative' }}>
-          {p.cover_arweave_id ? (
+          {p.cover_url ? (
             <img
-              src={`/api/media/proxy?url=${encodeURIComponent(p.cover_arweave_id)}`}
+              src={`/api/media/proxy?url=${encodeURIComponent(p.cover_url)}`}
               alt={p.title}
               style={{ width: '100%', height: 180, objectFit: 'cover' }}
             />

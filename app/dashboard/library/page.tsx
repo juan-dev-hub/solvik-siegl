@@ -11,7 +11,7 @@ type License = {
   digital_products: {
     id: string
     title: string
-    cover_arweave_id: string | null
+    cover_url: string | null
     issuers: { institution_name: string; slug: string } | null
   } | null
 }
@@ -90,9 +90,9 @@ export default function LibraryPage() {
                   className="glass-card"
                   style={{ padding: 0, overflow: 'hidden' }}
                 >
-                  {product?.cover_arweave_id ? (
+                  {product?.cover_url ? (
                     <img
-                      src={`/api/media/proxy?url=${encodeURIComponent(product.cover_arweave_id)}`}
+                      src={`/api/media/proxy?url=${encodeURIComponent(product.cover_url)}`}
                       alt={product?.title ?? ''}
                       style={{ width: '100%', height: 140, objectFit: 'cover' }}
                     />

@@ -10,7 +10,7 @@ type Product = {
   id: string
   title: string
   description: string | null
-  cover_arweave_id: string | null
+  cover_url: string | null
   price_usdc: number
   total_copies: number
   sold_copies: number
@@ -142,9 +142,9 @@ export default function ProductPage() {
         >
           {/* Cover */}
           <div style={{ position: 'relative' }}>
-            {product.cover_arweave_id ? (
+            {product.cover_url ? (
               <img
-                src={`/api/media/proxy?url=${encodeURIComponent(product.cover_arweave_id)}`}
+                src={`/api/media/proxy?url=${encodeURIComponent(product.cover_url)}`}
                 alt={product.title}
                 style={{ width: '100%', borderRadius: 16, boxShadow: '0 20px 60px rgba(0,0,0,0.5)' }}
               />

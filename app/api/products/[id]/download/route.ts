@@ -66,8 +66,8 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 
   if (!product) return NextResponse.json({ error: 'Product not found' }, { status: 404 })
 
-  // Fetch original PDF from Shadow Drive (arweave_tx_id stores the full URL)
-  const storageRes = await fetch(product.arweave_tx_id)
+  const storageUrl = product.arweave_tx_id
+  const storageRes = await fetch(storageUrl)
   if (!storageRes.ok) {
     return NextResponse.json({ error: 'Failed to fetch source file' }, { status: 502 })
   }

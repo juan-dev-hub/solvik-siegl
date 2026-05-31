@@ -16,7 +16,7 @@ export default function NewCertPage() {
   const [docType, setDocType]     = useState(t.doc_types[0].value)
   const [expiresAt, setExpiresAt] = useState('')
   const [step, setStep]           = useState<Step>('idle')
-  const [result, setResult]       = useState<{ arweave_tx_id: string; verify_url: string; pdf: string } | null>(null)
+  const [result, setResult]       = useState<{ storage_url: string; verify_url: string; pdf: string } | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
   const STEP_LABELS: Record<Step, string> = {
@@ -81,7 +81,7 @@ export default function NewCertPage() {
         return
       }
 
-      setResult({ arweave_tx_id: data.storage_url!, verify_url: data.verify_url!, pdf: data.pdf! })
+      setResult({ storage_url: data.storage_url!, verify_url: data.verify_url!, pdf: data.pdf! })
       setStep('done')
       toast.success('Certificado emitido', 'Guardado en Shadow Drive · Solana.')
     } catch (e) {
@@ -131,7 +131,7 @@ export default function NewCertPage() {
             {t.new_cert.success_title}
           </h2>
           <p style={{ fontFamily: 'SF Mono, Fira Code, monospace', fontSize: 11, color: 'rgba(180,210,255,0.4)', marginBottom: 28, wordBreak: 'break-all' }}>
-            {result.arweave_tx_id}
+            {result.storage_url}
           </p>
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
             <a href={result.verify_url} className="btn-secondary">{t.new_cert.view_cert}</a>
