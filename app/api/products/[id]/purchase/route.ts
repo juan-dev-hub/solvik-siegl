@@ -59,7 +59,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       recipientAddress: buyerWallet,
     }).catch(() => null)
 
-    const storageUrl = product.arweave_tx_id
+    const storageUrl = product.storage_url
 
     const { data: license, error } = await supabaseAdmin
       .from('digital_licenses')
@@ -68,7 +68,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
         product_id: params.id,
         buyer_wallet: buyerWallet,
         cnft_address: cnftAddress,
-        arweave_tx_id: storageUrl,
+        storage_url: storageUrl,
         solana_tx_hash: txHash,
       })
       .select()

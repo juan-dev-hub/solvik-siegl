@@ -4,7 +4,7 @@ import { supabaseAdmin } from '@/lib/supabase'
 export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
   const { data, error } = await supabaseAdmin
     .from('digital_products')
-    .select(`id, title, description, cover_url:cover_arweave_id, price_usdc, total_copies, sold_copies, issuer_wallet, issuers:issuer_wallet (institution_name, slug)`)
+    .select(`id, title, description, cover_url, price_usdc, total_copies, sold_copies, issuer_wallet, issuers:issuer_wallet (institution_name, slug)`)
     .eq('id', params.id)
     .eq('is_active', true)
     .single()

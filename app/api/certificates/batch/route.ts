@@ -126,7 +126,7 @@ async function processBatch(params: {
 
       await supabaseAdmin.from('certificates').insert({
         issuer_wallet: wallet,
-        arweave_tx_id: upload.id,
+        storage_url: upload.id,
         file_name: `${name}.${ext}`,
         file_size_bytes: fileData.length,
         doc_type: docType,

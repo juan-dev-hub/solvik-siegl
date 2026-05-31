@@ -51,7 +51,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   // Validate license belongs to this product — buyer_wallet is authoritative from DB
   const { data: license } = await supabaseAdmin
     .from('digital_licenses')
-    .select('id, product_id, buyer_wallet, arweave_tx_id')
+    .select('id, product_id, buyer_wallet, storage_url')
     .eq('id', licenseId)
     .eq('product_id', params.id)
     .single()
@@ -60,13 +60,13 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 
   const { data: product } = await supabaseAdmin
     .from('digital_products')
-    .select('title, arweave_tx_id')
+    .select('title, storage_url')
     .eq('id', params.id)
     .single()
 
   if (!product) return NextResponse.json({ error: 'Product not found' }, { status: 404 })
 
-  const storageUrl = product.arweave_tx_id
+  const storageUrl = product.storage_url
   const storageRes = await fetch(storageUrl)
   if (!storageRes.ok) {
     return NextResponse.json({ error: 'Failed to fetch source file' }, { status: 502 })

@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
 
     const { data: cert } = await supabaseAdmin.from('certificates').insert({
       issuer_wallet: issuerWallet,
-      arweave_tx_id: storageUrl,
+      storage_url: storageUrl,
       cnft_address: cnftAddress,
       file_name: file.name,
       file_size_bytes: file.size,

@@ -13,7 +13,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 type CertWithIssuer = {
   id: string
-  arweave_tx_id: string
+  storage_url: string
   issued_to: string
   issuer_wallet: string
   issuer_name: string
@@ -43,7 +43,7 @@ async function findCert(id: string): Promise<CertWithIssuer | null> {
   const byStorage = await supabaseAdmin
     .from('certificates')
     .select(`*, issuers (institution_name, sns_domain, sns_verified)`)
-    .eq('arweave_tx_id', id)
+    .eq('storage_url', id)
     .maybeSingle<CertWithIssuer>()
   return byStorage.data ?? null
 }
@@ -68,7 +68,7 @@ export default async function VerifyPage({ params }: { params: { id: string } })
   return (
     <VerifyCard
       cert={{
-        storage_url:     cert.arweave_tx_id,
+        storage_url:     cert.storage_url,
         issued_to:       cert.issued_to,
         issuer_wallet:   cert.issuer_wallet,
         issuer_name:     cert.issuer_name,

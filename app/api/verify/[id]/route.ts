@@ -13,7 +13,7 @@ async function findCert(id: string) {
   const byStorage = await supabaseAdmin
     .from('certificates')
     .select(`*, issuers (institution_name, sns_domain, sns_verified)`)
-    .eq('arweave_tx_id', id)
+    .eq('storage_url', id)
     .maybeSingle()
   return byStorage.data ?? null
 }

@@ -55,8 +55,8 @@ export async function POST(req: NextRequest) {
         issuer_wallet: wallet,
         title,
         description,
-        arweave_tx_id: storageUrl,
-        cover_arweave_id: coverUrl,
+        storage_url: storageUrl,
+        cover_url: coverUrl,
         price_usdc: priceUsdc,
         total_copies: parsedCopies,
       })

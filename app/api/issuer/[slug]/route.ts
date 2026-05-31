@@ -13,7 +13,7 @@ export async function GET(_req: NextRequest, { params }: { params: { slug: strin
 
     const { data: certs } = await supabaseAdmin
       .from('certificates')
-      .select('id, storage_url:arweave_tx_id, issued_to, doc_type, issued_at, expires_at')
+      .select('id, storage_url, issued_to, doc_type, issued_at, expires_at')
       .eq('issuer_wallet', issuer.wallet_address)
       .eq('is_public', true)
       .order('issued_at', { ascending: false })
