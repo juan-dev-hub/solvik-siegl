@@ -16,12 +16,25 @@ export async function POST(req: NextRequest) {
     const docType   = fd.get('doc_type') as string
     const expiresAt = fd.get('expires_at') as string | null
 
-    const { data: planCheck } = await supabaseAdmin.from('issuers').select('plan').eq('wallet_address', wallet).single()
+    // Resolver issuer real: si la wallet conectada es un helper,
+    // todas las operaciones se ejecutan bajo el issuer dueño de la cuenta.
+    // El certificado queda firmado por el issuer, no por el helper.
+    let issuerWallet = wallet
+    const { data: ownerRow } = await supabaseAdmin
+      .from('issuers')
+      .select('wallet_address, plan')
+      .contains('helper_wallets', [wallet])
+      .single()
+    if (ownerRow) {
+      issuerWallet = ownerRow.wallet_address
+    }
+
+    const { data: planCheck } = await supabaseAdmin.from('issuers').select('plan').eq('wallet_address', issuerWallet).single()
     if (planCheck?.plan === 'verk') return NextResponse.json({ error: 'El plan VERK no incluye emisión de certificados.' }, { status: 403 })
 
     if (!file || !issuedTo) return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
 
-    const validation = await validateFileAndAccess(wallet, file.size, file.type)
+    const validation = await validateFileAndAccess(issuerWallet, file.size, file.type)
     if (!validation.valid) {
       return NextResponse.json({ error: validation.error }, { status: 402 })
     }
@@ -30,9 +43,9 @@ export async function POST(req: NextRequest) {
 
     const arweave = await uploadToShdwDrive(buffer, file.type, {
       doc_type: docType,
-      issuer_wallet: wallet,
+      issuer_wallet: issuerWallet,
       issued_to: issuedTo,
-    }, wallet)
+    }, issuerWallet)
     const arweaveTxId = arweave.id
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://www.solvikstudio.com'
     const verifyUrl = `${appUrl}/verify/${arweaveTxId}`
@@ -43,7 +56,7 @@ export async function POST(req: NextRequest) {
         name: `Solvik Studio Certificate — ${issuedTo}`,
         symbol: 'SVKS',
         uri: `https://arweave.net/${arweaveTxId}`,
-        recipientAddress: wallet,
+        recipientAddress: issuerWallet,
       })
     } catch (e) {
       console.error('cNFT mint error:', e)
@@ -52,7 +65,7 @@ export async function POST(req: NextRequest) {
     let attestationPda: string | null = null
     try {
       attestationPda = await createAttestation({
-        subject: wallet,
+        subject: issuerWallet,
         arweave_tx_id: arweaveTxId,
         doc_type: docType,
       })
@@ -60,14 +73,14 @@ export async function POST(req: NextRequest) {
       console.error('Attestation error:', e)
     }
 
-    await updateStorageUsed(wallet, file.size)
+    await updateStorageUsed(issuerWallet, file.size)
 
     const { data: issuer } = await supabaseAdmin
-      .from('issuers').select('institution_name').eq('wallet_address', wallet).single()
+      .from('issuers').select('institution_name').eq('wallet_address', issuerWallet).single()
     const issuerName = issuer?.institution_name ?? 'Solvik Studio'
 
     await supabaseAdmin.from('certificates').insert({
-      issuer_wallet: wallet,
+      issuer_wallet: issuerWallet,
       arweave_tx_id: arweaveTxId,
       cnft_address: cnftAddress,
       file_name: file.name,

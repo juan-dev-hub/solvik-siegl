@@ -32,12 +32,20 @@ const PLANS = [
     features: [] as string[],
   },
   {
-    id: 'pro', price: 99, storage: '5 GB', popular: true,
-    features: ['5 GB en Shadow Drive', 'Todo VERK incluido', 'PDF + QR verificable', 'Solana cNFT', 'Attestation on-chain', 'Badge dominio SNS'],
+    id: 'varde', price: 39, popular: true,
+    features: [
+      'Almacenamiento inmutable en Shadow Drive',
+      'Emisión de certificados digitales',
+      'Subida masiva por carpetas (Drag & Drop)',
+      'PDF + QR verificable',
+      'Solana cNFT',
+      'Attestation on-chain',
+      'Hasta 3 wallets colaboradoras (ACL)',
+    ],
   },
   {
     id: 'studio', price: 249, storage: '20 GB',
-    features: ['20 GB en Shadow Drive', 'Todo Pro incluido', 'Batch ZIP', 'Página pública de issuer'],
+    features: ['20 GB en Shadow Drive', 'Todo VARDE incluido', 'Batch ZIP', 'Página pública de issuer'],
   },
 ]
 
