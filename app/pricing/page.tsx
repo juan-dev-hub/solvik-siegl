@@ -299,7 +299,7 @@ export default function PricingPage() {
                   <p style={{ fontFamily: 'Luna, sans-serif', fontWeight: 800, fontSize: 18, color: '#00FFB3', marginBottom: 8 }}>¡Pago confirmado!</p>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, color: 'rgba(240,240,255,0.6)', fontSize: 13, fontFamily: 'Luna, sans-serif', marginTop: 16 }}>
                     <Loader2 size={14} className="animate-spin" />
-                    Configurando Shadow Drive — firmá en Phantom...
+                    Configurando Shadow Drive — aprobá en tu wallet...
                   </div>
                 </motion.div>
               ) : pollStatus === 'success' ? (
