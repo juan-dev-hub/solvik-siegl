@@ -29,9 +29,9 @@
 
 // Precios en micro-USDC (1 USDC = 1_000_000)
 export const PLAN_PRICES_USDC: Record<string, bigint> = {
-  verk:   10_000_000n,  // $10  — tier base: obras digitales + tienda
-  varde:  39_000_000n,  // $39  — tier medio: certificados + batch + helpers
-  studio: 249_000_000n, // $249 — tier avanzado: todo + página pública de issuer
+  verk:  9_500_000n,  // $9.50  — tier base: obras digitales + tienda
+  varde: 39_450_000n, // $39.45 — tier medio: certificados + batch + helpers
+  kraft: 99_250_000n, // $99.25 — tier soberano: universidades + 15 helpers + bucket propio
 }
 
 // ─── Primer pago: 60% Owner | 20% Gas | 10% Shadow | 10% Contract ────────────

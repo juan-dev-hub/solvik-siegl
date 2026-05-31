@@ -15,16 +15,16 @@ const VERK_SECTIONS = [
 
 const PLANS = [
   {
-    id: 'verk', price: 10,
+    id: 'verk', price: 9.50,
     features: [] as string[],
   },
   {
-    id: 'varde', price: 39, popular: true,
+    id: 'varde', price: 39.45, popular: true,
     features: ['Almacenamiento inmutable en Shadow Drive', 'Emisión de certificados digitales', 'Subida masiva por carpetas', 'PDF + QR verificable', 'Solana cNFT', 'Attestation on-chain', 'Hasta 3 wallets colaboradoras (ACL)'],
   },
   {
-    id: 'studio', price: 249, storage: '20 GB',
-    features: ['20 GB en Shadow Drive', 'Todo VARDE incluido', 'Batch ZIP', 'Página pública de issuer'],
+    id: 'kraft', price: 99.25,
+    features: ['Arquitectura soberana — bucket propio', 'Hasta 15 wallets colaboradoras (ACL)', 'Carga masiva Drag & Drop al bucket soberano', 'Todo VARDE incluido', 'Página pública de issuer'],
   },
 ]
 

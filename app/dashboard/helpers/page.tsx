@@ -3,20 +3,22 @@ import { useState, useEffect } from 'react'
 import { UserPlus, Trash2, Loader2, Users } from 'lucide-react'
 import { InfoTip } from '@/components/InfoTip'
 
-const MAX_HELPERS = 3
-
 export default function HelpersPage() {
-  const [helpers, setHelpers]   = useState<string[]>([])
-  const [input, setInput]       = useState('')
-  const [loading, setLoading]   = useState(true)
-  const [adding, setAdding]     = useState(false)
-  const [removing, setRemoving] = useState<string | null>(null)
-  const [error, setError]       = useState<string | null>(null)
+  const [helpers, setHelpers]       = useState<string[]>([])
+  const [maxHelpers, setMaxHelpers] = useState(3)
+  const [input, setInput]           = useState('')
+  const [loading, setLoading]       = useState(true)
+  const [adding, setAdding]         = useState(false)
+  const [removing, setRemoving]     = useState<string | null>(null)
+  const [error, setError]           = useState<string | null>(null)
 
   useEffect(() => {
     fetch('/api/helpers')
       .then(r => r.json())
-      .then(d => setHelpers(d.helpers ?? []))
+      .then(d => {
+        setHelpers(d.helpers ?? [])
+        setMaxHelpers(d.max_helpers ?? 3)
+      })
       .catch(() => {})
       .finally(() => setLoading(false))
   }, [])
@@ -69,7 +71,7 @@ export default function HelpersPage() {
         />
       </div>
       <p style={{ color: 'rgba(180,210,255,0.5)', fontSize: 14, marginBottom: 36 }}>
-        Autorizá hasta {MAX_HELPERS} wallets para que emitan certificados bajo tu cuenta. El certificado siempre queda firmado como tuyo.
+        Autorizá hasta {maxHelpers} wallets para que emitan certificados bajo tu cuenta. El certificado siempre queda firmado como tuyo.
       </p>
 
       {/* Lista actual */}
@@ -77,7 +79,7 @@ export default function HelpersPage() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
           <Users size={16} color="#4ABAFF" />
           <span style={{ fontWeight: 700, fontSize: 15, color: '#F0F8FF' }}>
-            Colaboradores activos ({helpers.length}/{MAX_HELPERS})
+            Colaboradores activos ({helpers.length}/{maxHelpers})
           </span>
         </div>
 
@@ -115,7 +117,7 @@ export default function HelpersPage() {
       </div>
 
       {/* Agregar */}
-      {helpers.length < MAX_HELPERS && (
+      {helpers.length < maxHelpers && (
         <div className="glass-card">
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
             <UserPlus size={16} color="#00FFB3" />
@@ -155,9 +157,9 @@ export default function HelpersPage() {
         </div>
       )}
 
-      {helpers.length >= MAX_HELPERS && (
+      {helpers.length >= maxHelpers && (
         <p style={{ fontSize: 12, color: 'rgba(180,210,255,0.35)', marginTop: 8 }}>
-          Límite de {MAX_HELPERS} colaboradores alcanzado. Eliminá uno para agregar otro.
+          Límite de {maxHelpers} colaboradores alcanzado. Eliminá uno para agregar otro.
         </p>
       )}
     </div>

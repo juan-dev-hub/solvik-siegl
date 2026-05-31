@@ -1,19 +1,17 @@
-// API de wallets colaboradoras (ACL) — solo planes VARDE y Studio.
-// Cada issuer puede autorizar hasta 3 wallets adicionales para emitir
-// certificados bajo su identidad. El certificado siempre queda firmado
-// por el issuer dueño de la cuenta — el helper solo opera en su nombre.
-//
+// API de wallets colaboradoras (ACL) — VARDE (hasta 3) y KRAFT (hasta 15).
+// El certificado siempre queda firmado por el issuer dueño de la cuenta.
 // La lista se guarda en la columna helper_wallets TEXT[] de issuers.
-// Ver: supabase-migration-v4.sql
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getWalletSession } from '@/lib/auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import { PublicKey } from '@solana/web3.js'
 
-const MAX_HELPERS = 3
-// Solo estos planes tienen acceso al feature de helpers
-const PLANS_WITH_HELPERS = ['varde', 'studio']
+const PLAN_MAX_HELPERS: Record<string, number> = {
+  varde: 3,
+  kraft: 15,
+}
+const PLANS_WITH_HELPERS = ['varde', 'kraft']
 
 // ── GET /api/helpers — lista de helpers del issuer autenticado ─────────────
 export async function GET() {
@@ -31,7 +29,10 @@ export async function GET() {
     return NextResponse.json({ error: 'Tu plan no incluye wallets colaboradoras.' }, { status: 403 })
   }
 
-  return NextResponse.json({ helpers: data.helper_wallets ?? [] })
+  return NextResponse.json({
+    helpers: data.helper_wallets ?? [],
+    max_helpers: PLAN_MAX_HELPERS[data.plan] ?? 3,
+  })
 }
 
 // ── POST /api/helpers — agregar una helper wallet ──────────────────────────
@@ -63,9 +64,10 @@ export async function POST(req: NextRequest) {
   }
 
   const current: string[] = issuer.helper_wallets ?? []
+  const maxHelpers = PLAN_MAX_HELPERS[issuer.plan] ?? 3
 
-  if (current.length >= MAX_HELPERS) {
-    return NextResponse.json({ error: `Límite de ${MAX_HELPERS} colaboradores alcanzado.` }, { status: 400 })
+  if (current.length >= maxHelpers) {
+    return NextResponse.json({ error: `Límite de ${maxHelpers} colaboradores alcanzado.` }, { status: 400 })
   }
   if (current.includes(helper_wallet)) {
     return NextResponse.json({ error: 'Esa wallet ya es colaboradora.' }, { status: 400 })

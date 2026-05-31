@@ -188,7 +188,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const isVerk    = plan === 'verk'
   const isVarde   = plan === 'varde'
-  const isStudio  = plan === 'studio'
+  const isKraft   = plan === 'kraft'
   const isExpired = plan && planExpires && new Date(planExpires) < new Date() && !autoRenew
 
   // Expired plan: read-only access (gallery + purchases only)
@@ -219,20 +219,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     { label: 'Mi página',           href: '/dashboard/page-settings', icon: <Monitor size={16} />,         tip: 'Tu página pública de issuer.' },
   ]
 
-  // Studio: todo VARDE + batch ZIP avanzado
-  const navStudio = [
-    { label: t.dashboard.overview,  href: '/dashboard',               icon: <LayoutDashboard size={16} />, tip: 'Resumen de tu cuenta.' },
+  // KRAFT: arquitectura soberana — hasta 15 helpers, bucket propio
+  const navKraft = [
+    { label: t.dashboard.overview,  href: '/dashboard',               icon: <LayoutDashboard size={16} />, tip: 'Resumen de tu cuenta soberana.' },
     { label: t.dashboard.new_cert,  href: '/dashboard/new',           icon: <Award size={16} />,           tip: 'Emitir un certificado individual.' },
-    { label: t.dashboard.batch,     href: '/dashboard/batch',         icon: <FolderOpen size={16} />,      tip: 'Emisión en lote con ZIP.' },
+    { label: t.dashboard.batch,     href: '/dashboard/batch',         icon: <FolderOpen size={16} />,      tip: 'Carga masiva de carpetas a tu bucket propio.' },
     { label: t.dashboard.my_certs,  href: '/dashboard/certs',         icon: <List size={16} />,            tip: 'Todos tus certificados emitidos.' },
     { label: t.dashboard.gallery,   href: '/dashboard/gallery',       icon: <Image size={16} />,           tip: 'Galería pública de certificados.' },
-    { label: 'Ayudantes',           href: '/dashboard/helpers',       icon: <Users size={16} />,           tip: 'Wallets autorizadas para emitir bajo tu cuenta.' },
+    { label: 'Ayudantes (15)',       href: '/dashboard/helpers',       icon: <Users size={16} />,           tip: 'Hasta 15 wallets autorizadas — departamentos enteros.' },
     { label: 'Mis obras',           href: '/dashboard/products',      icon: <ShoppingBag size={16} />,     tip: 'Creá y gestioná productos digitales.' },
     { label: 'Mis compras',         href: '/dashboard/library',       icon: <Library size={16} />,         tip: 'Productos que compraste.' },
     { label: 'Mi página',           href: '/dashboard/page-settings', icon: <Monitor size={16} />,         tip: 'Tu página pública de issuer.' },
   ]
 
-  const nav = isExpired ? navExpired : isVerk ? navVerk : isVarde ? navVarde : isStudio ? navStudio : navVarde
+  const nav = isExpired ? navExpired : isVerk ? navVerk : isVarde ? navVarde : isKraft ? navKraft : navVarde
 
   const embedCode = `<a href="${APP_URL}/i/${slug}" target="_blank">\n  <img src="${APP_URL}/api/widget/${slug}" alt="Verificado con Solvik Studio" />\n</a>`
 
