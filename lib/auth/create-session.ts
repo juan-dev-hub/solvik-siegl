@@ -7,8 +7,9 @@ import { supabaseAdmin } from '@/lib/supabase'
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET!)
 const isProd = () => process.env.NODE_ENV === 'production'
 
-// Genera JWT con nonce y actualiza la DB — invalida cualquier sesión anterior
-export async function createSessionToken(walletAddress: string): Promise<string> {
+// Genera JWT con nonce y actualiza la DB — invalida cualquier sesión anterior.
+// mobile=true: expiración de 365d (el usuario no puede reconnectar fácilmente desde móvil).
+export async function createSessionToken(walletAddress: string, mobile = false): Promise<string> {
   const nonce = crypto.randomUUID()
   await supabaseAdmin
     .from('issuers')
@@ -22,7 +23,7 @@ export async function createSessionToken(walletAddress: string): Promise<string>
 
   return new SignJWT({ wallet: walletAddress, nonce })
     .setProtectedHeader({ alg: 'HS256' })
-    .setExpirationTime('8h')
+    .setExpirationTime(mobile ? '365d' : '8h')
     .sign(JWT_SECRET)
 }
 

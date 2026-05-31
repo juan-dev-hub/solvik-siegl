@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.redirect(new URL('/?error=invalid', req.url))
     }
 
-    const sessionToken = await createSessionToken(payload.wallet)
+    const sessionToken = await createSessionToken(payload.wallet, true)
     const isProd = process.env.NODE_ENV === 'production'
     const res = NextResponse.redirect(new URL('/dashboard', req.url))
     res.cookies.set('wallet_session', sessionToken, { httpOnly: true, secure: isProd, sameSite: 'lax' })
