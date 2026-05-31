@@ -7,7 +7,7 @@ import { executeUSDCSplit } from './execute-split'
 import { calculateFirstPaymentSplit, calculateRenewalSplit, PLAN_STORAGE, PLAN_PRICES_USDC } from './splits'
 import { getShadowQuote, executeSwapAndBuildTx } from '../storage/provision'
 import { solRefillNeeded, refillGasIfNeeded } from '../solana/ensure-gas'
-import { buildRenewalDelegateTx, executeRenewal } from './subscription'
+import { buildRenewalDelegateTx } from './subscription'
 
 export { calculateFirstPaymentSplit, calculateRenewalSplit, PLAN_STORAGE, PLAN_PRICES_USDC }
 export { executeUSDCSplit }
