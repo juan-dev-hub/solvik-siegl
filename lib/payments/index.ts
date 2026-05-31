@@ -4,12 +4,12 @@ import { verifyUSDCPayment } from '../solana'
 import { getConnection } from '../solana/connection'
 import { registerIssuer } from '../contract'
 import { executeUSDCSplit } from './execute-split'
-import { calculateFirstPaymentSplit, calculateRenewalSplit, PLAN_STORAGE, PLAN_PRICES_USDC } from './splits'
+import { calculateFirstPaymentSplit, calculateRenewalSplit, PLAN_PRICES_USDC } from './splits'
 import { getShadowQuote, executeSwapAndBuildTx } from '../storage/provision'
 import { solRefillNeeded, refillGasIfNeeded } from '../solana/ensure-gas'
 import { buildRenewalDelegateTx } from './subscription'
 
-export { calculateFirstPaymentSplit, calculateRenewalSplit, PLAN_STORAGE, PLAN_PRICES_USDC }
+export { calculateFirstPaymentSplit, calculateRenewalSplit, PLAN_PRICES_USDC }
 export { executeUSDCSplit }
 export { calculateBookSplit } from './splits'
 
@@ -61,21 +61,13 @@ export async function processSubscription(
       let gasAmount = split.gas_amount - totalRefill
       if (gasAmount < 0n) gasAmount = 0n
 
-      // ── ExactOut quote for Shadow Drive ───────────────────────────────────
-      const { shdwLamports, usdcNeeded, quoteResponse } = await getShadowQuote(planId)
-
-      let shadowAmount = split.shadow_amount
-      if (usdcNeeded > shadowAmount) {
-        const overflow = usdcNeeded - shadowAmount
-        shadowAmount = usdcNeeded
-        gasAmount    = gasAmount - overflow
-        if (gasAmount < 0n) throw new Error('Insufficient funds to cover Shadow Drive swap cost')
-      }
+      // ── Quote Shadow Drive: cuánto storage compra el 20% del pago ────────
+      const { shdwLamports, actualBytes, quoteResponse } = await getShadowQuote(split.shadow_amount)
 
       // ── Execute split (wallets receive their USDC) ────────────────────────
       await executeUSDCSplit([
         { recipient: process.env.FEE_POOL_WALLET!, amount: gasAmount + feePoolRefill },
-        { recipient: process.env.SHADOW_WALLET!,  amount: shadowAmount + shadowRefill },
+        { recipient: process.env.SHADOW_WALLET!,  amount: split.shadow_amount + shadowRefill },
         { recipient: process.env.CONTRACT_WALLET!, amount: split.contract_amount },
       ])
 
@@ -102,7 +94,7 @@ export async function processSubscription(
         wallet_address:      walletAddress,
         institution_name:    'Sin nombre',
         slug:                walletAddress.slice(0, 8).toLowerCase(),
-        storage_limit_bytes: PLAN_STORAGE[planId],
+        storage_limit_bytes: Number(actualBytes),
         plan:                planId,
         plan_expires_at:     renewalDate.toISOString(),
         auto_renew:          true,
@@ -124,7 +116,7 @@ export async function processSubscription(
     nextRenewal.setDate(nextRenewal.getDate() + 30)
     await supabase
       .from('issuers')
-      .update({ storage_limit_bytes: PLAN_STORAGE[planId], plan: planId, plan_expires_at: nextRenewal.toISOString() })
+      .update({ plan: planId, plan_expires_at: nextRenewal.toISOString() })
       .eq('wallet_address', walletAddress)
   }
 

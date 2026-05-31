@@ -1,5 +1,3 @@
-// Queries the Anchor program PDA to verify an issuer's subscription status.
-// Falls back to Supabase storage_limit > 0 check until on-chain contract is live.
 import { createClient } from '@supabase/supabase-js'
 
 export type SubscriptionStatus = {
@@ -15,17 +13,16 @@ export async function verifySubscription(walletAddress: string): Promise<Subscri
   )
   const { data } = await supabase
     .from('issuers')
-    .select('storage_limit_bytes, registered_at')
+    .select('plan, plan_expires_at, storage_limit_bytes')
     .eq('wallet_address', walletAddress)
     .single()
 
-  if (!data || data.storage_limit_bytes <= 0) {
+  if (!data || !data.plan || data.storage_limit_bytes <= 0) {
     return { is_active: false, plan: 'none', expires_at: null }
   }
 
-  let plan = 'starter'
-  if (data.storage_limit_bytes >= 21_474_836_480) plan = 'studio'
-  else if (data.storage_limit_bytes >= 5_368_709_120) plan = 'pro'
+  const expiresAt = data.plan_expires_at ? new Date(data.plan_expires_at).getTime() : null
+  const is_active = expiresAt ? expiresAt > Date.now() : true
 
-  return { is_active: true, plan, expires_at: null }
+  return { is_active, plan: data.plan, expires_at: expiresAt }
 }

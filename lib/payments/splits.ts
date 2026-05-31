@@ -1,9 +1,3 @@
-export const PLAN_STORAGE: Record<string, number> = {
-  verk:   524_288_000,    // 500 MB
-  pro:    5_368_709_120,  // 5 GB
-  studio: 21_474_836_480, // 20 GB
-}
-
 export const PLAN_PRICES_USDC: Record<string, bigint> = {
   verk:   10_000_000n,  // $10
   pro:    99_000_000n,  // $99

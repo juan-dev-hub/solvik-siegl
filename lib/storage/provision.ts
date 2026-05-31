@@ -56,49 +56,43 @@ function buildInitAccount2Ix(
   })
 }
 
-// ─── Plan storage sizes ───────────────────────────────────────────────────────
-const PLAN_STORAGE_GIB: Record<string, number> = {
-  starter:  1,
-  pro:      5,
-  studio:  20,
-}
-
-// ─── Step 1: get exact SHDW cost + ExactOut Jupiter quote ────────────────────
-// Must be called BEFORE executing the split so the caller can adjust amounts.
+// ─── Step 1: quote how much SHDW (and bytes) a USDC budget buys ──────────────
 export type ShadowQuote = {
-  shdwLamports: bigint       // exact SHDW needed for the storage account
-  usdcNeeded:   bigint       // exact USDC needed for the swap (ExactOut)
-  quoteResponse: unknown     // raw Jupiter quote — pass to executeSwapAndBuildTx
+  shdwLamports:  bigint   // SHDW to receive (estimated; actual checked post-swap)
+  usdcNeeded:    bigint   // same as usdcBudget — spent ExactIn
+  actualBytes:   bigint   // bytes of Shadow Drive storage purchased
+  quoteResponse: unknown  // raw Jupiter quote — pass to executeSwapAndBuildTx
 }
 
-export async function getShadowQuote(planId: string): Promise<ShadowQuote> {
+export async function getShadowQuote(usdcBudget: bigint): Promise<ShadowQuote> {
   const connection = getConnection()
 
-  // Read current price from storageConfig PDA
   const [storageConfigPDA] = PublicKey.findProgramAddressSync(
     [Buffer.from('storage-config')], SHDW_PROGRAM_ID,
   )
   const storageConfig = await StorageConfig.fetch(connection, storageConfigPDA)
   if (!storageConfig) throw new Error('Could not fetch Shadow Drive storageConfig')
 
-  const gib = PLAN_STORAGE_GIB[planId] ?? 1
-  // shadesPerGib is already in SHDW lamports (shades = 10^-9 SHDW)
-  const shdwLamports = BigInt(storageConfig.shadesPerGib.toString()) * BigInt(gib)
-
-  // Jupiter ExactOut: how much USDC do we need to get exactly shdwLamports?
+  // ExactIn: spend exactly usdcBudget USDC, get as much SHDW as possible
   const quoteRes = await fetch(
     `https://quote-api.jup.ag/v6/quote` +
     `?inputMint=${USDC_MINT.toBase58()}` +
     `&outputMint=${SHDW_MINT.toBase58()}` +
-    `&amount=${shdwLamports}` +
-    `&swapMode=ExactOut` +
+    `&amount=${usdcBudget}` +
+    `&swapMode=ExactIn` +
     `&slippageBps=100`,
   )
-  if (!quoteRes.ok) throw new Error(`Jupiter ExactOut quote error: ${await quoteRes.text()}`)
+  if (!quoteRes.ok) throw new Error(`Jupiter ExactIn quote error: ${await quoteRes.text()}`)
   const quoteResponse = await quoteRes.json() as Record<string, unknown>
 
-  const usdcNeeded = BigInt(quoteResponse.inAmount as string)
-  return { shdwLamports, usdcNeeded, quoteResponse }
+  const shdwLamports = BigInt(quoteResponse.outAmount as string)
+
+  // Convert SHDW lamports → bytes using current Shadow Drive price
+  const GIB_BYTES     = 1_073_741_824n  // 1 GiB in bytes
+  const shadesPerGib  = BigInt(storageConfig.shadesPerGib.toString())
+  const actualBytes   = (shdwLamports * GIB_BYTES) / shadesPerGib
+
+  return { shdwLamports, usdcNeeded: usdcBudget, actualBytes, quoteResponse }
 }
 
 // ─── Step 2: execute swap + transfer SHDW to user + build unsigned tx ─────────
@@ -171,10 +165,11 @@ export async function executeSwapAndBuildTx(
   )
 
   // Build initializeAccount2 with user as owner1 (authority)
+  // Use actual SHDW balance received (not the estimate from the quote)
   const ix = buildInitAccount2Ix(
     {
       identifier: `solvik-${userWalletPubkey.slice(0, 8)}`,
-      storage: new BN(shdwLamports.toString()),
+      storage: new BN(shdwBalance.toString()),
     },
     {
       storageConfig:      storageConfigPDA,
