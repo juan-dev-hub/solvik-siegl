@@ -24,7 +24,7 @@ export async function processSubscription(
   walletAddress: string,
   planId: string,
   txHash: string
-): Promise<{ ok: boolean; error?: string; shadowSetupTx?: string; renewalDelegateTx?: string }> {
+): Promise<{ ok: boolean; error?: string; shadowSetupTx?: string; makeImmutableTx?: string; renewalDelegateTx?: string }> {
   const planPrice = PLAN_PRICES_USDC[planId]
   if (!planPrice) return { ok: false, error: 'Plan inválido.' }
 
@@ -82,8 +82,8 @@ export async function processSubscription(
         feePoolRefill > 0n ? refillGasIfNeeded(feePoolKeypair, connection) : Promise.resolve(),
       ])
 
-      // ── Shadow Drive: swap USDC→SHDW, fund user ATA, build setup tx ───────
-      const shadowSetupTx = await executeSwapAndBuildTx(walletAddress, shdwLamports, quoteResponse)
+      // ── Shadow Drive: swap USDC→SHDW, construir txs de creación e inmutabilidad
+      const { shadowSetupTx, makeImmutableTx } = await executeSwapAndBuildTx(walletAddress, shdwLamports, quoteResponse)
 
       const renewalDelegateTx = await buildRenewalDelegateTx(walletAddress, planId)
       const renewalDate = new Date()
@@ -100,7 +100,7 @@ export async function processSubscription(
         auto_renew:          true,
       })
 
-      return { ok: true, shadowSetupTx, renewalDelegateTx }
+      return { ok: true, shadowSetupTx, makeImmutableTx, renewalDelegateTx }
     }
 
     // ── Renewal ───────────────────────────────────────────────────────────────

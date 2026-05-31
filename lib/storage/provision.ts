@@ -8,11 +8,49 @@ import {
   createAssociatedTokenAccountIdempotentInstruction,
   createTransferCheckedInstruction,
   TOKEN_PROGRAM_ID,
+  ASSOCIATED_TOKEN_PROGRAM_ID,
 } from '@solana/spl-token'
 import { BN } from '@coral-xyz/anchor'
 import * as borsh from '@coral-xyz/borsh'
 import { UserInfo, StorageConfig } from '@shadow-drive/sdk'
 import { getConnection } from '../solana/connection'
+
+const SHDW_EMISSIONS_WALLET = new PublicKey('SHDWRWMZ6kmRG9CvKFSD7kVcnUqXMtd3SaMrLvWscbj')
+
+// makeAccountImmutable2 instruction — discriminator from Shadow Drive SDK source
+const MAKE_IMMUTABLE_DISCRIMINATOR = Buffer.from([67, 217, 126, 253, 69, 164, 84, 139])
+const MAKE_IMMUTABLE_LAYOUT = borsh.struct([borsh.u64('storageUsed')])
+
+function buildMakeImmutableIx(
+  storageUsed: BN,
+  accounts: {
+    storageConfig: PublicKey; storageAccount: PublicKey; stakeAccount: PublicKey
+    emissionsWallet: PublicKey; owner: PublicKey; ownerAta: PublicKey
+    tokenMint: PublicKey
+  },
+): TransactionInstruction {
+  const buf = Buffer.alloc(8)
+  MAKE_IMMUTABLE_LAYOUT.encode({ storageUsed }, buf)
+  const data = Buffer.concat([MAKE_IMMUTABLE_DISCRIMINATOR, buf])
+  return new TransactionInstruction({
+    programId: SHDW_PROGRAM_ID,
+    keys: [
+      { pubkey: accounts.storageConfig,   isSigner: false, isWritable: true  },
+      { pubkey: accounts.storageAccount,  isSigner: false, isWritable: true  },
+      { pubkey: accounts.stakeAccount,    isSigner: false, isWritable: true  },
+      { pubkey: accounts.emissionsWallet, isSigner: false, isWritable: true  },
+      { pubkey: accounts.owner,           isSigner: true,  isWritable: true  },
+      { pubkey: accounts.ownerAta,        isSigner: false, isWritable: true  },
+      { pubkey: SHDW_UPLOADER,            isSigner: true,  isWritable: false },
+      { pubkey: accounts.tokenMint,       isSigner: false, isWritable: true  },
+      { pubkey: SystemProgram.programId,  isSigner: false, isWritable: false },
+      { pubkey: TOKEN_PROGRAM_ID,         isSigner: false, isWritable: false },
+      { pubkey: ASSOCIATED_TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
+      { pubkey: SYSVAR_RENT_PUBKEY,       isSigner: false, isWritable: false },
+    ],
+    data,
+  })
+}
 
 // ─── Shadow Drive constants ───────────────────────────────────────────────────
 const SHDW_PROGRAM_ID = new PublicKey('2e1wdyNhUvE76y6yUCvah2KaviavMJYKoRun8acMRBZZ')
@@ -95,13 +133,17 @@ export async function getShadowQuote(usdcBudget: bigint): Promise<ShadowQuote> {
   return { shdwLamports, usdcNeeded: usdcBudget, actualBytes, quoteResponse }
 }
 
-// ─── Step 2: execute swap + transfer SHDW to user + build unsigned tx ─────────
-// Called after the split has been executed (SHADOW_WALLET already holds usdcNeeded).
+export type ShadowSetupTxs = {
+  shadowSetupTx:   string  // initializeAccount2 — crea la cuenta mutable
+  makeImmutableTx: string  // makeAccountImmutable2 — la bloquea inmediatamente
+}
+
+// ─── Step 2: swap USDC→SHDW, construir tx de creación e inmutabilidad ─────────
 export async function executeSwapAndBuildTx(
   userWalletPubkey: string,
   shdwLamports:     bigint,
   quoteResponse:    unknown,
-): Promise<string> {
+): Promise<ShadowSetupTxs> {
   const secret = JSON.parse(process.env.SHADOW_WALLET_SECRET!) as number[]
   const shadowKeypair = Keypair.fromSecretKey(Uint8Array.from(secret))
   const connection = getConnection()
@@ -181,11 +223,36 @@ export async function executeSwapAndBuildTx(
     },
   )
 
+  const blockhash = (await connection.getLatestBlockhash()).blockhash
+
   const setupTx = new Transaction()
   setupTx.add(ix)
-  setupTx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash
+  setupTx.recentBlockhash = blockhash
   setupTx.feePayer = userWallet
 
-  // User signs with Phantom, Shadow Drive API adds uploader sig and broadcasts
-  return setupTx.serialize({ requireAllSignatures: false, verifySignatures: false }).toString('base64')
+  // makeAccountImmutable2 — se firma después de crear la cuenta
+  // storageUsed = 0 porque la cuenta recién se crea y no tiene archivos aún
+  const emissionsAta = await getAssociatedTokenAddress(SHDW_MINT, SHDW_EMISSIONS_WALLET)
+  const immutableIx = buildMakeImmutableIx(
+    new BN(0),
+    {
+      storageConfig:   storageConfigPDA,
+      storageAccount,
+      stakeAccount,
+      emissionsWallet: emissionsAta,
+      owner:           userWallet,
+      ownerAta:        userShdwAta,
+      tokenMint:       SHDW_MINT,
+    },
+  )
+
+  const immutableTx = new Transaction()
+  immutableTx.add(immutableIx)
+  immutableTx.recentBlockhash = blockhash
+  immutableTx.feePayer = userWallet
+
+  return {
+    shadowSetupTx:   setupTx.serialize({ requireAllSignatures: false, verifySignatures: false }).toString('base64'),
+    makeImmutableTx: immutableTx.serialize({ requireAllSignatures: false, verifySignatures: false }).toString('base64'),
+  }
 }

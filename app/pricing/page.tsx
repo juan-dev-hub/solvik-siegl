@@ -96,7 +96,7 @@ export default function PricingPage() {
     }
   }
 
-  async function handleShadowSetup(txBase64: string) {
+  async function handleShadowSetup(txBase64: string, makeImmutableTxBase64: string | null) {
     try {
       const w = window as unknown as Record<string, unknown>
       const provider = (w.solflare ?? (w.phantom as Record<string,unknown>)?.solana ?? w.solana) as
@@ -104,6 +104,8 @@ export default function PricingPage() {
       if (!provider) return
 
       const { Transaction } = await import('@solana/web3.js')
+
+      // 1. Crear cuenta Shadow Drive
       const tx = Transaction.from(Buffer.from(txBase64, 'base64'))
       const signed = await provider.signTransaction(tx)
       const serialized = signed.serialize({ requireAllSignatures: false })
@@ -122,8 +124,19 @@ export default function PricingPage() {
           body: JSON.stringify({ shdw_bucket: shdwData.shdw_bucket }),
         })
       }
+
+      // 2. Hacer la cuenta inmutable — el storage no vence ni se puede borrar
+      if (makeImmutableTxBase64) {
+        const immTx = Transaction.from(Buffer.from(makeImmutableTxBase64, 'base64'))
+        const signedImm = await provider.signTransaction(immTx)
+        const serializedImm = signedImm.serialize({ requireAllSignatures: false })
+        await fetch('https://shadow-storage.genesysgo.net/make-immutable', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ transaction: Buffer.from(serializedImm).toString('base64'), storageUsed: 0 }),
+        })
+      }
     } catch (e) {
-      // Shadow Drive setup failed — subscription is still active, can retry later
       console.error('Shadow Drive setup error:', e)
     }
   }
@@ -166,11 +179,11 @@ export default function PricingPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ ...body, tx_hash: data.signature }),
         })
-        const subData = await subRes.json() as { shadowSetupTx?: string; renewalDelegateTx?: string }
+        const subData = await subRes.json() as { shadowSetupTx?: string; makeImmutableTx?: string; renewalDelegateTx?: string }
 
         if (subData.shadowSetupTx) {
           setPollStatus('shadow-setup')
-          await handleShadowSetup(subData.shadowSetupTx)
+          await handleShadowSetup(subData.shadowSetupTx, subData.makeImmutableTx ?? null)
         }
 
         if (subData.renewalDelegateTx) {
