@@ -54,7 +54,6 @@ function buildMakeImmutableIx(
 const SHDW_PROGRAM_ID = new PublicKey('2e1wdyNhUvE76y6yUCvah2KaviavMJYKoRun8acMRBZZ')
 const SHDW_MINT       = new PublicKey('SHDWyBxihqiCj6YekG2GUr7wqKLeLAMK1gHZck9pL6y')
 const SHDW_UPLOADER   = new PublicKey('972oJTFyjmVNsWM4GHEGPWUomAiJf2qrVotLtwnKmWem')
-const SHDW_DECIMALS   = 9
 const USDC_MINT       = new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v')
 
 export const SHDW_DRIVE_API = 'https://shadow-storage.genesysgo.net'
