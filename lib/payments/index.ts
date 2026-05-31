@@ -5,7 +5,7 @@ import { getConnection } from '../solana/connection'
 import { registerIssuer } from '../contract'
 import { executeUSDCSplit } from './execute-split'
 import { calculateFirstPaymentSplit, calculateRenewalSplit, PLAN_PRICES_USDC } from './splits'
-import { getShadowQuote, executeSwapAndBuildTx } from '../storage/provision'
+import { getShadowQuote, createImmutableStorageAccount } from '../storage/provision'
 import { solRefillNeeded, refillGasIfNeeded } from '../solana/ensure-gas'
 import { buildRenewalDelegateTx } from './subscription'
 
@@ -24,7 +24,7 @@ export async function processSubscription(
   walletAddress: string,
   planId: string,
   txHash: string
-): Promise<{ ok: boolean; error?: string; shadowSetupTx?: string; renewalDelegateTx?: string }> {
+): Promise<{ ok: boolean; error?: string; renewalDelegateTx?: string }> {
   const planPrice = PLAN_PRICES_USDC[planId]
   if (!planPrice) return { ok: false, error: 'Plan inválido.' }
 
@@ -62,7 +62,7 @@ export async function processSubscription(
       if (gasAmount < 0n) gasAmount = 0n
 
       // ── Quote Shadow Drive: cuánto storage compra el 20% del pago ────────
-      const { shdwLamports, actualBytes, quoteResponse } = await getShadowQuote(split.shadow_amount)
+      const { actualBytes, quoteResponse } = await getShadowQuote(split.shadow_amount)
 
       // ── Execute split (wallets receive their USDC) ────────────────────────
       await executeUSDCSplit([
@@ -82,8 +82,8 @@ export async function processSubscription(
         feePoolRefill > 0n ? refillGasIfNeeded(feePoolKeypair, connection) : Promise.resolve(),
       ])
 
-      // ── Shadow Drive: swap USDC→SHDW, fund user ATA, build setup tx ───────
-      const shadowSetupTx = await executeSwapAndBuildTx(walletAddress, shdwLamports, quoteResponse)
+      // ── Shadow Drive: crear cuenta inmutable gestionada por la plataforma ───
+      const shdwBucket = await createImmutableStorageAccount(walletAddress, quoteResponse)
 
       const renewalDelegateTx = await buildRenewalDelegateTx(walletAddress, planId)
       const renewalDate = new Date()
@@ -91,16 +91,17 @@ export async function processSubscription(
 
       await registerIssuer(walletAddress, planId)
       await supabase.from('issuers').insert({
-        wallet_address:      walletAddress,
-        institution_name:    'Sin nombre',
-        slug:                walletAddress.slice(0, 8).toLowerCase(),
-        storage_limit_bytes: Number(actualBytes),
-        plan:                planId,
-        plan_expires_at:     renewalDate.toISOString(),
-        auto_renew:          true,
+        wallet_address:        walletAddress,
+        institution_name:      'Sin nombre',
+        slug:                  walletAddress.slice(0, 8).toLowerCase(),
+        storage_limit_bytes:   Number(actualBytes),
+        shadow_account_pubkey: shdwBucket,
+        plan:                  planId,
+        plan_expires_at:       renewalDate.toISOString(),
+        auto_renew:            true,
       })
 
-      return { ok: true, shadowSetupTx, renewalDelegateTx }
+      return { ok: true, renewalDelegateTx }
     }
 
     // ── Renewal ───────────────────────────────────────────────────────────────

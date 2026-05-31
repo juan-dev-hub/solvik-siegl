@@ -20,9 +20,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       ok: true,
       plan: plan_id,
-      // Present on first payment — frontend must have user sign this with Phantom
-      // then POST to https://shadow-storage.genesysgo.net/storage-account
-      shadowSetupTx: result.shadowSetupTx ?? null,
+      renewalDelegateTx: result.renewalDelegateTx ?? null,
     })
   } catch (err) {
     console.error('Subscribe error:', err)
