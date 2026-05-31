@@ -92,7 +92,7 @@ export default function LibraryPage() {
                 >
                   {product?.cover_arweave_id ? (
                     <img
-                      src={`/api/media/proxy?url=${encodeURIComponent(`https://arweave.net/${product.cover_arweave_id}`)}`}
+                      src={`/api/media/proxy?url=${encodeURIComponent(product.cover_arweave_id)}`}
                       alt={product?.title ?? ''}
                       style={{ width: '100%', height: 140, objectFit: 'cover' }}
                     />

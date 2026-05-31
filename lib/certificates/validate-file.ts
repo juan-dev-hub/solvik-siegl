@@ -17,7 +17,7 @@ export async function validateFileAndAccess(
   if (!ALLOWED_TYPES.includes(fileType)) {
     return {
       valid: false,
-      error: 'Solo aceptamos PDF, WebP y WebM. Convierte tu archivo para pagar menos en Arweave.',
+      error: 'Solo aceptamos PDF, WebP y WebM.',
     }
   }
 

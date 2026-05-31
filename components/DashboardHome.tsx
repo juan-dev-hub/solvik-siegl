@@ -234,7 +234,7 @@ export function DashboardHome({ wallet, issuer, totalCerts, recentCerts, monthVe
                   <p style={{ color: '#F0F0FF', fontWeight: 500, fontFamily: 'Luna, sans-serif', fontSize: 14, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '40vw' }}>{c.issued_to}</p>
                   <p style={{ color: 'rgba(240,240,255,0.4)', fontSize: 11, fontFamily: 'Luna, sans-serif' }}>{c.doc_type} · {new Date(c.issued_at).toLocaleDateString(dateLocale)}</p>
                 </div>
-                <a href={`/verify/${c.arweave_tx_id}`} style={{ color: '#00D4FF', display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, textDecoration: 'none', flexShrink: 0 }}>
+                <a href={`/verify/${c.id}`} style={{ color: '#00D4FF', display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, textDecoration: 'none', flexShrink: 0 }}>
                   <ExternalLink size={12} /> QR
                 </a>
               </div>

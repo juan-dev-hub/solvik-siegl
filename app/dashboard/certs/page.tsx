@@ -5,7 +5,7 @@ import { useTranslation } from '@/components/LanguageProvider'
 import { LOCALE_DATE } from '@/lib/i18n'
 
 type Certificate = {
-  id: string; arweave_tx_id: string; issued_to: string; doc_type: string
+  id: string; arweave_tx_id: string; issued_to: string; doc_type: string; cert_id?: string
   file_name: string; issued_at: string; expires_at: string | null; cnft_address: string | null
 }
 
@@ -88,7 +88,7 @@ export default function CertsPage() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8, marginBottom: 4 }}>
                   <p style={{ color: '#F0F8FF', fontWeight: 600, fontSize: 14, fontFamily: 'Luna, sans-serif', flex: 1 }}>{cert.issued_to}</p>
                   <div style={{ display: 'flex', gap: 10, flexShrink: 0 }}>
-                    <a href={`/verify/${cert.arweave_tx_id}`} style={{ color: '#4ABAFF', fontSize: 12, display: 'inline-flex', alignItems: 'center', gap: 3, textDecoration: 'none' }}>
+                    <a href={`/verify/${cert.id}`} style={{ color: '#4ABAFF', fontSize: 12, display: 'inline-flex', alignItems: 'center', gap: 3, textDecoration: 'none' }}>
                       <ExternalLink size={12} />{t.certs.view_qr}
                     </a>
                     <button onClick={() => downloadPDF(cert)} disabled={downloadingId === cert.id} style={{ background: 'none', border: 'none', color: 'rgba(180,210,255,0.55)', fontSize: 12, display: 'inline-flex', alignItems: 'center', gap: 3, cursor: 'pointer', fontFamily: 'Luna, sans-serif' }}>
@@ -124,7 +124,7 @@ export default function CertsPage() {
                   </td>
                   <td style={{ padding: '12px 20px' }}>
                     <div style={{ display: 'flex', gap: 12 }}>
-                      <a href={`/verify/${cert.arweave_tx_id}`} style={{ color: '#4ABAFF', fontSize: 12, display: 'inline-flex', alignItems: 'center', gap: 4, textDecoration: 'none' }}>
+                      <a href={`/verify/${cert.id}`} style={{ color: '#4ABAFF', fontSize: 12, display: 'inline-flex', alignItems: 'center', gap: 4, textDecoration: 'none' }}>
                         <ExternalLink size={13} />{t.certs.view_qr}
                       </a>
                       <button onClick={() => downloadPDF(cert)} disabled={downloadingId === cert.id} style={{ background: 'none', border: 'none', color: 'rgba(180,210,255,0.6)', fontSize: 12, display: 'inline-flex', alignItems: 'center', gap: 4, cursor: 'pointer', fontFamily: 'Luna, sans-serif' }}>

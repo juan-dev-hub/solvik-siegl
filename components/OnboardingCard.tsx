@@ -6,7 +6,7 @@ const STEPS = [
   {
     num: '1', color: '#00FFB3',
     title: 'Emití tu primer certificado',
-    desc: 'Subí un PDF con el diploma y completá el nombre del destinatario. En segundos queda en Arweave y Solana.',
+    desc: 'Subí un PDF con el diploma y completá el nombre del destinatario. En segundos queda en Shadow Drive y Solana.',
     href: '/dashboard/new',
   },
   {

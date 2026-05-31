@@ -95,7 +95,8 @@ export async function POST(req: NextRequest) {
       doc_type: cert.doc_type,
       issued_at: cert.issued_at,
       expires_at: cert.expires_at,
-      arweave_tx_id: cert.arweave_tx_id,
+      cert_id: cert.id,
+      storage_url: cert.arweave_tx_id,
     })
 
     return new NextResponse(new Uint8Array(pdfBuffer), {

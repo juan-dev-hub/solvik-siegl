@@ -102,16 +102,16 @@ export function VerifyCard({ cert }: { cert: CertData }) {
             </div>
           </div>
 
-          {/* Arweave */}
+          {/* Shadow Drive */}
           <div style={{ marginBottom: 24 }}>
-            <p className="section-title">{t.verify.arweave_hash}</p>
+            <p className="section-title">{t.verify.storage_url}</p>
             <a
-              href={`https://arweave.net/${cert.arweave_tx_id}`}
+              href={cert.arweave_tx_id}
               target="_blank"
               rel="noopener noreferrer"
               style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: '#4ABAFF', fontSize: 12, fontFamily: 'SF Mono, Fira Code, monospace', textDecoration: 'none', wordBreak: 'break-all' }}
             >
-              {cert.arweave_tx_id}
+              {cert.arweave_tx_id.replace('https://shdw-drive.genesysgo.net/', 'shdw://')}
               <ExternalLink size={12} />
             </a>
           </div>

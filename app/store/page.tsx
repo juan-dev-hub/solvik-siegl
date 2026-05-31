@@ -152,7 +152,7 @@ function ProductCard({ product: p }: { product: Product }) {
         <div style={{ position: 'relative' }}>
           {p.cover_arweave_id ? (
             <img
-              src={`/api/media/proxy?url=${encodeURIComponent(`https://arweave.net/${p.cover_arweave_id}`)}`}
+              src={`/api/media/proxy?url=${encodeURIComponent(p.cover_arweave_id)}`}
               alt={p.title}
               style={{ width: '100%', height: 180, objectFit: 'cover' }}
             />

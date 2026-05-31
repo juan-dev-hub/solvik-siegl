@@ -41,21 +41,19 @@ export async function POST(req: NextRequest) {
 
     const buffer = Buffer.from(await file.arrayBuffer())
 
-    const arweave = await uploadToShdwDrive(buffer, file.type, {
+    const upload = await uploadToShdwDrive(buffer, file.type, {
       doc_type: docType,
       issuer_wallet: issuerWallet,
       issued_to: issuedTo,
     }, issuerWallet)
-    const arweaveTxId = arweave.id
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://www.solvikstudio.com'
-    const verifyUrl = `${appUrl}/verify/${arweaveTxId}`
+    const storageUrl = upload.id
 
     let cnftAddress: string | null = null
     try {
       cnftAddress = await mintCNFT({
         name: `Solvik Studio Certificate — ${issuedTo}`,
         symbol: 'SVKS',
-        uri: `https://arweave.net/${arweaveTxId}`,
+        uri: storageUrl,
         recipientAddress: issuerWallet,
       })
     } catch (e) {
@@ -66,7 +64,7 @@ export async function POST(req: NextRequest) {
     try {
       attestationPda = await createAttestation({
         subject: issuerWallet,
-        arweave_tx_id: arweaveTxId,
+        arweave_tx_id: storageUrl,
         doc_type: docType,
       })
     } catch (e) {
@@ -79,9 +77,9 @@ export async function POST(req: NextRequest) {
       .from('issuers').select('institution_name').eq('wallet_address', issuerWallet).single()
     const issuerName = issuer?.institution_name ?? 'Solvik Studio'
 
-    await supabaseAdmin.from('certificates').insert({
+    const { data: cert } = await supabaseAdmin.from('certificates').insert({
       issuer_wallet: issuerWallet,
-      arweave_tx_id: arweaveTxId,
+      arweave_tx_id: storageUrl,
       cnft_address: cnftAddress,
       file_name: file.name,
       file_size_bytes: file.size,
@@ -90,7 +88,11 @@ export async function POST(req: NextRequest) {
       issued_to: issuedTo,
       is_public: true,
       expires_at: expiresAt ?? null,
-    })
+    }).select('id').single()
+
+    const certId = cert?.id ?? storageUrl
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://www.solvikstudio.com'
+    const verifyUrl = `${appUrl}/verify/${certId}`
 
     const pdfBuffer = await generateCertificatePDF({
       issued_to: issuedTo,
@@ -98,11 +100,12 @@ export async function POST(req: NextRequest) {
       doc_type: docType,
       issued_at: new Date().toISOString(),
       expires_at: expiresAt,
-      arweave_tx_id: arweaveTxId,
+      cert_id: certId,
+      storage_url: storageUrl,
     })
 
     return NextResponse.json({
-      arweave_tx_id: arweaveTxId,
+      storage_url: storageUrl,
       cnft_address: cnftAddress,
       attestation_pda: attestationPda,
       verify_url: verifyUrl,

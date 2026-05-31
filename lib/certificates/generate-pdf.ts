@@ -7,11 +7,12 @@ export async function generateCertificatePDF(params: {
   doc_type: string
   issued_at: string
   expires_at?: string | null
-  arweave_tx_id: string
+  cert_id: string
+  storage_url: string
 }): Promise<Buffer> {
-  const { issued_to, issuer_name, doc_type, issued_at, expires_at, arweave_tx_id } = params
+  const { issued_to, issuer_name, doc_type, issued_at, expires_at, cert_id, storage_url } = params
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://www.solvikstudio.com'
-  const verifyUrl = `${appUrl}/verify/${arweave_tx_id}`
+  const verifyUrl = `${appUrl}/verify/${cert_id}`
 
   const doc = await PDFDocument.create()
   const page = doc.addPage([595, 842]) // A4
@@ -90,7 +91,7 @@ export async function generateCertificatePDF(params: {
     end: { x: width - 40, y: 80 },
     thickness: 0.5, color: rgb(0.8, 0.88, 1),
   })
-  page.drawText(`Arweave TX: ${arweave_tx_id}`, {
+  page.drawText(`Shadow Drive: ${storage_url.slice(0, 60)}`, {
     x: 40, y: 65,
     size: 7, font: fontReg, color: rgb(0.6, 0.6, 0.7),
   })

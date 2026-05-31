@@ -485,7 +485,7 @@ export default function IssuerPage() {
                           {new Date(c.issued_at).toLocaleDateString('es-ES')}
                         </p>
                         <a
-                          href={`/verify/${c.arweave_tx_id}`}
+                          href={`/verify/${c.id}`}
                           style={{ display: 'inline-flex', alignItems: 'center', gap: 5, color: '#4ABAFF', fontSize: 12, textDecoration: 'none', fontWeight: 600 }}
                         >
                           <ExternalLink size={12} /> Verificar
@@ -538,7 +538,7 @@ export default function IssuerPage() {
                   }}>
                     {p.cover_arweave_id && (
                       <img
-                        src={`/api/media/proxy?url=${encodeURIComponent(`https://arweave.net/${p.cover_arweave_id}`)}`}
+                        src={`/api/media/proxy?url=${encodeURIComponent(p.cover_arweave_id)}`}
                         alt={p.title}
                         style={{ width: '100%', height: 170, objectFit: 'cover', display: 'block' }}
                       />
@@ -583,7 +583,7 @@ export default function IssuerPage() {
           <span style={{ fontWeight: 700, fontSize: 13, color: 'rgba(180,210,255,0.35)' }}>Solvik Studio</span>
         </a>
         <p style={{ fontSize: 12, color: 'rgba(180,210,255,0.18)' }}>
-          Certificados verificables en Arweave · {issuer.institution_name}
+          Certificados verificables en Shadow Drive · Solana · {issuer.institution_name}
         </p>
       </footer>
     </div>

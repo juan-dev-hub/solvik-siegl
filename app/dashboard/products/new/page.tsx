@@ -232,7 +232,7 @@ export default function NewProductPage() {
               className="btn-primary"
               style={{ fontSize: 15, opacity: step === 'uploading' ? 0.7 : 1 }}
             >
-              {step === 'uploading' ? 'Subiendo a Arweave...' : 'Publicar producto'}
+              {step === 'uploading' ? 'Subiendo a Shadow Drive...' : 'Publicar producto'}
             </motion.button>
           </motion.form>
         )}

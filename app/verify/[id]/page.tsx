@@ -31,14 +31,28 @@ type CertWithIssuer = {
   } | null
 }
 
-export default async function VerifyPage({ params }: { params: { id: string } }) {
-  const { data: cert } = await supabaseAdmin
+async function findCert(id: string): Promise<CertWithIssuer | null> {
+  // Try by UUID (new certs), then by storage URL (old certs)
+  const byId = await supabaseAdmin
     .from('certificates')
     .select(`*, issuers (institution_name, sns_domain, sns_verified)`)
-    .eq('arweave_tx_id', params.id)
-    .single<CertWithIssuer>()
+    .eq('id', id)
+    .maybeSingle<CertWithIssuer>()
+  if (byId.data) return byId.data
+
+  const byStorage = await supabaseAdmin
+    .from('certificates')
+    .select(`*, issuers (institution_name, sns_domain, sns_verified)`)
+    .eq('arweave_tx_id', id)
+    .maybeSingle<CertWithIssuer>()
+  return byStorage.data ?? null
+}
+
+export default async function VerifyPage({ params }: { params: { id: string } }) {
+  const cert = await findCert(params.id)
 
   if (!cert) notFound()
+
 
   let attestationActive = false
   if (cert.attestation_pda) {

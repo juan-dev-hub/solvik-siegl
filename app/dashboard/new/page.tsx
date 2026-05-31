@@ -5,7 +5,7 @@ import { useTranslation } from '@/components/LanguageProvider'
 import { useToast } from '@/components/ToastProvider'
 import { InfoTip } from '@/components/InfoTip'
 
-type Step = 'idle' | 'uploading_arweave' | 'minting_cnft' | 'attestation' | 'done' | 'error'
+type Step = 'idle' | 'uploading_storage' | 'minting_cnft' | 'attestation' | 'done' | 'error'
 
 export default function NewCertPage() {
   const { t } = useTranslation()
@@ -20,7 +20,7 @@ export default function NewCertPage() {
   const inputRef = useRef<HTMLInputElement>(null)
 
   const STEP_LABELS: Record<Step, string> = {
-    idle: '', uploading_arweave: t.new_cert.uploading, minting_cnft: t.new_cert.minting,
+    idle: '', uploading_storage: t.new_cert.uploading, minting_cnft: t.new_cert.minting,
     attestation: t.new_cert.attestation_step, done: t.new_cert.done, error: t.new_cert.error,
   }
 
@@ -50,7 +50,7 @@ export default function NewCertPage() {
       return
     }
 
-    setStep('uploading_arweave')
+    setStep('uploading_storage')
 
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), 30_000)
@@ -74,16 +74,16 @@ export default function NewCertPage() {
       setStep('attestation')
       await new Promise(r => setTimeout(r, 600))
 
-      const data = (await res.json()) as { arweave_tx_id?: string; verify_url?: string; pdf?: string; error?: string }
+      const data = (await res.json()) as { storage_url?: string; verify_url?: string; pdf?: string; error?: string }
       if (!res.ok || data.error) {
         toast.error('Error al emitir certificado', data.error ?? 'Ocurrió un error inesperado. Inténtalo de nuevo.')
         setStep('error')
         return
       }
 
-      setResult({ arweave_tx_id: data.arweave_tx_id!, verify_url: data.verify_url!, pdf: data.pdf! })
+      setResult({ arweave_tx_id: data.storage_url!, verify_url: data.verify_url!, pdf: data.pdf! })
       setStep('done')
-      toast.success('Certificado emitido', 'Guardado permanentemente en Arweave.')
+      toast.success('Certificado emitido', 'Guardado en Shadow Drive · Solana.')
     } catch (e) {
       clearTimeout(timeoutId)
       setStep('error')
@@ -112,7 +112,7 @@ export default function NewCertPage() {
   }
 
   const steps = [t.new_cert.uploading, t.new_cert.minting, t.new_cert.attestation_step, t.new_cert.done]
-  const stepIndex: Record<Step, number> = { idle: -1, uploading_arweave: 0, minting_cnft: 1, attestation: 2, done: 3, error: -1 }
+  const stepIndex: Record<Step, number> = { idle: -1, uploading_storage: 0, minting_cnft: 1, attestation: 2, done: 3, error: -1 }
   const currentIdx = stepIndex[step]
 
   return (

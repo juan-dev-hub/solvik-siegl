@@ -66,13 +66,13 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 
   if (!product) return NextResponse.json({ error: 'Product not found' }, { status: 404 })
 
-  // Fetch original PDF from Arweave
-  const arweaveRes = await fetch(`https://arweave.net/${product.arweave_tx_id}`)
-  if (!arweaveRes.ok) {
+  // Fetch original PDF from Shadow Drive (arweave_tx_id stores the full URL)
+  const storageRes = await fetch(product.arweave_tx_id)
+  if (!storageRes.ok) {
     return NextResponse.json({ error: 'Failed to fetch source file' }, { status: 502 })
   }
 
-  const originalBytes = await arweaveRes.arrayBuffer()
+  const originalBytes = await storageRes.arrayBuffer()
 
   // Embed QR on every page — PDF generated in memory, never saved to disk
   const modifiedBytes = await embedQrOnAllPages(originalBytes, licenseId)
