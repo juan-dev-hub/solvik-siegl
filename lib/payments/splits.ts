@@ -14,7 +14,7 @@
 // SPLITS POR MES:
 //   Mes 1 (primer pago del usuario):
 //     Owner        60%  — ingreso neto
-//     FeePool      20%  — gas de operaciones (cNFT, SAS, renovaciones)
+//     FeePool      20%  — gas de operaciones (cNFT, Shadow Drive, SAS, renovaciones)
 //     Shadow Drive 10%  — compra SHDW → almacenamiento permanente e inmutable
 //     Contract     10%  — reserva on-chain
 //

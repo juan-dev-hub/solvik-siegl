@@ -1,4 +1,4 @@
-// Records a certificate on-chain after successful storage upload.
+// Records a certificate on-chain after Shadow Drive upload.
 // Only callable with ISSUER_WALLET_SECRET.
 export async function recordCertificate(params: {
   issuerWallet: string
