@@ -5,8 +5,6 @@ import {
 } from '@solana/web3.js'
 import {
   getAssociatedTokenAddress,
-  createAssociatedTokenAccountIdempotentInstruction,
-  createTransferCheckedInstruction,
   TOKEN_PROGRAM_ID,
   ASSOCIATED_TOKEN_PROGRAM_ID,
 } from '@solana/spl-token'
@@ -133,23 +131,23 @@ export async function getShadowQuote(usdcBudget: bigint): Promise<ShadowQuote> {
   return { shdwLamports, usdcNeeded: usdcBudget, actualBytes, quoteResponse }
 }
 
-export type ShadowSetupTxs = {
-  shadowSetupTx:   string  // initializeAccount2 — crea la cuenta mutable
-  makeImmutableTx: string  // makeAccountImmutable2 — la bloquea inmediatamente
+export type ShadowProvisionResult = {
+  storageAccountPubkey: string
 }
 
-// ─── Step 2: swap USDC→SHDW, construir tx de creación e inmutabilidad ─────────
+// ─── Step 2: swap USDC→SHDW, crear e inmutabilizar cuenta bajo la plataforma ──
+// La plataforma (SHADOW_WALLET) es dueña de cada bucket — el backend puede subir
+// archivos sin pedir firma al usuario después del pago inicial.
 export async function executeSwapAndBuildTx(
   userWalletPubkey: string,
   shdwLamports:     bigint,
   quoteResponse:    unknown,
-): Promise<ShadowSetupTxs> {
+): Promise<ShadowProvisionResult> {
   const secret = JSON.parse(process.env.SHADOW_WALLET_SECRET!) as number[]
   const shadowKeypair = Keypair.fromSecretKey(Uint8Array.from(secret))
   const connection = getConnection()
-  const userWallet = new PublicKey(userWalletPubkey)
 
-  // ExactOut swap: SHADOW_WALLET USDC → exactly shdwLamports SHDW
+  // 1. Swap USDC→SHDW — shadow wallet recibe el SHDW directamente
   const swapRes = await fetch('https://quote-api.jup.ag/v6/swap', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -169,45 +167,30 @@ export async function executeSwapAndBuildTx(
   const swapSig = await connection.sendRawTransaction(swapTx.serialize(), { skipPreflight: false })
   await connection.confirmTransaction(swapSig, 'confirmed')
 
-  // Transfer all SHDW from SHADOW_WALLET to user's ATA
+  // 2. Leer saldo real de SHDW recibido (no el estimado del quote)
   const shadowShdwAta = await getAssociatedTokenAddress(SHDW_MINT, shadowKeypair.publicKey)
-  const userShdwAta   = await getAssociatedTokenAddress(SHDW_MINT, userWallet)
   const balInfo = await connection.getTokenAccountBalance(shadowShdwAta)
   const shdwBalance = BigInt(balInfo.value.amount)
 
-  const fundTx = new Transaction()
-  fundTx.add(createAssociatedTokenAccountIdempotentInstruction(
-    shadowKeypair.publicKey, userShdwAta, userWallet, SHDW_MINT,
-  ))
-  fundTx.add(createTransferCheckedInstruction(
-    shadowShdwAta, SHDW_MINT, userShdwAta, shadowKeypair.publicKey, shdwBalance, SHDW_DECIMALS,
-  ))
-  fundTx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash
-  fundTx.feePayer = shadowKeypair.publicKey
-  fundTx.sign(shadowKeypair)
-  const fundSig = await connection.sendRawTransaction(fundTx.serialize(), { skipPreflight: false })
-  await connection.confirmTransaction(fundSig, 'confirmed')
-
-  // Derive PDAs for user's new storage account
+  // 3. Derivar PDAs desde el shadow wallet — la plataforma es la dueña
   const [storageConfigPDA] = PublicKey.findProgramAddressSync(
     [Buffer.from('storage-config')], SHDW_PROGRAM_ID,
   )
   const [userInfoPDA] = PublicKey.findProgramAddressSync(
-    [Buffer.from('user-info'), userWallet.toBytes()], SHDW_PROGRAM_ID,
+    [Buffer.from('user-info'), shadowKeypair.publicKey.toBytes()], SHDW_PROGRAM_ID,
   )
   const userInfoAccount = await UserInfo.fetch(connection, userInfoPDA)
   const accountSeed = new BN(userInfoAccount?.accountCounter ?? 0)
 
   const [storageAccount] = PublicKey.findProgramAddressSync(
-    [Buffer.from('storage-account'), userWallet.toBytes(), accountSeed.toTwos(2).toArrayLike(Buffer, 'le', 4)],
+    [Buffer.from('storage-account'), shadowKeypair.publicKey.toBytes(), accountSeed.toTwos(2).toArrayLike(Buffer, 'le', 4)],
     SHDW_PROGRAM_ID,
   )
   const [stakeAccount] = PublicKey.findProgramAddressSync(
     [Buffer.from('stake-account'), storageAccount.toBytes()], SHDW_PROGRAM_ID,
   )
 
-  // Build initializeAccount2 with user as owner1 (authority)
-  // Use actual SHDW balance received (not the estimate from the quote)
+  // 4. Construir initializeAccount2 con shadowKeypair como owner
   const ix = buildInitAccount2Ix(
     {
       identifier: `solvik-${userWalletPubkey.slice(0, 8)}`,
@@ -218,20 +201,30 @@ export async function executeSwapAndBuildTx(
       userInfo:           userInfoPDA,
       storageAccount,
       stakeAccount,
-      owner1:             userWallet,
-      owner1TokenAccount: userShdwAta,
+      owner1:             shadowKeypair.publicKey,
+      owner1TokenAccount: shadowShdwAta,
     },
   )
 
-  const blockhash = (await connection.getLatestBlockhash()).blockhash
-
   const setupTx = new Transaction()
   setupTx.add(ix)
-  setupTx.recentBlockhash = blockhash
-  setupTx.feePayer = userWallet
+  setupTx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash
+  setupTx.feePayer = shadowKeypair.publicKey
+  setupTx.sign(shadowKeypair)
 
-  // makeAccountImmutable2 — se firma después de crear la cuenta
-  // storageUsed = 0 porque la cuenta recién se crea y no tiene archivos aún
+  // 5. POST a Shadow Drive API — añade la firma de SHDW_UPLOADER y confirma en cadena
+  const shdwRes = await fetch(`${SHDW_DRIVE_API}/storage-account`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      transaction: setupTx.serialize({ requireAllSignatures: false }).toString('base64'),
+    }),
+  })
+  if (!shdwRes.ok) throw new Error(`Shadow Drive create error: ${await shdwRes.text()}`)
+  const shdwData = await shdwRes.json() as { shdw_bucket?: string }
+  const storageAccountPubkey = shdwData.shdw_bucket ?? storageAccount.toBase58()
+
+  // 6. makeAccountImmutable2 — bloquea la cuenta; archivos ya no pueden borrarse
   const emissionsAta = await getAssociatedTokenAddress(SHDW_MINT, SHDW_EMISSIONS_WALLET)
   const immutableIx = buildMakeImmutableIx(
     new BN(0),
@@ -240,19 +233,26 @@ export async function executeSwapAndBuildTx(
       storageAccount,
       stakeAccount,
       emissionsWallet: emissionsAta,
-      owner:           userWallet,
-      ownerAta:        userShdwAta,
+      owner:           shadowKeypair.publicKey,
+      ownerAta:        shadowShdwAta,
       tokenMint:       SHDW_MINT,
     },
   )
 
   const immutableTx = new Transaction()
   immutableTx.add(immutableIx)
-  immutableTx.recentBlockhash = blockhash
-  immutableTx.feePayer = userWallet
+  immutableTx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash
+  immutableTx.feePayer = shadowKeypair.publicKey
+  immutableTx.sign(shadowKeypair)
 
-  return {
-    shadowSetupTx:   setupTx.serialize({ requireAllSignatures: false, verifySignatures: false }).toString('base64'),
-    makeImmutableTx: immutableTx.serialize({ requireAllSignatures: false, verifySignatures: false }).toString('base64'),
-  }
+  await fetch(`${SHDW_DRIVE_API}/make-immutable`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      transaction: immutableTx.serialize({ requireAllSignatures: false }).toString('base64'),
+      storageUsed: 0,
+    }),
+  })
+
+  return { storageAccountPubkey }
 }

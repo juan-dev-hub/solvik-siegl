@@ -4,8 +4,8 @@ export const PLAN_PRICES_USDC: Record<string, bigint> = {
   studio: 249_000_000n, // $249
 }
 
-// Mes 1 (primer pago): Owner 50% | Gas/Trees 20% | Shadow Drive 20% | Contract 10%
-// Owner keeps the remaining 50% in OWNER_WALLET — no transfer needed for that share
+// Mes 1 (primer pago): Owner 60% | Gas 20% | Shadow Drive 10% | Contract 10%
+// Owner keeps 60% in OWNER_WALLET — no transfer needed for that share
 export function calculateFirstPaymentSplit(totalAmount: bigint): {
   gas_amount: bigint
   shadow_amount: bigint
@@ -13,18 +13,18 @@ export function calculateFirstPaymentSplit(totalAmount: bigint): {
 } {
   return {
     gas_amount:      (totalAmount * 20n) / 100n,
-    shadow_amount:   (totalAmount * 20n) / 100n,
+    shadow_amount:   (totalAmount * 10n) / 100n,
     contract_amount: (totalAmount * 10n) / 100n,
   }
 }
 
-// Mes 2+: Owner 50% | Gas/Trees 30% | Contract 20% | Shadow Drive 0%
+// Mes 2+: Owner 60% | Gas 20% | Contract 20% | Shadow Drive 0%
 export function calculateRenewalSplit(totalAmount: bigint): {
   gas_amount: bigint
   contract_amount: bigint
 } {
   return {
-    gas_amount:      (totalAmount * 30n) / 100n,
+    gas_amount:      (totalAmount * 20n) / 100n,
     contract_amount: (totalAmount * 20n) / 100n,
   }
 }

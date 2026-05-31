@@ -24,7 +24,7 @@ export async function uploadToShdwDrive(
   tags: Record<string, string>,
   issuerWallet: string,
 ): Promise<ShdwUploadResult> {
-  const secret = JSON.parse(process.env.FEE_POOL_WALLET_SECRET!) as number[]
+  const secret = JSON.parse(process.env.SHADOW_WALLET_SECRET!) as number[]
   const keypair = Keypair.fromSecretKey(Uint8Array.from(secret))
   const connection = new Connection(process.env.NEXT_PUBLIC_SOLANA_RPC!, 'confirmed')
 

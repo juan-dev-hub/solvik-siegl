@@ -194,11 +194,19 @@ export default function NewCertPage() {
               {t.new_cert.cost_note}
             </div>
 
-            <button className="btn-primary" onClick={handleSubmit} disabled={!file || !issuedTo.trim() || (step !== 'idle' && step !== 'error')} style={{ width: '100%', justifyContent: 'center' }}>
-              {step !== 'idle' && step !== 'error' ? (
-                <><Loader2 size={16} className="animate-spin" />{STEP_LABELS[step]}</>
-              ) : t.new_cert.submit}
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <button className="btn-primary" onClick={handleSubmit} disabled={!file || !issuedTo.trim() || (step !== 'idle' && step !== 'error')} style={{ flex: 1, justifyContent: 'center' }}>
+                {step !== 'idle' && step !== 'error' ? (
+                  <><Loader2 size={16} className="animate-spin" />{STEP_LABELS[step]}</>
+                ) : t.new_cert.submit}
+              </button>
+              <InfoTip
+                title="Política de contenido"
+                text="Todo el contenido almacenado es rastreable a través de su wallet de origen. La distribución de material ilegal, inapropiado o que infrinja derechos de terceros queda estrictamente prohibida. La plataforma no recopila datos de identidad, pero el contenido publicado puede ser detectado e investigado por las autoridades competentes."
+                position="left"
+                size={15}
+              />
+            </div>
           </div>
 
           {/* Progress panel */}

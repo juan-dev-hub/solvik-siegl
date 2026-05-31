@@ -28,7 +28,7 @@ const VERK_SECTIONS = [
 
 const PLANS = [
   {
-    id: 'verk', price: 10, storage: '500 MB',
+    id: 'verk', price: 10,
     features: [] as string[],
   },
   {
@@ -54,7 +54,7 @@ export default function PricingPage() {
   const [hasSession, setHasSession] = useState(false)
   const [loading, setLoading]       = useState<string | null>(null)
   const [modal, setModal]           = useState<ModalState | null>(null)
-  const [pollStatus, setPollStatus] = useState<'waiting' | 'success' | 'shadow-setup'>('waiting')
+  const [pollStatus, setPollStatus] = useState<'waiting' | 'success'>('waiting')
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   useEffect(() => {
@@ -96,51 +96,6 @@ export default function PricingPage() {
     }
   }
 
-  async function handleShadowSetup(txBase64: string, makeImmutableTxBase64: string | null) {
-    try {
-      const w = window as unknown as Record<string, unknown>
-      const provider = (w.solflare ?? (w.phantom as Record<string,unknown>)?.solana ?? w.solana) as
-        { signTransaction: (tx: unknown) => Promise<{ serialize: (o?: object) => Uint8Array }> } | undefined
-      if (!provider) return
-
-      const { Transaction } = await import('@solana/web3.js')
-
-      // 1. Crear cuenta Shadow Drive
-      const tx = Transaction.from(Buffer.from(txBase64, 'base64'))
-      const signed = await provider.signTransaction(tx)
-      const serialized = signed.serialize({ requireAllSignatures: false })
-
-      const shdwRes = await fetch('https://shadow-storage.genesysgo.net/storage-account', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ transaction: Buffer.from(serialized).toString('base64') }),
-      })
-      const shdwData = await shdwRes.json() as { shdw_bucket?: string }
-
-      if (shdwData.shdw_bucket) {
-        await fetch('/api/shadow/confirm', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ shdw_bucket: shdwData.shdw_bucket }),
-        })
-      }
-
-      // 2. Hacer la cuenta inmutable — el storage no vence ni se puede borrar
-      if (makeImmutableTxBase64) {
-        const immTx = Transaction.from(Buffer.from(makeImmutableTxBase64, 'base64'))
-        const signedImm = await provider.signTransaction(immTx)
-        const serializedImm = signedImm.serialize({ requireAllSignatures: false })
-        await fetch('https://shadow-storage.genesysgo.net/make-immutable', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ transaction: Buffer.from(serializedImm).toString('base64'), storageUsed: 0 }),
-        })
-      }
-    } catch (e) {
-      console.error('Shadow Drive setup error:', e)
-    }
-  }
-
   async function handleRenewalDelegate(txBase64: string) {
     try {
       const w = window as unknown as Record<string, unknown>
@@ -179,12 +134,7 @@ export default function PricingPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ ...body, tx_hash: data.signature }),
         })
-        const subData = await subRes.json() as { shadowSetupTx?: string; makeImmutableTx?: string; renewalDelegateTx?: string }
-
-        if (subData.shadowSetupTx) {
-          setPollStatus('shadow-setup')
-          await handleShadowSetup(subData.shadowSetupTx, subData.makeImmutableTx ?? null)
-        }
+        const subData = await subRes.json() as { renewalDelegateTx?: string }
 
         if (subData.renewalDelegateTx) {
           await handleRenewalDelegate(subData.renewalDelegateTx)
@@ -233,9 +183,11 @@ export default function PricingPage() {
               <p style={{ fontSize: 40, fontFamily: 'Luna, sans-serif', fontWeight: 800, color: '#7B2FFF', lineHeight: 1 }}>
                 ${p.price}<span style={{ fontSize: 16, color: 'rgba(240,240,255,0.5)', fontWeight: 400 }}>{t.landing.per_month}</span>
               </p>
-              <p style={{ fontSize: 14, color: '#00D4FF', fontFamily: 'Luna, sans-serif', marginBottom: 24, marginTop: 6, fontWeight: 600 }}>
-                {p.storage} {t.landing.credits}
-              </p>
+              {'storage' in p && p.storage && (
+                <p style={{ fontSize: 14, color: '#00D4FF', fontFamily: 'Luna, sans-serif', marginBottom: 24, marginTop: 6, fontWeight: 600 }}>
+                  {p.storage} {t.landing.credits}
+                </p>
+              )}
               <div style={{ marginBottom: 28 }}>
                 {p.id === 'verk' ? (
                   VERK_SECTIONS.map(s => (
@@ -306,16 +258,7 @@ export default function PricingPage() {
                 <X size={20} />
               </button>
 
-              {pollStatus === 'shadow-setup' ? (
-                <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }}>
-                  <CheckCircle size={40} color="#00FFB3" style={{ margin: '0 auto 12px' }} />
-                  <p style={{ fontFamily: 'Luna, sans-serif', fontWeight: 800, fontSize: 18, color: '#00FFB3', marginBottom: 8 }}>¡Pago confirmado!</p>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, color: 'rgba(240,240,255,0.6)', fontSize: 13, fontFamily: 'Luna, sans-serif', marginTop: 16 }}>
-                    <Loader2 size={14} className="animate-spin" />
-                    Configurando Shadow Drive — aprobá en tu wallet...
-                  </div>
-                </motion.div>
-              ) : pollStatus === 'success' ? (
+              {pollStatus === 'success' ? (
                 <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }}>
                   <CheckCircle size={64} color="#00FFB3" style={{ margin: '0 auto 16px' }} />
                   <p style={{ fontFamily: 'Luna, sans-serif', fontWeight: 800, fontSize: 22, color: '#00FFB3', marginBottom: 8 }}>¡Pago confirmado!</p>

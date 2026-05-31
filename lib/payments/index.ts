@@ -24,7 +24,7 @@ export async function processSubscription(
   walletAddress: string,
   planId: string,
   txHash: string
-): Promise<{ ok: boolean; error?: string; shadowSetupTx?: string; makeImmutableTx?: string; renewalDelegateTx?: string }> {
+): Promise<{ ok: boolean; error?: string; renewalDelegateTx?: string }> {
   const planPrice = PLAN_PRICES_USDC[planId]
   if (!planPrice) return { ok: false, error: 'Plan inválido.' }
 
@@ -61,7 +61,7 @@ export async function processSubscription(
       let gasAmount = split.gas_amount - totalRefill
       if (gasAmount < 0n) gasAmount = 0n
 
-      // ── Quote Shadow Drive: cuánto storage compra el 20% del pago ────────
+      // ── Quote Shadow Drive: cuánto storage compra el 10% del pago ────────
       const { shdwLamports, actualBytes, quoteResponse } = await getShadowQuote(split.shadow_amount)
 
       // ── Execute split (wallets receive their USDC) ────────────────────────
@@ -82,8 +82,8 @@ export async function processSubscription(
         feePoolRefill > 0n ? refillGasIfNeeded(feePoolKeypair, connection) : Promise.resolve(),
       ])
 
-      // ── Shadow Drive: swap USDC→SHDW, construir txs de creación e inmutabilidad
-      const { shadowSetupTx, makeImmutableTx } = await executeSwapAndBuildTx(walletAddress, shdwLamports, quoteResponse)
+      // ── Shadow Drive: swap USDC→SHDW, crea cuenta inmutable bajo la plataforma
+      const { storageAccountPubkey } = await executeSwapAndBuildTx(walletAddress, shdwLamports, quoteResponse)
 
       const renewalDelegateTx = await buildRenewalDelegateTx(walletAddress, planId)
       const renewalDate = new Date()
@@ -91,16 +91,17 @@ export async function processSubscription(
 
       await registerIssuer(walletAddress, planId)
       await supabase.from('issuers').insert({
-        wallet_address:      walletAddress,
-        institution_name:    'Sin nombre',
-        slug:                walletAddress.slice(0, 8).toLowerCase(),
-        storage_limit_bytes: Number(actualBytes),
-        plan:                planId,
-        plan_expires_at:     renewalDate.toISOString(),
-        auto_renew:          true,
+        wallet_address:        walletAddress,
+        institution_name:      'Sin nombre',
+        slug:                  walletAddress.slice(0, 8).toLowerCase(),
+        storage_limit_bytes:   Number(actualBytes),
+        plan:                  planId,
+        plan_expires_at:       renewalDate.toISOString(),
+        auto_renew:            true,
+        shadow_account_pubkey: storageAccountPubkey,
       })
 
-      return { ok: true, shadowSetupTx, makeImmutableTx, renewalDelegateTx }
+      return { ok: true, renewalDelegateTx }
     }
 
     // ── Renewal ───────────────────────────────────────────────────────────────
