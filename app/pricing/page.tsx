@@ -46,12 +46,12 @@ const PLANS = [
   {
     id: 'kraft', price: 99.25,
     features: [
-      'Arquitectura soberana — bucket propio en Shadow Drive',
-      'Hasta 15 wallets colaboradoras (ACL)',
-      'Carga masiva Drag & Drop al bucket soberano',
       'Todo VARDE incluido',
+      'Hasta 15 wallets colaboradoras (ACL)',
+      'Mayor capacidad de almacenamiento en Shadow Drive',
+      'Carga masiva de carpetas (Drag & Drop)',
       'Página pública de issuer',
-      'Ideal para universidades y corporativos',
+      'Ideal para universidades, corporativos y multi-instructor',
     ],
   },
 ]

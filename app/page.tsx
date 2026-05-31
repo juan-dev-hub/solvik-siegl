@@ -24,7 +24,7 @@ const PLANS = [
   },
   {
     id: 'kraft', price: 99.25,
-    features: ['Arquitectura soberana — bucket propio', 'Hasta 15 wallets colaboradoras (ACL)', 'Carga masiva Drag & Drop al bucket soberano', 'Todo VARDE incluido', 'Página pública de issuer'],
+    features: ['Todo VARDE incluido', 'Hasta 15 wallets colaboradoras (ACL)', 'Mayor capacidad de almacenamiento', 'Carga masiva de carpetas (Drag & Drop)', 'Página pública de issuer'],
   },
 ]
 

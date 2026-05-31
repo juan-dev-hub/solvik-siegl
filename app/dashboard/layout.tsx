@@ -219,14 +219,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     { label: 'Mi página',           href: '/dashboard/page-settings', icon: <Monitor size={16} />,         tip: 'Tu página pública de issuer.' },
   ]
 
-  // KRAFT: arquitectura soberana — hasta 15 helpers, bucket propio
+  // KRAFT: escala institucional — hasta 15 helpers, mayor almacenamiento
   const navKraft = [
-    { label: t.dashboard.overview,  href: '/dashboard',               icon: <LayoutDashboard size={16} />, tip: 'Resumen de tu cuenta soberana.' },
+    { label: t.dashboard.overview,  href: '/dashboard',               icon: <LayoutDashboard size={16} />, tip: 'Resumen de tu cuenta.' },
     { label: t.dashboard.new_cert,  href: '/dashboard/new',           icon: <Award size={16} />,           tip: 'Emitir un certificado individual.' },
-    { label: t.dashboard.batch,     href: '/dashboard/batch',         icon: <FolderOpen size={16} />,      tip: 'Carga masiva de carpetas a tu bucket propio.' },
+    { label: t.dashboard.batch,     href: '/dashboard/batch',         icon: <FolderOpen size={16} />,      tip: 'Carga masiva de carpetas completas.' },
     { label: t.dashboard.my_certs,  href: '/dashboard/certs',         icon: <List size={16} />,            tip: 'Todos tus certificados emitidos.' },
     { label: t.dashboard.gallery,   href: '/dashboard/gallery',       icon: <Image size={16} />,           tip: 'Galería pública de certificados.' },
-    { label: 'Ayudantes (15)',       href: '/dashboard/helpers',       icon: <Users size={16} />,           tip: 'Hasta 15 wallets autorizadas — departamentos enteros.' },
+    { label: 'Ayudantes (15)',       href: '/dashboard/helpers',       icon: <Users size={16} />,           tip: 'Hasta 15 wallets autorizadas para emitir bajo tu cuenta.' },
     { label: 'Mis obras',           href: '/dashboard/products',      icon: <ShoppingBag size={16} />,     tip: 'Creá y gestioná productos digitales.' },
     { label: 'Mis compras',         href: '/dashboard/library',       icon: <Library size={16} />,         tip: 'Productos que compraste.' },
     { label: 'Mi página',           href: '/dashboard/page-settings', icon: <Monitor size={16} />,         tip: 'Tu página pública de issuer.' },
