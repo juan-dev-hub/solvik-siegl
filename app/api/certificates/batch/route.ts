@@ -13,8 +13,17 @@ export async function POST(req: NextRequest) {
     const wallet = await getWalletSession()
     if (!wallet) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+    // Resolve helper wallet → owner issuer (same as upload route)
+    let issuerWallet = wallet
+    const { data: ownerRow } = await supabaseAdmin
+      .from('issuers')
+      .select('wallet_address, plan')
+      .contains('helper_wallets', [wallet])
+      .single()
+    if (ownerRow) issuerWallet = ownerRow.wallet_address
+
     const { data: issuer } = await supabaseAdmin
-      .from('issuers').select('*').eq('wallet_address', wallet).single()
+      .from('issuers').select('*').eq('wallet_address', issuerWallet).single()
     if (!issuer) return NextResponse.json({ error: 'Issuer not found' }, { status: 404 })
     if (issuer.plan === 'verk') return NextResponse.json({ error: 'El plan VERK no incluye emisión de certificados.' }, { status: 403 })
 
@@ -43,7 +52,7 @@ export async function POST(req: NextRequest) {
     // Create batch job
     const { data: job } = await supabaseAdmin
       .from('batch_jobs')
-      .insert({ issuer_wallet: wallet, total_files: validFiles.length })
+      .insert({ issuer_wallet: issuerWallet, total_files: validFiles.length })
       .select('id')
       .single()
 
@@ -52,7 +61,7 @@ export async function POST(req: NextRequest) {
     // Process async in background (fire and forget)
     processBatch({
       jobId: job.id,
-      wallet,
+      wallet: issuerWallet,
       issuerName: issuer.institution_name,
       validFiles,
       docType,

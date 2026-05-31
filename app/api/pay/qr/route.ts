@@ -5,9 +5,9 @@ import { verifyChallenge } from '@/lib/altcha'
 const USDC_MINT = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
 
 const PLAN_AMOUNTS: Record<string, number> = {
-  starter:  49,
-  pro:      99,
-  studio:  249,
+  verk:    10,
+  varde:   39,
+  studio: 249,
 }
 
 export async function GET(req: NextRequest) {

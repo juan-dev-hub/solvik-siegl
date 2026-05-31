@@ -31,6 +31,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid price' }, { status: 400 })
     }
 
+    const parsedCopies = isNaN(totalCopies) ? 9999 : totalCopies
+    if (parsedCopies < 1) {
+      return NextResponse.json({ error: 'Total copies must be at least 1' }, { status: 400 })
+    }
+
     const fileBuffer = Buffer.from(await file.arrayBuffer())
     const uploadResult = await uploadToShdwDrive(fileBuffer, file.type, {
       'Product-Title': title,
@@ -53,7 +58,7 @@ export async function POST(req: NextRequest) {
         arweave_tx_id: arweaveTxId,
         cover_arweave_id: coverArweaveId,
         price_usdc: priceUsdc,
-        total_copies: isNaN(totalCopies) ? 9999 : totalCopies,
+        total_copies: parsedCopies,
       })
       .select()
       .single()

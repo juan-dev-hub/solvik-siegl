@@ -26,7 +26,17 @@ export async function GET(req: NextRequest) {
     const { data, count, error } = await query
     if (error) throw error
 
-    return NextResponse.json({ data: data ?? [], total: count ?? 0 })
+    const startOfMonth = new Date()
+    startOfMonth.setDate(1)
+    startOfMonth.setHours(0, 0, 0, 0)
+
+    const { count: monthVerifs } = await supabaseAdmin
+      .from('certificate_verifications')
+      .select('certificates!inner(issuer_wallet)', { count: 'exact', head: true })
+      .eq('certificates.issuer_wallet', wallet)
+      .gte('verified_at', startOfMonth.toISOString())
+
+    return NextResponse.json({ data: data ?? [], total: count ?? 0, month_verifs: monthVerifs ?? 0 })
   } catch (err) {
     return NextResponse.json(
       { error: err instanceof Error ? err.message : String(err) },

@@ -95,8 +95,15 @@ export default function ProductPage() {
 
         setLicenseId(purchaseData.licenseId)
         setPollStatus('success')
-      } catch {
-        // keep polling
+      } catch (err) {
+        // Only stop polling and surface the error if the payment was found but
+        // processing failed — transient network errors keep retrying.
+        const message = err instanceof Error ? err.message : String(err)
+        if (message && message !== 'Failed to fetch') {
+          clearInterval(pollRef.current!)
+          setModal(null)
+          setErrorMsg(message)
+        }
       }
     }, 2000)
   }

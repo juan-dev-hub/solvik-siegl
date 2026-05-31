@@ -95,19 +95,19 @@ export default function ProductsPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.35, ease: 'easeOut', delay: i * 0.07 }}
                 className="glass-card"
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 24px' }}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', flexWrap: 'wrap', gap: 12 }}
               >
-                <div style={{ flex: 1 }}>
-                  <p style={{ fontFamily: 'Luna, sans-serif', fontWeight: 700, fontSize: 15, color: '#F0F8FF', marginBottom: 4 }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ fontFamily: 'Luna, sans-serif', fontWeight: 700, fontSize: 15, color: '#F0F8FF', marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {p.title}
                   </p>
-                  <div style={{ display: 'flex', gap: 16, fontSize: 12, color: 'rgba(180,210,255,0.45)', fontFamily: 'Luna, sans-serif' }}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, fontSize: 12, color: 'rgba(180,210,255,0.45)', fontFamily: 'Luna, sans-serif' }}>
                     <span>${(p.price_usdc / 1_000_000).toFixed(2)} USDC</span>
                     <span>{p.sold_copies}/{p.total_copies} vendidos</span>
                     <span>{new Date(p.created_at).toLocaleDateString('es-ES')}</span>
                   </div>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
                   <span style={{ fontSize: 11, color: p.is_active ? '#52C878' : 'rgba(180,210,255,0.3)', fontFamily: 'Luna, sans-serif', background: p.is_active ? 'rgba(82,200,120,0.1)' : 'rgba(180,210,255,0.05)', borderRadius: 20, padding: '3px 10px', border: `1px solid ${p.is_active ? 'rgba(82,200,120,0.3)' : 'rgba(180,210,255,0.1)'}` }}>
                     {p.is_active ? 'Activo' : 'Inactivo'}
                   </span>
