@@ -204,11 +204,6 @@ export default function LandingPage() {
               <p style={{ fontSize: 40, fontFamily: 'Luna, sans-serif', fontWeight: 800, color: '#7B2FFF', lineHeight: 1 }}>
                 ${p.price}<span style={{ fontSize: 16, color: 'rgba(240,240,255,0.5)', fontWeight: 400 }}>{t.landing.per_month}</span>
               </p>
-              {'storage' in p && p.storage && (
-                <p style={{ fontSize: 14, color: '#00D4FF', fontFamily: 'Luna, sans-serif', marginBottom: 24, marginTop: 6, fontWeight: 600 }}>
-                  {p.storage} {t.landing.credits}
-                </p>
-              )}
               <div style={{ marginBottom: 28 }}>
                 {p.id === 'verk' ? (
                   VERK_SECTIONS.map(s => (
