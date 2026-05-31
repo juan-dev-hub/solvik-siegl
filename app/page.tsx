@@ -3,35 +3,34 @@ import { useState, useEffect } from 'react'
 import { useTranslation } from '@/components/LanguageProvider'
 import { WalletAuthButton } from '@/components/WalletAuthButton'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
-import { Shield, AlertTriangle, Clock, ShieldCheck, KeyRound, Globe, Zap, CheckCircle, Menu, X } from 'lucide-react'
+import { Shield, AlertTriangle, Clock, ShieldCheck, KeyRound, Globe, Zap, CheckCircle, Menu, X, GraduationCap, Palette } from 'lucide-react'
 import { HeroTitle } from '@/components/HeroTitle'
 
-const VERK_SECTIONS = [
-  { title: 'Almacenamiento seguro en la nube', desc: 'WebP, M4A, WebM o PDF · Máx. 5 MB por archivo. Guardado de forma permanente — nadie puede borrar ni alterar tus archivos.' },
-  { title: 'Sin comisiones de red', desc: 'La plataforma absorbe todos los costos operativos. Precio fijo mensual, sin sorpresas.' },
-  { title: 'Ediciones limitadas', desc: 'Controlá el cupo de tus obras. El sistema bloquea nuevas ventas automáticamente al agotarse.' },
-  { title: 'Cobros directos, 0% de comisión', desc: 'El dinero va directo a tu cuenta. No retenemos ningún porcentaje de tus ventas.' },
-]
-
-const PLANS = [
-  {
-    id: 'verk', price: 9.50,
-    features: [] as string[],
-  },
-  {
-    id: 'varde', price: 39.45, popular: true,
-    features: ['Almacenamiento permanente en la nube', 'Emisión de certificados digitales', 'Subida masiva por carpetas', 'PDF con código QR de verificación', 'Credencial digital verificable', 'Registro de autenticidad', 'Hasta 3 usuarios colaboradores'],
-  },
-  {
-    id: 'kraft', price: 99.25,
-    features: ['Todo VARDE incluido', 'Hasta 15 usuarios colaboradores', 'Mayor capacidad de almacenamiento', 'Carga masiva de carpetas (Drag & Drop)', 'Página pública institucional'],
-  },
+const PLANS_BASE = [
+  { id: 'verk',  price: 9.50 },
+  { id: 'varde', price: 39.45, popular: true },
+  { id: 'kraft', price: 99.25 },
 ]
 
 export default function LandingPage() {
   const { t } = useTranslation()
   const [hasSession, setHasSession] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+
+  const VERK_SECTIONS = [
+    { title: t.landing.verk_f1_title, desc: t.landing.verk_f1_desc },
+    { title: t.landing.verk_f2_title, desc: t.landing.verk_f2_desc },
+    { title: t.landing.verk_f3_title, desc: t.landing.verk_f3_desc },
+    { title: t.landing.verk_f4_title, desc: t.landing.verk_f4_desc },
+  ]
+
+  const PLAN_FEATURES: Record<string, string[]> = {
+    verk: [],
+    varde: [t.landing.varde_f1, t.landing.varde_f2, t.landing.varde_f3, t.landing.varde_f4, t.landing.varde_f5, t.landing.varde_f6, t.landing.varde_f7],
+    kraft: [t.landing.kraft_f1, t.landing.kraft_f2, t.landing.kraft_f3, t.landing.kraft_f4, t.landing.kraft_f5],
+  }
+
+  const PLANS = PLANS_BASE.map(p => ({ ...p, features: PLAN_FEATURES[p.id] ?? [] }))
 
   useEffect(() => {
     setHasSession(document.cookie.includes('session_active=1'))
@@ -94,6 +93,32 @@ export default function LandingPage() {
         <div id="hero-connect">
           <WalletAuthButton showWidget />
         </div>
+      </div>
+
+      {/* Two-niche cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 20, maxWidth: 860, margin: '0 auto 80px', padding: '0 clamp(16px, 5vw, 40px)' }}>
+        {[
+          {
+            icon: <GraduationCap size={32} color="#00FFB3" />,
+            color: '#00FFB3',
+            title: t.landing.niche_inst_title,
+            desc: t.landing.niche_inst_desc,
+          },
+          {
+            icon: <Palette size={32} color="#B06FFF" />,
+            color: '#B06FFF',
+            title: t.landing.niche_creator_title,
+            desc: t.landing.niche_creator_desc,
+          },
+        ].map(n => (
+          <div key={n.title} style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${n.color}30`, borderRadius: 16, padding: '28px 28px 26px' }}>
+            <div style={{ width: 52, height: 52, borderRadius: 14, background: `${n.color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 18 }}>
+              {n.icon}
+            </div>
+            <h3 style={{ fontFamily: 'Luna, sans-serif', fontWeight: 800, fontSize: 18, color: '#F0F0FF', marginBottom: 10 }}>{n.title}</h3>
+            <p style={{ fontSize: 14, color: 'rgba(240,240,255,0.6)', fontFamily: 'Luna, sans-serif', lineHeight: 1.7 }}>{n.desc}</p>
+          </div>
+        ))}
       </div>
 
       {/* Disclaimer card */}

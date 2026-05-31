@@ -7,53 +7,10 @@ import { CheckCircle, X, Loader2 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import QRCode from 'qrcode'
 
-const VERK_SECTIONS = [
-  {
-    title: 'Almacenamiento seguro en la nube',
-    desc: 'Subí WebP, M4A, WebM o PDF. Máx. 5 MB por archivo. Tus archivos quedan guardados de forma permanente — nadie los puede borrar ni alterar.',
-  },
-  {
-    title: 'Sin comisiones de red',
-    desc: 'La plataforma absorbe todos los costos operativos. Pagás un precio fijo mensual y listo — sin sorpresas ni cargos extra.',
-  },
-  {
-    title: 'Ediciones limitadas',
-    desc: 'Lanzá colecciones con cupo estricto. El sistema bloquea automáticamente nuevas ventas cuando se agotan las copias disponibles.',
-  },
-  {
-    title: 'Cobros directos, 0% de comisión',
-    desc: 'El dinero va directo a tu cuenta. Solvik Studio no retiene ningún porcentaje de tus ventas.',
-  },
-]
-
-const PLANS = [
-  {
-    id: 'verk', price: 9.50,
-    features: [] as string[],
-  },
-  {
-    id: 'varde', price: 39.45, popular: true,
-    features: [
-      'Almacenamiento permanente en la nube',
-      'Emisión de certificados digitales',
-      'Subida masiva por carpetas (Drag & Drop)',
-      'PDF con código QR de verificación',
-      'Credencial digital verificable',
-      'Registro de autenticidad',
-      'Hasta 3 usuarios colaboradores',
-    ],
-  },
-  {
-    id: 'kraft', price: 99.25,
-    features: [
-      'Todo VARDE incluido',
-      'Hasta 15 wallets colaboradoras (ACL)',
-      'Mayor capacidad de almacenamiento en Shadow Drive',
-      'Carga masiva de carpetas (Drag & Drop)',
-      'Página pública de issuer',
-      'Ideal para universidades, corporativos y multi-instructor',
-    ],
-  },
+const PLANS_BASE = [
+  { id: 'verk',  price: 9.50 },
+  { id: 'varde', price: 39.45, popular: true },
+  { id: 'kraft', price: 99.25 },
 ]
 
 type ModalState = {
@@ -71,6 +28,21 @@ export default function PricingPage() {
   const [modal, setModal]           = useState<ModalState | null>(null)
   const [pollStatus, setPollStatus] = useState<'waiting' | 'success'>('waiting')
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  const VERK_SECTIONS = [
+    { title: t.landing.verk_f1_title, desc: t.landing.verk_f1_desc },
+    { title: t.landing.verk_f2_title, desc: t.landing.verk_f2_desc },
+    { title: t.landing.verk_f3_title, desc: t.landing.verk_f3_desc },
+    { title: t.landing.verk_f4_title, desc: t.landing.verk_f4_desc },
+  ]
+
+  const PLAN_FEATURES: Record<string, string[]> = {
+    verk: [],
+    varde: [t.landing.varde_f1, t.landing.varde_f2, t.landing.varde_f3, t.landing.varde_f4, t.landing.varde_f5, t.landing.varde_f6, t.landing.varde_f7],
+    kraft: [t.landing.kraft_f1, t.landing.kraft_f2, t.landing.kraft_f3, t.landing.kraft_f4, t.landing.kraft_f5],
+  }
+
+  const PLANS = PLANS_BASE.map(p => ({ ...p, features: PLAN_FEATURES[p.id] ?? [] }))
 
   useEffect(() => {
     setHasSession(document.cookie.includes('session_active=1'))
