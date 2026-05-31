@@ -12,6 +12,8 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+      - name: Test
+        run: echo "Actions works"
       - uses: actions/checkout@v4
       - name: Install Vercel CLI
         run: npm install -g vercel@latest
