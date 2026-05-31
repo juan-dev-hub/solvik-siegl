@@ -9,20 +9,20 @@ import QRCode from 'qrcode'
 
 const VERK_SECTIONS = [
   {
-    title: 'Bóveda Descentralizada',
-    desc: 'Shadow Drive · WebP, M4A, WebM, PDF · Máx. 5 MB por archivo. Almacenamiento optimizado para contenido multimedia premium.',
+    title: 'Almacenamiento seguro en la nube',
+    desc: 'Subí WebP, M4A, WebM o PDF. Máx. 5 MB por archivo. Tus archivos quedan guardados de forma permanente — nadie los puede borrar ni alterar.',
   },
   {
-    title: 'Zero-Gas Experience',
-    desc: 'La plataforma absorbe el gas de todas tus atestaciones. Operás sin necesidad de comprar SOL ni entender comisiones de red.',
+    title: 'Sin comisiones de red',
+    desc: 'La plataforma absorbe todos los costos operativos. Pagás un precio fijo mensual y listo — sin sorpresas ni cargos extra.',
   },
   {
-    title: 'Escasez Digital Controlada',
-    desc: 'Lanzá colecciones con ediciones estrictamente limitadas. El Árbol de Merkle Global bloquea automáticamente la acuñación una vez agotado el cupo.',
+    title: 'Ediciones limitadas',
+    desc: 'Lanzá colecciones con cupo estricto. El sistema bloquea automáticamente nuevas ventas cuando se agotan las copias disponibles.',
   },
   {
-    title: 'Pasarela USDC Directa',
-    desc: 'Cobros directo a tu wallet. La plataforma no retiene ningún porcentaje de tus ventas. 0% de comisión.',
+    title: 'Cobros directos, 0% de comisión',
+    desc: 'El dinero va directo a tu cuenta. Solvik Studio no retiene ningún porcentaje de tus ventas.',
   },
 ]
 
@@ -34,13 +34,13 @@ const PLANS = [
   {
     id: 'varde', price: 39.45, popular: true,
     features: [
-      'Almacenamiento inmutable en Shadow Drive',
+      'Almacenamiento permanente en la nube',
       'Emisión de certificados digitales',
       'Subida masiva por carpetas (Drag & Drop)',
-      'PDF + QR verificable',
-      'Solana cNFT',
-      'Attestation on-chain',
-      'Hasta 3 wallets colaboradoras (ACL)',
+      'PDF con código QR de verificación',
+      'Credencial digital verificable',
+      'Registro de autenticidad',
+      'Hasta 3 usuarios colaboradores',
     ],
   },
   {
@@ -198,11 +198,6 @@ export default function PricingPage() {
               <p style={{ fontSize: 40, fontFamily: 'Luna, sans-serif', fontWeight: 800, color: '#7B2FFF', lineHeight: 1 }}>
                 ${p.price}<span style={{ fontSize: 16, color: 'rgba(240,240,255,0.5)', fontWeight: 400 }}>{t.landing.per_month}</span>
               </p>
-              {'storage' in p && p.storage && (
-                <p style={{ fontSize: 14, color: '#00D4FF', fontFamily: 'Luna, sans-serif', marginBottom: 24, marginTop: 6, fontWeight: 600 }}>
-                  {p.storage} {t.landing.credits}
-                </p>
-              )}
               <div style={{ marginBottom: 28 }}>
                 {p.id === 'verk' ? (
                   VERK_SECTIONS.map(s => (

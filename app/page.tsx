@@ -7,10 +7,10 @@ import { Shield, AlertTriangle, Clock, ShieldCheck, KeyRound, Globe, Zap, CheckC
 import { HeroTitle } from '@/components/HeroTitle'
 
 const VERK_SECTIONS = [
-  { title: 'Bóveda Descentralizada', desc: 'Shadow Drive · WebP, M4A, WebM, PDF · Máx. 5 MB por archivo.' },
-  { title: 'Zero-Gas Experience', desc: 'La plataforma absorbe el gas. Operás sin necesidad de SOL.' },
-  { title: 'Escasez Digital Controlada', desc: 'Ediciones limitadas. Árbol de Merkle bloquea acuñación al agotar cupo.' },
-  { title: 'Pasarela USDC Directa', desc: '0% de comisión. Cobros directo a tu wallet.' },
+  { title: 'Almacenamiento seguro en la nube', desc: 'WebP, M4A, WebM o PDF · Máx. 5 MB por archivo. Guardado de forma permanente — nadie puede borrar ni alterar tus archivos.' },
+  { title: 'Sin comisiones de red', desc: 'La plataforma absorbe todos los costos operativos. Precio fijo mensual, sin sorpresas.' },
+  { title: 'Ediciones limitadas', desc: 'Controlá el cupo de tus obras. El sistema bloquea nuevas ventas automáticamente al agotarse.' },
+  { title: 'Cobros directos, 0% de comisión', desc: 'El dinero va directo a tu cuenta. No retenemos ningún porcentaje de tus ventas.' },
 ]
 
 const PLANS = [
@@ -20,11 +20,11 @@ const PLANS = [
   },
   {
     id: 'varde', price: 39.45, popular: true,
-    features: ['Almacenamiento inmutable en Shadow Drive', 'Emisión de certificados digitales', 'Subida masiva por carpetas', 'PDF + QR verificable', 'Solana cNFT', 'Attestation on-chain', 'Hasta 3 wallets colaboradoras (ACL)'],
+    features: ['Almacenamiento permanente en la nube', 'Emisión de certificados digitales', 'Subida masiva por carpetas', 'PDF con código QR de verificación', 'Credencial digital verificable', 'Registro de autenticidad', 'Hasta 3 usuarios colaboradores'],
   },
   {
     id: 'kraft', price: 99.25,
-    features: ['Todo VARDE incluido', 'Hasta 15 wallets colaboradoras (ACL)', 'Mayor capacidad de almacenamiento', 'Carga masiva de carpetas (Drag & Drop)', 'Página pública de issuer'],
+    features: ['Todo VARDE incluido', 'Hasta 15 usuarios colaboradores', 'Mayor capacidad de almacenamiento', 'Carga masiva de carpetas (Drag & Drop)', 'Página pública institucional'],
   },
 ]
 
