@@ -244,6 +244,11 @@ export default function PricingPage() {
                 <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }}>
                   <CheckCircle size={64} color="#00FFB3" style={{ margin: '0 auto 16px' }} />
                   <p style={{ fontFamily: 'Luna, sans-serif', fontWeight: 800, fontSize: 22, color: '#00FFB3', marginBottom: 8 }}>¡Pago confirmado!</p>
+                  {process.env.NEXT_PUBLIC_DEVNET_MODE === 'true' && (
+                    <p style={{ fontSize: 13, color: '#FFD700', fontFamily: 'Luna, sans-serif', marginBottom: 8, background: 'rgba(255,215,0,0.08)', border: '1px solid rgba(255,215,0,0.3)', borderRadius: 8, padding: '8px 14px' }}>
+                      🎭 Es devnet, no mames — el dinero es falso
+                    </p>
+                  )}
                   <p style={{ fontSize: 14, color: 'rgba(240,240,255,0.5)', fontFamily: 'Luna, sans-serif' }}>Redirigiendo al dashboard...</p>
                 </motion.div>
               ) : (
@@ -251,8 +256,8 @@ export default function PricingPage() {
                   <p style={{ fontFamily: 'Luna, sans-serif', fontWeight: 800, fontSize: 20, color: '#F0F0FF', marginBottom: 6 }}>
                     {modal.title}
                   </p>
-                  <p style={{ fontSize: 13, color: 'rgba(240,240,255,0.5)', fontFamily: 'Luna, sans-serif', marginBottom: 24 }}>
-                    Pago con USDC en Solana
+                  <p style={{ fontSize: 13, color: process.env.NEXT_PUBLIC_DEVNET_MODE === 'true' ? '#FFD700' : 'rgba(240,240,255,0.5)', fontFamily: 'Luna, sans-serif', marginBottom: 24 }}>
+                    {process.env.NEXT_PUBLIC_DEVNET_MODE === 'true' ? '🎭 DEVNET — 0.001 SOL falso' : 'Pago con USDC'}
                   </p>
                   <img
                     src={modal.qrDataUrl}

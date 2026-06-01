@@ -32,6 +32,7 @@ export const PLAN_PRICES_USDC: Record<string, bigint> = {
   verk:  9_500_000n,  // $9.50  — tier base: obras digitales + tienda
   varde: 39_450_000n, // $39.45 — tier medio: certificados + batch + helpers
   kraft: 99_250_000n, // $99.25 — tier soberano: universidades + 15 helpers + bucket propio
+  dev:   5_000_000n,  // $5.00  — tier prueba personal (solo admin, 30 días, sin renovación)
 }
 
 // ─── Primer pago: 60% Owner | 20% Gas | 10% Shadow | 10% Contract ────────────
@@ -66,6 +67,23 @@ export function calculateRenewalSplit(totalAmount: bigint): {
 // ─── Compra de obra digital (libro, curso, etc.) ──────────────────────────────
 // Cuando un comprador adquiere un producto de un creador en la tienda.
 // El creador recibe el 70%; Solvik cobra 5% de comisión de plataforma.
+// ─── Plan DEV: split fijo para el tier de prueba personal ────────────────────
+// $5 total: $3.00 Owner | $1.50 Gas | $0.50 Shadow | $0 Contrato
+export function calculateDevSplit(): {
+  owner_amount:    bigint
+  gas_amount:      bigint
+  shadow_amount:   bigint
+  contract_amount: bigint
+} {
+  return {
+    owner_amount:    3_000_000n, // $3.00 → OWNER_WALLET
+    gas_amount:      1_500_000n, // $1.50 → FEE_POOL_WALLET
+    shadow_amount:     500_000n, // $0.50 → SHADOW_WALLET
+    contract_amount:         0n, // sin reserva de contrato
+  }
+}
+
+// ─── Compra de obra digital (libro, curso, etc.) ──────────────────────────────
 export function calculateBookSplit(totalAmount: bigint): {
   comision_solvik: bigint  //  5% → OWNER_WALLET (comisión plataforma)
   fee_pool_amount: bigint  // 15% → FEE_POOL_WALLET (gas de entrega)

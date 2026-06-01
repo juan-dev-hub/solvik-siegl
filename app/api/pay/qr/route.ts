@@ -8,6 +8,7 @@ const PLAN_AMOUNTS: Record<string, number> = {
   verk:   9.50,
   varde: 39.45,
   kraft: 99.25,
+  dev:    5.00,
 }
 
 export async function GET(req: NextRequest) {
@@ -41,15 +42,24 @@ export async function GET(req: NextRequest) {
   if (!owner) return NextResponse.json({ error: 'OWNER_WALLET no configurada' }, { status: 500 })
 
   const reference = Keypair.generate().publicKey.toBase58()
+  const isDevnet   = process.env.DEVNET_MODE === 'true'
 
-  const url =
-    `solana:${owner}` +
-    `?amount=${amount}` +
-    `&spl-token=${USDC_MINT}` +
-    `&reference=${reference}` +
-    `&label=${encodeURIComponent('Solvik Studio')}` +
-    `&memo=${encodeURIComponent(memo)}` +
-    `&message=${encodeURIComponent('Pago Solvik Studio')}`
+  // En devnet: SOL nativo (0.001 SOL), sin spl-token — USDC no existe en devnet.
+  // En mainnet: USDC real con el monto del plan.
+  const url = isDevnet
+    ? `solana:${owner}` +
+      `?amount=0.001` +
+      `&reference=${reference}` +
+      `&label=${encodeURIComponent('Solvik Studio [DEVNET]')}` +
+      `&memo=${encodeURIComponent('devnet-' + memo)}` +
+      `&message=${encodeURIComponent('Prueba devnet — no mames, es dinero falso')}`
+    : `solana:${owner}` +
+      `?amount=${amount}` +
+      `&spl-token=${USDC_MINT}` +
+      `&reference=${reference}` +
+      `&label=${encodeURIComponent('Solvik Studio')}` +
+      `&memo=${encodeURIComponent(memo)}` +
+      `&message=${encodeURIComponent('Pago Solvik Studio')}`
 
-  return NextResponse.json({ url, reference })
+  return NextResponse.json({ url, reference, devnet: isDevnet })
 }

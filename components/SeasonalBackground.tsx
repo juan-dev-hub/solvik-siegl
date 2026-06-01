@@ -4,10 +4,12 @@ import { useEffect, useRef } from 'react'
 type Season = 'spring' | 'summer' | 'autumn' | 'winter'
 
 function getSeason(month: number): Season {
-  if (month >= 3 && month <= 5)  return 'spring'
-  if (month >= 6 && month <= 8)  return 'summer'
-  if (month >= 9 && month <= 11) return 'autumn'
-  return 'winter'
+  // Hemisferio sur (América Latina):
+  // Mar-Jun: otoño (hojas) · Jul-Ago: invierno (nieve) · Sep-Oct: primavera (pétalos) · Nov-Feb: verano (gotas)
+  if (month >= 3 && month <= 6)  return 'autumn'
+  if (month >= 7 && month <= 8)  return 'winter'
+  if (month >= 9 && month <= 10) return 'spring'
+  return 'summer'
 }
 
 type Particle = {

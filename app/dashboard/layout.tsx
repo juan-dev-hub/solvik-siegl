@@ -188,7 +188,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const isVerk    = plan === 'verk'
   const isVarde   = plan === 'varde'
-  const isKraft   = plan === 'kraft'
+  const isKraft   = plan === 'kraft' || plan === 'dev'
   const isExpired = plan && planExpires && new Date(planExpires) < new Date() && !autoRenew
 
   // Expired plan: read-only access (gallery + purchases only)

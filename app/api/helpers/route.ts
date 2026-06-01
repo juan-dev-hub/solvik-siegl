@@ -10,8 +10,9 @@ import { PublicKey } from '@solana/web3.js'
 const PLAN_MAX_HELPERS: Record<string, number> = {
   varde: 3,
   kraft: 15,
+  dev:   15,
 }
-const PLANS_WITH_HELPERS = ['varde', 'kraft']
+const PLANS_WITH_HELPERS = ['varde', 'kraft', 'dev']
 
 // ── GET /api/helpers — lista de helpers del issuer autenticado ─────────────
 export async function GET() {

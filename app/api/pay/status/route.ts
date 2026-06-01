@@ -7,7 +7,10 @@ export async function GET(req: NextRequest) {
   if (!reference) return NextResponse.json({ error: 'Missing reference' }, { status: 400 })
 
   try {
-    const conn = new Connection(process.env.NEXT_PUBLIC_SOLANA_RPC!, 'confirmed')
+    const rpc = process.env.DEVNET_MODE === 'true'
+      ? (process.env.NEXT_PUBLIC_SOLANA_RPC_DEVNET ?? 'https://api.devnet.solana.com')
+      : process.env.NEXT_PUBLIC_SOLANA_RPC!
+    const conn = new Connection(rpc, 'confirmed')
     const referencePubkey = new PublicKey(reference)
 
     const signatures = await conn.getSignaturesForAddress(referencePubkey, { limit: 5 })

@@ -31,9 +31,26 @@ export default function AdminPage() {
   const [activating, setActivating] = useState(false)
   const [activated, setActivated]   = useState(false)
 
+  // Dev plan activation
+  const [activatingDev, setActivatingDev] = useState(false)
+  const [devActivated, setDevActivated]   = useState(false)
+  const [devExpiry, setDevExpiry]         = useState<string | null>(null)
+
   useEffect(() => {
     fetch('/api/admin/stats').then(r => r.json()).then((d: Stats) => setStats(d)).finally(() => setLoading(false))
   }, [])
+
+  const handleActivateDev = async () => {
+    setActivatingDev(true)
+    try {
+      const res = await fetch('/api/admin/activate-dev-plan', { method: 'POST' })
+      const data = await res.json() as { ok?: boolean; expires_at?: string }
+      if (data.ok) {
+        setDevActivated(true)
+        setDevExpiry(data.expires_at ?? null)
+      }
+    } finally { setActivatingDev(false) }
+  }
 
   const handleActivate = async () => {
     if (confirmText !== 'CONFIRMAR' && confirmText !== 'CONFIRM') return
@@ -74,6 +91,35 @@ export default function AdminPage() {
             <p style={{ fontSize: 12, color: 'rgba(180,210,255,0.45)', fontFamily: 'Luna, sans-serif', marginTop: 4 }}>{s.label}</p>
           </div>
         ))}
+      </div>
+
+      {/* Dev plan — solo visible para el admin */}
+      <div className="glass-card" style={{ marginBottom: 32, border: '1px solid rgba(255,215,0,0.25)', background: 'rgba(255,215,0,0.04)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
+          <div>
+            <h2 style={{ fontFamily: 'Luna, sans-serif', fontWeight: 800, fontSize: 20, color: '#FFD700', marginBottom: 4 }}>
+              🧪 Plan DEV — solo vos
+            </h2>
+            <p style={{ fontSize: 13, color: 'rgba(255,215,0,0.6)', fontFamily: 'Luna, sans-serif', lineHeight: 1.6 }}>
+              Acceso total · 30 días · Sin renovación · Split: $3 Owner / $1.50 Gas / $0.50 Shadow
+            </p>
+          </div>
+          {devActivated && devExpiry ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#52C878', fontFamily: 'Luna, sans-serif', fontWeight: 700, fontSize: 13 }}>
+              <CheckCircle size={16} /> Activo hasta {new Date(devExpiry).toLocaleDateString('es-ES')}
+            </div>
+          ) : null}
+        </div>
+        <button
+          className="btn-primary"
+          onClick={handleActivateDev}
+          disabled={activatingDev || devActivated}
+          style={{ fontSize: 14, background: 'linear-gradient(180deg, rgba(255,215,0,0.9), rgba(200,160,0,1))', borderTop: '1px solid rgba(255,255,255,0.3)' }}
+        >
+          {activatingDev ? <><Loader2 size={14} className="animate-spin" /> Activando...</>
+           : devActivated ? '✓ Plan DEV activo'
+           : 'Activar Plan DEV (30 días)'}
+        </button>
       </div>
 
       {/* Smart contract card */}
