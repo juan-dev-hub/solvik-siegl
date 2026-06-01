@@ -36,9 +36,45 @@ export default function AdminPage() {
   const [devActivated, setDevActivated]   = useState(false)
   const [devExpiry, setDevExpiry]         = useState<string | null>(null)
 
+  // Hero background image
+  const [heroBg, setHeroBg]           = useState<string | null>(null)
+  const [heroBgFile, setHeroBgFile]   = useState<File | null>(null)
+  const [heroBgPreview, setHeroBgPreview] = useState<string | null>(null)
+  const [uploadingBg, setUploadingBg] = useState(false)
+  const [bgError, setBgError]         = useState<string | null>(null)
+  const heroBgInputRef = useState(() => ({ current: null as HTMLInputElement | null }))[0]
+
   useEffect(() => {
     fetch('/api/admin/stats').then(r => r.json()).then((d: Stats) => setStats(d)).finally(() => setLoading(false))
+    fetch('/api/admin/hero-bg').then(r => r.json()).then(d => setHeroBg(d.url ?? null))
   }, [])
+
+  const handleHeroBgSelect = (f: File | null) => {
+    setBgError(null)
+    if (!f) return
+    if (f.type !== 'image/webp') { setBgError('Solo se aceptan archivos WebP.'); return }
+    if (f.size > 5 * 1024 * 1024) { setBgError('Máx 5 MB.'); return }
+    setHeroBgFile(f)
+    setHeroBgPreview(URL.createObjectURL(f))
+  }
+
+  const handleUploadHeroBg = async () => {
+    if (!heroBgFile) return
+    setUploadingBg(true)
+    setBgError(null)
+    try {
+      const form = new FormData()
+      form.append('file', heroBgFile)
+      const res = await fetch('/api/admin/hero-bg', { method: 'POST', body: form })
+      const data = await res.json() as { ok?: boolean; url?: string; error?: string }
+      if (!res.ok || !data.ok) throw new Error(data.error ?? 'Error al subir')
+      setHeroBg(data.url ?? null)
+      setHeroBgFile(null)
+      setHeroBgPreview(null)
+    } catch (err) {
+      setBgError(err instanceof Error ? err.message : 'Error desconocido')
+    } finally { setUploadingBg(false) }
+  }
 
   const handleActivateDev = async () => {
     setActivatingDev(true)
@@ -120,6 +156,64 @@ export default function AdminPage() {
            : devActivated ? '✓ Plan DEV activo'
            : 'Activar Plan DEV (30 días)'}
         </button>
+      </div>
+
+      {/* Hero background image */}
+      <div className="glass-card" style={{ marginBottom: 32 }}>
+        <h2 style={{ fontFamily: 'Luna, sans-serif', fontWeight: 700, fontSize: 20, color: '#F0F8FF', marginBottom: 6 }}>
+          Imagen de fondo
+        </h2>
+        <p style={{ fontSize: 13, color: 'rgba(180,210,255,0.5)', fontFamily: 'Luna, sans-serif', marginBottom: 20 }}>
+          WebP · máx 5 MB · se aplica en el homepage debajo de las partículas estacionales.
+        </p>
+
+        {/* Current image preview */}
+        {heroBg && (
+          <div style={{ marginBottom: 20, position: 'relative' }}>
+            <p style={{ fontSize: 11, color: 'rgba(180,210,255,0.35)', fontFamily: 'Luna, sans-serif', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Imagen actual</p>
+            <img src={heroBg} alt="Hero bg" style={{ width: '100%', maxHeight: 180, objectFit: 'cover', borderRadius: 10, border: '1px solid rgba(74,186,255,0.15)' }} />
+          </div>
+        )}
+
+        {/* New image picker */}
+        <input
+          type="file"
+          accept=".webp,image/webp"
+          style={{ display: 'none' }}
+          ref={el => { heroBgInputRef.current = el }}
+          onChange={e => handleHeroBgSelect(e.target.files?.[0] ?? null)}
+        />
+
+        {heroBgPreview && (
+          <div style={{ marginBottom: 16 }}>
+            <p style={{ fontSize: 11, color: 'rgba(180,210,255,0.35)', fontFamily: 'Luna, sans-serif', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Nueva imagen</p>
+            <img src={heroBgPreview} alt="preview" style={{ width: '100%', maxHeight: 160, objectFit: 'cover', borderRadius: 10, border: '1px solid rgba(0,212,255,0.25)' }} />
+          </div>
+        )}
+
+        {bgError && (
+          <p style={{ fontSize: 13, color: '#ff6b6b', marginBottom: 12, fontFamily: 'Luna, sans-serif' }}>{bgError}</p>
+        )}
+
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+          <button
+            className="btn-secondary"
+            onClick={() => heroBgInputRef.current?.click()}
+            style={{ fontSize: 13 }}
+          >
+            {heroBgPreview ? 'Cambiar imagen' : 'Seleccionar WebP'}
+          </button>
+          {heroBgFile && (
+            <button
+              className="btn-primary"
+              onClick={handleUploadHeroBg}
+              disabled={uploadingBg}
+              style={{ fontSize: 13 }}
+            >
+              {uploadingBg ? <><Loader2 size={13} className="animate-spin" /> Subiendo...</> : 'Guardar fondo'}
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Smart contract card */}

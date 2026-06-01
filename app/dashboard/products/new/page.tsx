@@ -147,19 +147,41 @@ export default function NewProductPage() {
               </motion.button>
             </div>
 
-            {/* Cover image */}
+            {/* Cover image — WebP only */}
             <div style={{ marginBottom: 24 }}>
               <label style={{ display: 'block', fontSize: 13, color: 'rgba(180,210,255,0.6)', fontFamily: 'Luna, sans-serif', marginBottom: 8 }}>
-                Imagen de portada (opcional)
+                Imagen de portada WebP <span style={{ color: 'rgba(180,210,255,0.35)' }}>(opcional · máx 5 MB)</span>
               </label>
-              <input type="file" ref={coverRef} accept="image/*" style={{ display: 'none' }} onChange={e => setCover(e.target.files?.[0] ?? null)} />
-              <button
-                type="button"
-                onClick={() => coverRef.current?.click()}
-                style={{ padding: '10px 18px', background: 'rgba(0,30,80,0.3)', border: `1px solid ${cover ? 'rgba(74,186,255,0.4)' : 'rgba(74,186,255,0.12)'}`, borderRadius: 10, cursor: 'pointer', color: cover ? '#4ABAFF' : 'rgba(180,210,255,0.4)', fontSize: 13, fontFamily: 'Luna, sans-serif' }}
-              >
-                {cover ? `✓ ${cover.name}` : 'Subir portada'}
-              </button>
+              <input
+                type="file"
+                ref={coverRef}
+                accept=".webp,image/webp"
+                style={{ display: 'none' }}
+                onChange={e => {
+                  const f = e.target.files?.[0] ?? null
+                  if (f) {
+                    if (f.type !== 'image/webp') { setError('La portada debe ser un archivo WebP.'); return }
+                    if (f.size > 5 * 1024 * 1024) { setError('La portada supera el límite de 5 MB.'); return }
+                  }
+                  setCover(f)
+                }}
+              />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <button
+                  type="button"
+                  onClick={() => coverRef.current?.click()}
+                  style={{ padding: '10px 18px', background: 'rgba(0,30,80,0.3)', border: `1px solid ${cover ? 'rgba(74,186,255,0.4)' : 'rgba(74,186,255,0.12)'}`, borderRadius: 10, cursor: 'pointer', color: cover ? '#4ABAFF' : 'rgba(180,210,255,0.4)', fontSize: 13, fontFamily: 'Luna, sans-serif' }}
+                >
+                  {cover ? `✓ ${cover.name}` : 'Subir portada WebP'}
+                </button>
+                {cover && (
+                  <img
+                    src={URL.createObjectURL(cover)}
+                    alt="preview"
+                    style={{ width: 56, height: 56, objectFit: 'cover', borderRadius: 8, border: '1px solid rgba(74,186,255,0.2)' }}
+                  />
+                )}
+              </div>
             </div>
 
             {/* Title */}

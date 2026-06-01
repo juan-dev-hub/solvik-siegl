@@ -16,6 +16,7 @@ export default function LandingPage() {
   const { t } = useTranslation()
   const [hasSession, setHasSession] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [heroBg, setHeroBg] = useState<string | null>(null)
 
   const VERK_SECTIONS = [
     { title: t.landing.verk_f1_title, desc: t.landing.verk_f1_desc },
@@ -34,6 +35,7 @@ export default function LandingPage() {
 
   useEffect(() => {
     setHasSession(document.cookie.includes('session_active=1'))
+    fetch('/api/admin/hero-bg').then(r => r.json()).then(d => setHeroBg(d.url ?? null)).catch(() => {})
   }, [])
 
   const handlePricingClick = () => {
@@ -45,7 +47,16 @@ export default function LandingPage() {
   }
 
   return (
-    <div style={{ minHeight: '100vh' }}>
+    <div style={{ minHeight: '100vh', position: 'relative' }}>
+      {/* Hero background image — partículas van encima (z-index 0) */}
+      {heroBg && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none',
+          backgroundImage: `url(${heroBg})`,
+          backgroundSize: 'cover', backgroundPosition: 'center',
+          opacity: 0.18,
+        }} />
+      )}
       {/* Navbar */}
       <nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 24px', borderBottom: '1px solid rgba(123,47,255,0.12)', backdropFilter: 'blur(12px)', position: 'sticky', top: 0, zIndex: 50, background: 'rgba(10,0,21,0.7)' }}>
         {/* Logo */}
