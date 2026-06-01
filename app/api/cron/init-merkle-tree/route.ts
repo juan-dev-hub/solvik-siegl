@@ -15,29 +15,29 @@ export async function GET(req: NextRequest) {
   try {
     const hasTree = await merkleTreeProvisioned()
 
-    // First-time setup: no tree exists yet
+    // Primer árbol: requiere $6 en FEE_POOL ($5 árbol + $1 fee swap)
     if (!hasTree) {
-      if (!(await feePoolHasTriggerAmount())) {
-        return NextResponse.json({ ok: true, status: 'waiting_for_deposit' })
+      if (!(await feePoolHasTriggerAmount(true))) {
+        return NextResponse.json({ ok: true, status: 'waiting_for_deposit', needed_usdc: 6 })
       }
-      const address = await provisionMerkleTree()
+      const address = await provisionMerkleTree(true)
       return NextResponse.json({ ok: true, status: 'provisioned', merkle_tree_address: address })
     }
 
-    // Ongoing: provision next tree when current one is 85% full and $10 are ready
+    // Árbol subsiguiente: requiere $11 en FEE_POOL ($10 árbol + $1 fee swap)
     const [nearlyFull, hasfunds] = await Promise.all([
       isCurrentTreeNearlyFull(),
-      feePoolHasTriggerAmount(),
+      feePoolHasTriggerAmount(false),
     ])
 
     if (!nearlyFull) {
       return NextResponse.json({ ok: true, status: 'tree_has_capacity' })
     }
     if (!hasfunds) {
-      return NextResponse.json({ ok: true, status: 'waiting_for_deposit' })
+      return NextResponse.json({ ok: true, status: 'waiting_for_deposit', needed_usdc: 11 })
     }
 
-    const address = await provisionMerkleTree()
+    const address = await provisionMerkleTree(false)
     return NextResponse.json({ ok: true, status: 'new_tree_provisioned', merkle_tree_address: address })
   } catch (err) {
     console.error('Merkle tree provision error:', err)
