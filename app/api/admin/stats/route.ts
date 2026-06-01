@@ -67,6 +67,24 @@ export async function GET() {
     const { data: config } = await supabaseAdmin.from('system_config').select('key, value')
     const contractActive = config?.find(c => c.key === 'contract_active')?.value === 'true'
 
+    // Costo real de deployment: ~2.5 SOL de rent exemption para un programa Anchor mediano.
+    // Se convierte a USDC usando el precio actual de SOL desde Jupiter.
+    const SOL_NEEDED_FOR_DEPLOY = 2.5
+    let solPriceUSDC = 150 // fallback conservador si Jupiter falla
+    try {
+      const priceRes = await fetch(
+        'https://price.jup.ag/v4/price?ids=SOL&vsToken=USDC',
+        { signal: AbortSignal.timeout(4000) }
+      )
+      if (priceRes.ok) {
+        const priceData = await priceRes.json() as { data?: { SOL?: { price?: number } } }
+        solPriceUSDC = priceData.data?.SOL?.price ?? solPriceUSDC
+      }
+    } catch { /* usa fallback */ }
+
+    const deploymentCostUsdc  = parseFloat((SOL_NEEDED_FOR_DEPLOY * solPriceUSDC).toFixed(2))
+    const readyToActivate     = contractBalance >= deploymentCostUsdc
+
     return NextResponse.json({
       total_usdc: totalUSDC,
       month_usdc: monthUSDC,
@@ -75,7 +93,9 @@ export async function GET() {
       total_certificates: totalCerts ?? 0,
       fee_pool_balance_sol: feePoolBalanceSOL,
       contract_wallet_balance_usdc: contractBalance,
-      ready_to_activate: contractBalance >= 25,
+      deployment_cost_usdc: deploymentCostUsdc,
+      sol_price_usdc: parseFloat(solPriceUSDC.toFixed(2)),
+      ready_to_activate: readyToActivate,
       contract_active: contractActive,
       issuers: issuerStats,
     })

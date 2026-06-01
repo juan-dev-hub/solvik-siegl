@@ -11,6 +11,8 @@ type Stats = {
   total_certificates: number
   fee_pool_balance_sol: number
   contract_wallet_balance_usdc: number
+  deployment_cost_usdc: number
+  sol_price_usdc: number
   ready_to_activate: boolean
   contract_active: boolean
   issuers: Array<{
@@ -104,7 +106,7 @@ export default function AdminPage() {
   if (loading) return <div style={{ display: 'flex', justifyContent: 'center', padding: 80 }}><Loader2 size={32} color="#4ABAFF" className="animate-spin" /></div>
   if (!stats) return null
 
-  const contractProgress = Math.min(100, (stats.contract_wallet_balance_usdc / 25) * 100)
+  const contractProgress = Math.min(100, (stats.contract_wallet_balance_usdc / stats.deployment_cost_usdc) * 100)
 
   return (
     <div>
@@ -231,8 +233,11 @@ export default function AdminPage() {
         <div style={{ background: 'rgba(0,20,60,0.4)', borderRadius: 50, height: 10, marginBottom: 12, overflow: 'hidden' }}>
           <div style={{ width: `${contractProgress}%`, height: '100%', background: stats.ready_to_activate ? 'linear-gradient(90deg, #52C878, #00D4AA)' : 'linear-gradient(90deg, #4ABAFF, #00D4AA)', borderRadius: 50, transition: 'width 0.5s ease' }} />
         </div>
-        <p style={{ fontSize: 13, color: 'rgba(180,210,255,0.5)', fontFamily: 'Luna, sans-serif', marginBottom: 20 }}>
-          ${stats.contract_wallet_balance_usdc.toFixed(2)} / $25.00
+        <p style={{ fontSize: 13, color: 'rgba(180,210,255,0.5)', fontFamily: 'Luna, sans-serif', marginBottom: 4 }}>
+          ${stats.contract_wallet_balance_usdc.toFixed(2)} / ${stats.deployment_cost_usdc.toFixed(2)} USDC
+        </p>
+        <p style={{ fontSize: 11, color: 'rgba(180,210,255,0.3)', fontFamily: 'Luna, sans-serif', marginBottom: 20 }}>
+          Estimado: ~2.5 SOL × ${stats.sol_price_usdc.toFixed(2)}/SOL (precio en tiempo real)
         </p>
 
         {stats.contract_active || activated ? (
