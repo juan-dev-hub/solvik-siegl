@@ -6,6 +6,7 @@ import { WalletAuthButton } from '@/components/WalletAuthButton'
 import { CheckCircle, X, Loader2 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import QRCode from 'qrcode'
+import { NetworkWarning } from '@/components/NetworkWarning'
 
 const PLANS_BASE = [
   { id: 'verk',  price: 9.50 },
@@ -191,16 +192,18 @@ export default function PricingPage() {
                 )}
               </div>
               {hasSession ? (
-                <motion.button
-                  onClick={() => handleBuyPlan(p.id)}
-                  disabled={loading !== null}
-                  whileHover={!loading ? { scale: 1.03 } : {}}
-                  whileTap={!loading ? { scale: 0.97 } : {}}
-                  className="btn-primary"
-                  style={{ width: '100%', justifyContent: 'center', display: 'flex', alignItems: 'center', gap: 8, opacity: loading ? 0.7 : 1, cursor: loading ? 'not-allowed' : 'pointer' }}
-                >
-                  {loading === `Plan ${p.id}` ? <><Loader2 size={14} className="animate-spin" /> Generando QR...</> : `Empezar hoy — $${p.price}/mes`}
-                </motion.button>
+                <NetworkWarning>
+                  <motion.button
+                    onClick={() => handleBuyPlan(p.id)}
+                    disabled={loading !== null}
+                    whileHover={!loading ? { scale: 1.03 } : {}}
+                    whileTap={!loading ? { scale: 0.97 } : {}}
+                    className="btn-primary"
+                    style={{ width: '100%', justifyContent: 'center', display: 'flex', alignItems: 'center', gap: 8, opacity: loading ? 0.7 : 1, cursor: loading ? 'not-allowed' : 'pointer' }}
+                  >
+                    {loading === `Plan ${p.id}` ? <><Loader2 size={14} className="animate-spin" /> Generando QR...</> : `Empezar hoy — $${p.price}/mes`}
+                  </motion.button>
+                </NetworkWarning>
               ) : (
                 <a href="/" className="btn-primary" style={{ width: '100%', justifyContent: 'center' }}>{t.common.connect}</a>
               )}

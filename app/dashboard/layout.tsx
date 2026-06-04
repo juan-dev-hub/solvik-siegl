@@ -10,7 +10,7 @@ import {
   Award, FolderOpen, List, CreditCard, Globe, LayoutDashboard,
   Image, LogOut, ExternalLink, Code2, ShoppingBag, Library,
   Home, Store, ChevronRight, Settings, Menu, X, Monitor, Smartphone,
-  Users,
+  Users, Tv, HardDrive as HardDriveIcon, Upload,
 } from 'lucide-react'
 import { InfoTip } from '@/components/InfoTip'
 
@@ -359,6 +359,24 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           >
             <Globe size={15} />
             {t.dashboard.verify_sns}
+          </a>
+        </Accordion>
+
+        <Accordion label="Canal de creador" icon={<Tv size={15} />}>
+          <a href="/dashboard/creator" style={linkStyle}>
+            <Tv size={15} />
+            Mi canal
+          </a>
+          <a href="/dashboard/creator/upload" style={linkStyle}>
+            <Upload size={15} />
+            Subir contenido
+          </a>
+        </Accordion>
+
+        <Accordion label="Vault personal" icon={<HardDriveIcon size={15} />}>
+          <a href="/vault" style={linkStyle}>
+            <HardDriveIcon size={15} />
+            Mi vault
           </a>
         </Accordion>
       </nav>
