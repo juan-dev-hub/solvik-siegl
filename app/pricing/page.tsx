@@ -145,13 +145,22 @@ export default function PricingPage() {
           <img src="/logo.jpg" alt="Solvik Studio" style={{ height: 32, objectFit: 'contain', borderRadius: 6 }} />
           <span style={{ fontFamily: 'Luna, sans-serif', fontWeight: 800, fontSize: 18, color: '#F0F0FF' }}>Solvik Studio</span>
         </a>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+          <a href="/pechat" style={{ color: '#7B2FFF', textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>Pečat</a>
+          <a href="/torg"   style={{ color: 'rgba(240,240,255,0.55)', textDecoration: 'none', fontSize: 13 }}>Torg</a>
+          <a href="/vault"  style={{ color: 'rgba(240,240,255,0.55)', textDecoration: 'none', fontSize: 13 }}>Vault</a>
+          <a href="/spaces" style={{ color: 'rgba(240,240,255,0.55)', textDecoration: 'none', fontSize: 13 }}>Spaces</a>
           <LanguageSwitcher />
           <WalletAuthButton />
         </div>
       </nav>
 
       <div className="page-container">
+        <div style={{ textAlign: 'center', marginBottom: 16 }}>
+          <div style={{ display: 'inline-block', background: 'rgba(123,47,255,0.12)', border: '1px solid rgba(123,47,255,0.35)', borderRadius: 50, padding: '4px 18px', marginBottom: 14 }}>
+            <span style={{ fontSize: 12, fontWeight: 700, color: '#7B2FFF', letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'Luna, sans-serif' }}>Solvik Pečat</span>
+          </div>
+        </div>
         <h1 style={{ fontFamily: 'Luna, sans-serif', fontWeight: 800, fontSize: 40, color: '#F0F0FF', textAlign: 'center', marginBottom: 12 }}>
           {t.pricing.title}
         </h1>

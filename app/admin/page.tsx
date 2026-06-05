@@ -1,7 +1,21 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { useTranslation } from '@/components/LanguageProvider'
-import { Loader2, CheckCircle } from 'lucide-react'
+import { Loader2, CheckCircle, TreePine } from 'lucide-react'
+
+type MerkleInfo = {
+  fee_pool_usdc: number
+  fee_pool_sol: number
+  sol_price_usdc: number
+  first_tree_trigger: number
+  first_tree_cost: number
+  next_tree_trigger: number
+  next_tree_cost: number
+  can_create_first_tree: boolean
+  can_create_next_tree: boolean
+  tree_address: string | null
+  has_tree: boolean
+}
 
 type Stats = {
   total_usdc: number
@@ -46,10 +60,39 @@ export default function AdminPage() {
   const [bgError, setBgError]         = useState<string | null>(null)
   const heroBgInputRef = useState(() => ({ current: null as HTMLInputElement | null }))[0]
 
+  // Merkle tree
+  const [merkle, setMerkle]             = useState<MerkleInfo | null>(null)
+  const [merkleLoading, setMerkleLoading] = useState(false)
+  const [provisioning, setProvisioning] = useState(false)
+  const [provisionMsg, setProvisionMsg] = useState<string | null>(null)
+
   useEffect(() => {
     fetch('/api/admin/stats').then(r => r.json()).then((d: Stats) => setStats(d)).finally(() => setLoading(false))
     fetch('/api/admin/hero-bg').then(r => r.json()).then(d => setHeroBg(d.url ?? null))
+    refreshMerkle()
   }, [])
+
+  const refreshMerkle = () => {
+    setMerkleLoading(true)
+    fetch('/api/admin/merkle-price')
+      .then(r => r.json())
+      .then((d: MerkleInfo) => setMerkle(d))
+      .catch(() => {})
+      .finally(() => setMerkleLoading(false))
+  }
+
+  const handleProvisionMerkle = async () => {
+    setProvisioning(true)
+    setProvisionMsg(null)
+    try {
+      const res = await fetch('/api/admin/provision-merkle', { method: 'POST' })
+      const data = await res.json() as { ok?: boolean; tree_address?: string; was_first?: boolean; error?: string }
+      if (!res.ok || !data.ok) { setProvisionMsg(`Error: ${data.error ?? 'desconocido'}`); return }
+      setProvisionMsg(`✓ Árbol provisionado: ${data.tree_address?.slice(0, 20)}...`)
+      refreshMerkle()
+    } catch { setProvisionMsg('Error al conectar con el servidor.') }
+    finally { setProvisioning(false) }
+  }
 
   const handleHeroBgSelect = (f: File | null) => {
     setBgError(null)
@@ -158,6 +201,97 @@ export default function AdminPage() {
            : devActivated ? '✓ Plan DEV activo'
            : 'Activar Plan DEV (30 días)'}
         </button>
+      </div>
+
+      {/* Merkle Tree widget */}
+      <div className="glass-card" style={{ marginBottom: 32, border: '1px solid rgba(74,186,255,0.2)', background: 'rgba(74,186,255,0.03)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, flexWrap: 'wrap', gap: 10 }}>
+          <div>
+            <h2 style={{ fontFamily: 'Luna, sans-serif', fontWeight: 800, fontSize: 20, color: '#4ABAFF', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <TreePine size={20} /> Árbol de Merkle — cNFTs
+            </h2>
+            <p style={{ fontSize: 13, color: 'rgba(74,186,255,0.5)', fontFamily: 'Luna, sans-serif' }}>
+              Enviá USDC a FeePool y el cron ejecutará la compra automáticamente.
+            </p>
+          </div>
+          <button onClick={refreshMerkle} disabled={merkleLoading} className="btn-secondary" style={{ fontSize: 12, padding: '6px 14px' }}>
+            {merkleLoading ? <Loader2 size={12} className="animate-spin" /> : '↻ Actualizar'}
+          </button>
+        </div>
+
+        {merkle && (
+          <>
+            {/* Current tree */}
+            <div style={{ background: 'rgba(0,20,60,0.4)', borderRadius: 10, padding: '12px 16px', marginBottom: 16 }}>
+              <p style={{ fontSize: 11, color: 'rgba(180,210,255,0.4)', fontFamily: 'Luna, sans-serif', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Árbol activo</p>
+              {merkle.has_tree ? (
+                <p style={{ fontSize: 13, color: '#00FFB3', fontFamily: 'Luna, sans-serif', fontWeight: 600, wordBreak: 'break-all' }}>{merkle.tree_address}</p>
+              ) : (
+                <p style={{ fontSize: 13, color: 'rgba(255,180,0,0.7)', fontFamily: 'Luna, sans-serif' }}>No hay árbol provisionado todavía.</p>
+              )}
+            </div>
+
+            {/* Fee Pool balances */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 16 }}>
+              {[
+                { label: 'FeePool USDC', value: `$${merkle.fee_pool_usdc.toFixed(2)}`, color: '#4ABAFF' },
+                { label: 'FeePool SOL', value: `${merkle.fee_pool_sol.toFixed(4)} SOL`, color: '#B06FFF' },
+                { label: 'Precio SOL', value: `$${merkle.sol_price_usdc.toFixed(2)}`, color: '#FFD700' },
+              ].map(item => (
+                <div key={item.label} style={{ background: 'rgba(0,20,60,0.35)', borderRadius: 10, padding: '10px 14px' }}>
+                  <p style={{ fontSize: 18, fontWeight: 800, color: item.color, fontFamily: 'Luna, sans-serif' }}>{item.value}</p>
+                  <p style={{ fontSize: 11, color: 'rgba(180,210,255,0.4)', fontFamily: 'Luna, sans-serif', marginTop: 4 }}>{item.label}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Trigger thresholds */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 20 }}>
+              {[
+                {
+                  label: merkle.has_tree ? 'Siguiente árbol' : 'Primer árbol',
+                  trigger: merkle.has_tree ? merkle.next_tree_trigger : merkle.first_tree_trigger,
+                  cost: merkle.has_tree ? merkle.next_tree_cost : merkle.first_tree_cost,
+                  ready: merkle.has_tree ? merkle.can_create_next_tree : merkle.can_create_first_tree,
+                  current: merkle.fee_pool_usdc,
+                },
+              ].map(item => (
+                <div key={item.label} style={{ gridColumn: '1 / -1', background: item.ready ? 'rgba(0,255,179,0.05)' : 'rgba(0,20,60,0.3)', border: `1px solid ${item.ready ? 'rgba(0,255,179,0.25)' : 'rgba(74,186,255,0.1)'}`, borderRadius: 12, padding: '16px 18px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                    <p style={{ fontSize: 14, fontWeight: 700, color: '#F0F8FF', fontFamily: 'Luna, sans-serif' }}>{item.label}</p>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: item.ready ? '#00FFB3' : '#FFD700', background: item.ready ? 'rgba(0,255,179,0.1)' : 'rgba(255,215,0,0.1)', border: `1px solid ${item.ready ? 'rgba(0,255,179,0.3)' : 'rgba(255,215,0,0.3)'}`, borderRadius: 50, padding: '2px 10px', fontFamily: 'Luna, sans-serif' }}>
+                      {item.ready ? 'LISTO' : 'PENDIENTE'}
+                    </span>
+                  </div>
+                  <div style={{ height: 6, background: 'rgba(74,186,255,0.1)', borderRadius: 4, overflow: 'hidden', marginBottom: 8 }}>
+                    <div style={{ width: `${Math.min(100, (item.current / item.trigger) * 100)}%`, height: '100%', background: item.ready ? 'linear-gradient(90deg,#00FFB3,#00D4AA)' : 'linear-gradient(90deg,#4ABAFF,#7B2FFF)', borderRadius: 4, transition: 'width 0.5s' }} />
+                  </div>
+                  <p style={{ fontSize: 12, color: 'rgba(180,210,255,0.5)', fontFamily: 'Luna, sans-serif' }}>
+                    ${item.current.toFixed(2)} / ${item.trigger.toFixed(2)} USDC · Costo árbol: ${item.cost} USDC
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            {provisionMsg && (
+              <p style={{ fontSize: 13, color: provisionMsg.startsWith('✓') ? '#00FFB3' : '#FF6B6B', fontFamily: 'Luna, sans-serif', marginBottom: 12 }}>{provisionMsg}</p>
+            )}
+
+            <button
+              className="btn-primary"
+              onClick={handleProvisionMerkle}
+              disabled={provisioning || (!merkle.can_create_first_tree && !merkle.can_create_next_tree)}
+              style={{ fontSize: 13, opacity: (!merkle.can_create_first_tree && !merkle.can_create_next_tree) ? 0.4 : 1 }}
+            >
+              {provisioning ? <><Loader2 size={13} className="animate-spin" /> Provisionando...</> : '🌳 Provisionar árbol ahora'}
+            </button>
+            {(!merkle.can_create_first_tree && !merkle.can_create_next_tree) && (
+              <p style={{ fontSize: 12, color: 'rgba(180,210,255,0.4)', fontFamily: 'Luna, sans-serif', marginTop: 8 }}>
+                Envía USDC a FeePool para cubrir el umbral. El cron diario ejecutará la compra automáticamente.
+              </p>
+            )}
+          </>
+        )}
       </div>
 
       {/* Hero background image */}

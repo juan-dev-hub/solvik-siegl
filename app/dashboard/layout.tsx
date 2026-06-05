@@ -374,7 +374,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </Accordion>
 
         <Accordion label="Vault personal" icon={<HardDriveIcon size={15} />}>
-          <a href="/vault" style={linkStyle}>
+          <a href="/dashboard/vault" style={linkStyle}>
             <HardDriveIcon size={15} />
             Mi vault
           </a>

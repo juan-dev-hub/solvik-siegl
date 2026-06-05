@@ -3,13 +3,54 @@ import { useState, useEffect } from 'react'
 import { useTranslation } from '@/components/LanguageProvider'
 import { WalletAuthButton } from '@/components/WalletAuthButton'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
-import { Shield, AlertTriangle, Clock, ShieldCheck, KeyRound, Globe, Zap, CheckCircle, Menu, X, GraduationCap, Palette } from 'lucide-react'
+import { ShieldCheck, KeyRound, Globe, Zap, Menu, X } from 'lucide-react'
 import { HeroTitle } from '@/components/HeroTitle'
 
-const PLANS_BASE = [
-  { id: 'verk',  price: 9.50 },
-  { id: 'varde', price: 39.45, popular: true },
-  { id: 'kraft', price: 99.25 },
+const PRODUCTS = [
+  {
+    id: 'pechat',
+    label: 'Solvik Pečat',
+    tag: 'Certificación',
+    href: '/pechat',
+    color: '#7B2FFF',
+    bg: 'rgba(123,47,255,0.08)',
+    border: 'rgba(123,47,255,0.25)',
+    desc: 'Certificados, credenciales y documentos sellados en blockchain. Verificables al instante — en cualquier parte del mundo, para siempre.',
+    cta: 'Ver Pečat →',
+  },
+  {
+    id: 'torg',
+    label: 'Solvik Torg',
+    tag: 'Comercio digital',
+    href: '/torg',
+    color: '#00D4AA',
+    bg: 'rgba(0,212,170,0.07)',
+    border: 'rgba(0,212,170,0.2)',
+    desc: 'Vende ebooks, cursos, software y cualquier activo digital. El 70% llega a tu wallet al instante. Sin intermediarios.',
+    cta: 'Ver Torg →',
+  },
+  {
+    id: 'vault',
+    label: 'Solvik Vault',
+    tag: 'Almacenamiento',
+    href: '/vault',
+    color: '#4ABAFF',
+    bg: 'rgba(74,186,255,0.07)',
+    border: 'rgba(74,186,255,0.2)',
+    desc: 'Almacenamiento descentralizado en Shadow Drive. Tus archivos, tu wallet, tu propiedad — sin servidores centralizados.',
+    cta: 'Ver Vault →',
+  },
+  {
+    id: 'spaces',
+    label: 'Solvik Spaces',
+    tag: 'Streaming',
+    href: '/spaces',
+    color: '#B06FFF',
+    bg: 'rgba(176,111,255,0.07)',
+    border: 'rgba(176,111,255,0.2)',
+    desc: 'Canal de creador con suscripciones en USDC. Tu audiencia. Tus reglas. Sin algoritmos que te silencien.',
+    cta: 'Ver Spaces →',
+  },
 ]
 
 export default function LandingPage() {
@@ -18,73 +59,41 @@ export default function LandingPage() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [heroBg, setHeroBg] = useState<string | null>(null)
 
-  const VERK_SECTIONS = [
-    { title: t.landing.verk_f1_title, desc: t.landing.verk_f1_desc },
-    { title: t.landing.verk_f2_title, desc: t.landing.verk_f2_desc },
-    { title: t.landing.verk_f3_title, desc: t.landing.verk_f3_desc },
-    { title: t.landing.verk_f4_title, desc: t.landing.verk_f4_desc },
-  ]
-
-  const PLAN_FEATURES: Record<string, string[]> = {
-    verk: [],
-    varde: [t.landing.varde_f1, t.landing.varde_f2, t.landing.varde_f3, t.landing.varde_f4, t.landing.varde_f5, t.landing.varde_f6, t.landing.varde_f7],
-    kraft: [t.landing.kraft_f1, t.landing.kraft_f2, t.landing.kraft_f3, t.landing.kraft_f4, t.landing.kraft_f5],
-  }
-
-  const PLANS = PLANS_BASE.map(p => ({ ...p, features: PLAN_FEATURES[p.id] ?? [] }))
-
   useEffect(() => {
     setHasSession(document.cookie.includes('session_active=1'))
     fetch('/api/admin/hero-bg').then(r => r.json()).then(d => setHeroBg(d.url ?? null)).catch(() => {})
   }, [])
 
-  const handlePricingClick = () => {
-    if (hasSession) {
-      window.location.href = '/pricing'
-    } else {
-      document.getElementById('hero-connect')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-    }
-  }
-
   return (
     <div style={{ minHeight: '100vh', position: 'relative' }}>
-      {/* Hero background image — partículas van encima (z-index 0) */}
       {heroBg && (
-        <div style={{
-          position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none',
-          backgroundImage: `url(${heroBg})`,
-          backgroundSize: 'cover', backgroundPosition: 'center',
-          opacity: 0.18,
-        }} />
+        <div style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', backgroundImage: `url(${heroBg})`, backgroundSize: 'cover', backgroundPosition: 'center', opacity: 0.18 }} />
       )}
+
       {/* Navbar */}
       <nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 24px', borderBottom: '1px solid rgba(123,47,255,0.12)', backdropFilter: 'blur(12px)', position: 'sticky', top: 0, zIndex: 50, background: 'rgba(10,0,21,0.7)' }}>
-        {/* Logo */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <img src="/logo.jpg" alt="Solvik Studio" style={{ height: 30, objectFit: 'contain', borderRadius: 6 }} />
           <span style={{ fontFamily: 'Luna, sans-serif', fontWeight: 800, fontSize: 17, color: '#F0F0FF' }}>Solvik Studio</span>
         </div>
-
-        {/* Desktop: links + wallet — oculto en móvil via CSS */}
         <div className="nav-desktop">
-          <a href="/pricing" style={{ color: 'rgba(240,240,255,0.65)', textDecoration: 'none', fontSize: 14 }}>{t.nav.pricing}</a>
-          <a href="/terms" style={{ color: 'rgba(240,240,255,0.65)', textDecoration: 'none', fontSize: 14 }}>{t.nav.terms}</a>
+          <a href="/pechat" style={{ color: 'rgba(240,240,255,0.65)', textDecoration: 'none', fontSize: 14 }}>Pečat</a>
+          <a href="/torg"   style={{ color: 'rgba(240,240,255,0.65)', textDecoration: 'none', fontSize: 14 }}>Torg</a>
+          <a href="/vault"  style={{ color: 'rgba(240,240,255,0.65)', textDecoration: 'none', fontSize: 14 }}>Vault</a>
+          <a href="/spaces" style={{ color: 'rgba(240,240,255,0.65)', textDecoration: 'none', fontSize: 14 }}>Spaces</a>
+          <a href="/terms"  style={{ color: 'rgba(240,240,255,0.65)', textDecoration: 'none', fontSize: 14 }}>{t.nav.terms}</a>
           <LanguageSwitcher />
           <WalletAuthButton />
         </div>
-
-        {/* Móvil: solo hamburger — oculto en desktop via CSS */}
         <div className="mobile-menu">
-          <button
-            onClick={() => setMenuOpen(v => !v)}
-            style={{ background: 'rgba(74,186,255,0.08)', border: '1px solid rgba(74,186,255,0.2)', borderRadius: 8, padding: '8px 10px', cursor: 'pointer', color: '#4ABAFF', display: 'flex', alignItems: 'center' }}
-          >
+          <button onClick={() => setMenuOpen(v => !v)} style={{ background: 'rgba(74,186,255,0.08)', border: '1px solid rgba(74,186,255,0.2)', borderRadius: 8, padding: '8px 10px', cursor: 'pointer', color: '#4ABAFF', display: 'flex', alignItems: 'center' }}>
             {menuOpen ? <X size={18} /> : <Menu size={18} />}
           </button>
           {menuOpen && (
             <div style={{ position: 'absolute', top: 'calc(100% + 8px)', right: 0, background: 'rgba(5,10,40,0.97)', backdropFilter: 'blur(20px)', border: '1px solid rgba(74,186,255,0.15)', borderRadius: 12, padding: '8px 0', minWidth: 180, zIndex: 200, boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}>
-              <a href="/pricing" onClick={() => setMenuOpen(false)} style={{ display: 'block', padding: '12px 18px', color: 'rgba(240,240,255,0.7)', textDecoration: 'none', fontSize: 14, borderBottom: '1px solid rgba(74,186,255,0.08)' }}>{t.nav.pricing}</a>
-              <a href="/terms" onClick={() => setMenuOpen(false)} style={{ display: 'block', padding: '12px 18px', color: 'rgba(240,240,255,0.7)', textDecoration: 'none', fontSize: 14, borderBottom: '1px solid rgba(74,186,255,0.08)' }}>{t.nav.terms}</a>
+              {[['Pečat', '/pechat'], ['Torg', '/torg'], ['Vault', '/vault'], ['Spaces', '/spaces'], [t.nav.terms, '/terms']].map(([label, href]) => (
+                <a key={href} href={href} onClick={() => setMenuOpen(false)} style={{ display: 'block', padding: '12px 18px', color: 'rgba(240,240,255,0.7)', textDecoration: 'none', fontSize: 14, borderBottom: '1px solid rgba(74,186,255,0.08)' }}>{label}</a>
+              ))}
               <div style={{ padding: '10px 18px' }}><LanguageSwitcher /></div>
             </div>
           )}
@@ -93,46 +102,90 @@ export default function LandingPage() {
 
       {/* Hero */}
       <div className="hero-section" style={{ textAlign: 'center', padding: '100px 40px 80px', maxWidth: 800, margin: '0 auto' }}>
-        <HeroTitle
-          text={t.landing.hero_title}
-          className="hero-title"
-          style={{ marginBottom: 28 }}
-        />
+        <HeroTitle text={t.landing.hero_title} className="hero-title" style={{ marginBottom: 28 }} />
         <p style={{ fontSize: 20, color: 'rgba(0,212,255,0.75)', fontFamily: 'var(--font-outfit), Outfit, Luna, sans-serif', lineHeight: 1.7, marginBottom: 40, maxWidth: 600, margin: '0 auto 40px' }}>
           {t.landing.hero_sub}
         </p>
         <div id="hero-connect">
           <WalletAuthButton showWidget />
         </div>
+        {hasSession && (
+          <a href="/dashboard" className="btn-secondary" style={{ display: 'inline-block', marginTop: 16, fontSize: 14 }}>
+            {t.common.dashboard} →
+          </a>
+        )}
       </div>
 
-      {/* Two-niche cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 20, maxWidth: 860, margin: '0 auto 80px', padding: '0 clamp(16px, 5vw, 40px)' }}>
+      {/* Products */}
+      <div style={{ maxWidth: 1000, margin: '0 auto 80px', padding: '0 clamp(16px,5vw,40px)' }}>
+        <p style={{ textAlign: 'center', fontSize: 12, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(180,210,255,0.3)', marginBottom: 32, fontFamily: 'Luna, sans-serif' }}>
+          Ecosistema Solvik Studio
+        </p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 20 }}>
+          {PRODUCTS.map(p => (
+            <a key={p.id} href={p.href} style={{ textDecoration: 'none', display: 'block', background: p.bg, border: `1px solid ${p.border}`, borderRadius: 16, padding: '26px 24px 28px', transition: 'transform 0.18s ease, box-shadow 0.18s ease' }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-3px)'; (e.currentTarget as HTMLElement).style.boxShadow = `0 8px 32px ${p.color}22` }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = 'none'; (e.currentTarget as HTMLElement).style.boxShadow = 'none' }}
+            >
+              <div style={{ display: 'inline-block', background: `${p.color}18`, border: `1px solid ${p.color}40`, borderRadius: 50, padding: '2px 12px', marginBottom: 14 }}>
+                <span style={{ fontSize: 11, fontWeight: 700, color: p.color, letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: 'Luna, sans-serif' }}>{p.tag}</span>
+              </div>
+              <p style={{ fontFamily: 'Luna, sans-serif', fontWeight: 800, fontSize: 19, color: '#F0F0FF', marginBottom: 10 }}>{p.label}</p>
+              <p style={{ fontSize: 13, color: 'rgba(180,210,255,0.6)', lineHeight: 1.65, fontFamily: 'Luna, sans-serif', marginBottom: 18 }}>{p.desc}</p>
+              <span style={{ fontSize: 13, fontWeight: 700, color: p.color, fontFamily: 'Luna, sans-serif' }}>{p.cta}</span>
+            </a>
+          ))}
+        </div>
+      </div>
+
+      {/* Pain cards */}
+      <div className="pain-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 24, maxWidth: 900, margin: '0 auto 80px', padding: '0 clamp(16px, 5vw, 40px)' }}>
         {[
-          {
-            icon: <GraduationCap size={32} color="#00FFB3" />,
-            color: '#00FFB3',
-            title: t.landing.niche_inst_title,
-            desc: t.landing.niche_inst_desc,
-          },
-          {
-            icon: <Palette size={32} color="#B06FFF" />,
-            color: '#B06FFF',
-            title: t.landing.niche_creator_title,
-            desc: t.landing.niche_creator_desc,
-          },
-        ].map(n => (
-          <div key={n.title} style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${n.color}30`, borderRadius: 16, padding: '28px 28px 26px' }}>
-            <div style={{ width: 52, height: 52, borderRadius: 14, background: `${n.color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 18 }}>
-              {n.icon}
-            </div>
-            <h3 style={{ fontFamily: 'Luna, sans-serif', fontWeight: 800, fontSize: 18, color: '#F0F0FF', marginBottom: 10 }}>{n.title}</h3>
-            <p style={{ fontSize: 14, color: 'rgba(240,240,255,0.6)', fontFamily: 'Luna, sans-serif', lineHeight: 1.7 }}>{n.desc}</p>
+          { icon: '⚠️', title: t.landing.feat1_title, desc: t.landing.feat1_desc },
+          { icon: '🛡️', title: t.landing.feat2_title, desc: t.landing.feat2_desc },
+          { icon: '⏱️', title: t.landing.feat3_title, desc: t.landing.feat3_desc },
+        ].map(f => (
+          <div key={f.title} className="glass-card" style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: 28, marginBottom: 14 }}>{f.icon}</div>
+            <h3 style={{ fontFamily: 'Luna, sans-serif', fontWeight: 700, fontSize: 17, color: '#F0F0FF', marginBottom: 10 }}>{f.title}</h3>
+            <p style={{ fontSize: 14, color: 'rgba(240,240,255,0.6)', fontFamily: 'Luna, sans-serif', lineHeight: 1.6 }}>{f.desc}</p>
           </div>
         ))}
       </div>
 
-      {/* Disclaimer card */}
+      {/* Solution */}
+      <div style={{ maxWidth: 700, margin: '0 auto 80px', padding: '0 clamp(16px, 5vw, 40px)', textAlign: 'center' }}>
+        <div style={{ borderLeft: '3px solid #7B2FFF', borderRight: '3px solid #00D4FF', background: 'linear-gradient(135deg, rgba(123,47,255,0.10) 0%, rgba(0,212,255,0.06) 100%)', borderRadius: 16, padding: 'clamp(20px,5vw,32px) clamp(16px,5vw,40px)' }}>
+          <p style={{ fontWeight: 800, fontSize: 22, color: '#F0F0FF', marginBottom: 12 }}>{t.landing.solution_title}</p>
+          <p style={{ fontSize: 16, lineHeight: 1.6, marginBottom: 20, background: 'linear-gradient(90deg, #B06FFF, #00D4FF)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', fontWeight: 600 }}>
+            {t.landing.solution_body}
+          </p>
+          <p style={{ fontSize: 14, color: 'rgba(0,212,255,0.55)', fontStyle: 'italic' }}>{t.landing.urgency}</p>
+        </div>
+      </div>
+
+      {/* Trust */}
+      <div style={{ maxWidth: 900, margin: '0 auto 80px', padding: '0 clamp(16px, 5vw, 40px)' }}>
+        <p style={{ textAlign: 'center', fontSize: 12, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(180,210,255,0.35)', marginBottom: 32 }}>
+          {t.landing.trust_title}
+        </p>
+        <div className="pain-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 20 }}>
+          {[
+            { icon: <ShieldCheck size={22} color="#00FFB3" />, color: '#00FFB3', title: t.landing.trust_altcha_title, desc: t.landing.trust_altcha_desc },
+            { icon: <KeyRound size={22} color="#4ABAFF" />, color: '#4ABAFF', title: t.landing.trust_wallet_title, desc: t.landing.trust_wallet_desc },
+            { icon: <Globe size={22} color="#B06FFF" />, color: '#B06FFF', title: t.landing.trust_storage_title, desc: t.landing.trust_storage_desc },
+            { icon: <Zap size={22} color="#FFD700" />, color: '#FFD700', title: t.landing.trust_payments_title, desc: t.landing.trust_payments_desc },
+          ].map(item => (
+            <div key={item.title} style={{ display: 'flex', flexDirection: 'column', gap: 10, padding: '20px 20px 22px', background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14 }}>
+              <div style={{ width: 40, height: 40, borderRadius: 10, background: `${item.color}14`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{item.icon}</div>
+              <p style={{ fontWeight: 700, fontSize: 14, color: '#F0F8FF', lineHeight: 1.3 }}>{item.title}</p>
+              <p style={{ fontSize: 13, color: 'rgba(180,210,255,0.5)', lineHeight: 1.6 }}>{item.desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Disclaimer */}
       <div style={{ maxWidth: 720, margin: '0 auto 60px', padding: '0 clamp(16px, 5vw, 40px)' }}>
         <div style={{ border: '1px solid rgba(255,215,0,0.4)', background: 'rgba(255,215,0,0.05)', borderRadius: 16, padding: '16px 24px' }}>
           <p style={{ fontSize: 13, color: 'rgba(255,215,0,0.8)', fontFamily: 'Luna, sans-serif', lineHeight: 1.7 }}>
@@ -141,139 +194,8 @@ export default function LandingPage() {
         </div>
       </div>
 
-      {/* Pain cards */}
-      <div className="pain-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 24, maxWidth: 900, margin: '0 auto 80px', padding: '0 clamp(16px, 5vw, 40px)' }}>
-        {[
-          { icon: <AlertTriangle size={28} color="#FF6B6B" />, title: t.landing.feat1_title, desc: t.landing.feat1_desc },
-          { icon: <Shield size={28} color="#B06FFF" />, title: t.landing.feat2_title, desc: t.landing.feat2_desc },
-          { icon: <Clock size={28} color="#FFD700" />, title: t.landing.feat3_title, desc: t.landing.feat3_desc },
-        ].map(f => (
-          <div key={f.title} className="glass-card" style={{ textAlign: 'center' }}>
-            <div style={{ marginBottom: 16 }}>{f.icon}</div>
-            <h3 style={{ fontFamily: 'Luna, sans-serif', fontWeight: 700, fontSize: 17, color: '#F0F0FF', marginBottom: 10 }}>{f.title}</h3>
-            <p style={{ fontSize: 14, color: 'rgba(240,240,255,0.6)', fontFamily: 'Luna, sans-serif', lineHeight: 1.6 }}>{f.desc}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* Solution block */}
-      <div style={{ maxWidth: 700, margin: '0 auto 80px', padding: '0 clamp(16px, 5vw, 40px)', textAlign: 'center' }}>
-        <div style={{ borderLeft: '3px solid #7B2FFF', borderRight: '3px solid #00D4FF', background: 'linear-gradient(135deg, rgba(123,47,255,0.10) 0%, rgba(0,212,255,0.06) 100%)', borderRadius: 16, padding: 'clamp(20px,5vw,32px) clamp(16px,5vw,40px)' }}>
-          <p style={{ fontWeight: 800, fontSize: 22, color: '#F0F0FF', marginBottom: 12 }}>
-            {t.landing.solution_title}
-          </p>
-          <p style={{ fontSize: 16, lineHeight: 1.6, marginBottom: 20, background: 'linear-gradient(90deg, #B06FFF, #00D4FF)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', fontWeight: 600 }}>
-            {t.landing.solution_body}
-          </p>
-          <p style={{ fontSize: 14, color: 'rgba(0,212,255,0.55)', fontStyle: 'italic' }}>
-            {t.landing.urgency}
-          </p>
-        </div>
-      </div>
-
-      {/* Trust / Security section */}
-      <div style={{ maxWidth: 900, margin: '0 auto 80px', padding: '0 clamp(16px, 5vw, 40px)' }}>
-        <p style={{ textAlign: 'center', fontSize: 12, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(180,210,255,0.35)', marginBottom: 32 }}>
-          {t.landing.trust_title}
-        </p>
-        <div className="pain-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 20 }}>
-          {[
-            {
-              icon: <ShieldCheck size={22} color="#00FFB3" />,
-              color: '#00FFB3',
-              title: t.landing.trust_altcha_title,
-              desc: t.landing.trust_altcha_desc,
-            },
-            {
-              icon: <KeyRound size={22} color="#4ABAFF" />,
-              color: '#4ABAFF',
-              title: t.landing.trust_wallet_title,
-              desc: t.landing.trust_wallet_desc,
-            },
-            {
-              icon: <Globe size={22} color="#B06FFF" />,
-              color: '#B06FFF',
-              title: t.landing.trust_storage_title,
-              desc: t.landing.trust_storage_desc,
-            },
-            {
-              icon: <Zap size={22} color="#FFD700" />,
-              color: '#FFD700',
-              title: t.landing.trust_payments_title,
-              desc: t.landing.trust_payments_desc,
-            },
-          ].map(item => (
-            <div key={item.title} style={{
-              display: 'flex', flexDirection: 'column', gap: 10,
-              padding: '20px 20px 22px',
-              background: 'rgba(255,255,255,0.025)',
-              border: '1px solid rgba(255,255,255,0.07)',
-              borderRadius: 14,
-            }}>
-              <div style={{ width: 40, height: 40, borderRadius: 10, background: `${item.color}14`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                {item.icon}
-              </div>
-              <p style={{ fontWeight: 700, fontSize: 14, color: '#F0F8FF', lineHeight: 1.3 }}>{item.title}</p>
-              <p style={{ fontSize: 13, color: 'rgba(180,210,255,0.5)', lineHeight: 1.6 }}>{item.desc}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Pricing */}
-      <div style={{ maxWidth: 960, margin: '0 auto 80px', padding: '0 clamp(16px, 5vw, 40px)' }}>
-        <h2 style={{ fontFamily: 'Luna, sans-serif', fontWeight: 800, fontSize: 32, color: '#F0F0FF', textAlign: 'center', marginBottom: 8 }}>
-          {t.pricing.title}
-        </h2>
-        <p style={{ textAlign: 'center', color: 'rgba(240,240,255,0.5)', fontSize: 15, fontFamily: 'Luna, sans-serif', marginBottom: 40 }}>
-          {t.landing.pricing_sub}
-        </p>
-        <div className="pricing-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 20, marginBottom: 28 }}>
-          {PLANS.map(p => (
-            <div key={p.id} className="glass-card" style={{ border: p.popular ? '1px solid #7B2FFF' : undefined, position: 'relative' }}>
-              {p.popular && (
-                <div style={{ position: 'absolute', top: -14, left: '50%', transform: 'translateX(-50%)', background: 'linear-gradient(90deg, #7B2FFF, #00D4FF)', color: '#fff', borderRadius: 50, padding: '3px 18px', fontSize: 11, fontWeight: 700, fontFamily: 'Luna, sans-serif', whiteSpace: 'nowrap' }}>
-                  {t.landing.most_popular}
-                </div>
-              )}
-              <p style={{ fontFamily: 'Luna, sans-serif', fontWeight: 800, fontSize: 22, color: '#F0F0FF', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>{p.id}</p>
-              <p style={{ fontSize: 40, fontFamily: 'Luna, sans-serif', fontWeight: 800, color: '#7B2FFF', lineHeight: 1 }}>
-                ${p.price}<span style={{ fontSize: 16, color: 'rgba(240,240,255,0.5)', fontWeight: 400 }}>{t.landing.per_month}</span>
-              </p>
-              <div style={{ marginBottom: 28 }}>
-                {p.id === 'verk' ? (
-                  VERK_SECTIONS.map(s => (
-                    <div key={s.title} style={{ marginBottom: 14, paddingBottom: 14, borderBottom: '1px solid rgba(123,47,255,0.12)' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
-                        <CheckCircle size={13} color="#00FFB3" />
-                        <span style={{ fontSize: 13, fontWeight: 700, color: '#F0F0FF', fontFamily: 'Luna, sans-serif' }}>{s.title}</span>
-                      </div>
-                      <p style={{ fontSize: 11, color: 'rgba(180,210,255,0.55)', fontFamily: 'Luna, sans-serif', lineHeight: 1.6, paddingLeft: 21, margin: 0 }}>{s.desc}</p>
-                    </div>
-                  ))
-                ) : (
-                  p.features.map(f => (
-                    <div key={f} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-                      <CheckCircle size={14} color="#00FFB3" />
-                      <span style={{ fontSize: 13, color: 'rgba(240,240,255,0.7)', fontFamily: 'Luna, sans-serif' }}>{f}</span>
-                    </div>
-                  ))
-                )}
-              </div>
-              <button onClick={handlePricingClick} className="btn-primary" style={{ width: '100%', justifyContent: 'center' }}>
-                {hasSession ? `${t.landing.get_plan} $${p.price}/mes` : t.common.connect}
-              </button>
-            </div>
-          ))}
-        </div>
-
-      </div>
-
-      {/* Footer */}
       <footer style={{ borderTop: '1px solid rgba(123,47,255,0.1)', padding: '32px 40px', textAlign: 'center' }}>
-        <p style={{ fontSize: 12, color: 'rgba(240,240,255,0.3)', fontFamily: 'Luna, sans-serif' }}>
-          {t.nav.disclaimer}
-        </p>
+        <p style={{ fontSize: 12, color: 'rgba(240,240,255,0.3)', fontFamily: 'Luna, sans-serif' }}>{t.nav.disclaimer}</p>
         <p style={{ fontSize: 12, color: 'rgba(240,240,255,0.2)', marginTop: 8, fontFamily: 'Luna, sans-serif' }}>
           © 2025 Solvik Studio · <a href="/terms" style={{ color: 'rgba(240,240,255,0.3)', textDecoration: 'none' }}>{t.nav.terms}</a>
         </p>

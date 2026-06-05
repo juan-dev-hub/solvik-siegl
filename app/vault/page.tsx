@@ -1,104 +1,117 @@
 'use client'
-import { useState, useEffect, useRef } from 'react'
-import { HardDrive, Upload, File, Loader2 } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { useTranslation } from '@/components/LanguageProvider'
+import { LanguageSwitcher } from '@/components/LanguageSwitcher'
+import { WalletAuthButton } from '@/components/WalletAuthButton'
+import { HardDrive, Shield, Key, Globe, Lock, Menu, X } from 'lucide-react'
 
-type VaultAccount = { storage_gb: number; storage_used_gb: number; expires_at: string | null }
-type VaultFile    = { id: string; file_name: string; shadow_url: string; file_size_bytes: number; file_type: string; uploaded_at: string }
+export default function VaultMarketingPage() {
+  const { t } = useTranslation()
+  const [hasSession, setHasSession] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
 
-export default function VaultPage() {
-  const [vault, setVault]   = useState<VaultAccount | null>(null)
-  const [files, setFiles]   = useState<VaultFile[]>([])
-  const [loading, setLoading] = useState(true)
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const [uploading, setUploading] = useState(false)
-  const [error, setError]   = useState<string | null>(null)
+  useEffect(() => {
+    setHasSession(document.cookie.includes('session_active=1'))
+  }, [])
 
-  const fetchVault = () => {
-    fetch('/api/vault/info').then(r => r.json()).then(d => {
-      setVault(d.vault ?? null)
-      setFiles(d.files ?? [])
-    }).catch(() => {}).finally(() => setLoading(false))
-  }
-
-  useEffect(() => { fetchVault() }, [])
-
-  const handleUpload = async (f: File) => {
-    if (f.size > 5 * 1024 * 1024) { setError('Máx 5 MB'); return }
-    const allowed = ['application/pdf', 'image/webp', 'video/webm']
-    if (!allowed.includes(f.type)) { setError('Solo PDF, WebP o WebM'); return }
-    setUploading(true); setError(null)
-    try {
-      const form = new FormData()
-      form.append('file', f)
-      const res = await fetch('/api/vault/upload', { method: 'POST', body: form })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error)
-      fetchVault()
-    } catch (err) { setError(err instanceof Error ? err.message : 'Error') }
-    finally { setUploading(false) }
-  }
-
-  const pctUsed = vault ? Math.min(100, (vault.storage_used_gb / vault.storage_gb) * 100) : 0
-
-  if (loading) return <div style={{ padding: 48, textAlign: 'center', color: 'rgba(180,210,255,0.4)' }}>Cargando...</div>
+  const features = [
+    { icon: <HardDrive size={22} color="#4ABAFF" />, title: 'Shadow Drive — Solana', desc: 'Tus archivos se almacenan en Shadow Drive, la red de almacenamiento descentralizado nativa de Solana. Sin servidores centralizados.' },
+    { icon: <Key size={22} color="#FFD700" />, title: 'Control mediante tu wallet', desc: 'Sólo la wallet que activó el vault puede acceder, subir o eliminar archivos. Sin contraseñas. Sin cuentas de terceros.' },
+    { icon: <Shield size={22} color="#00FFB3" />, title: 'Propiedad soberana', desc: 'Tus datos son tuyos. El bucket de almacenamiento está vinculado a tu identidad en Solana, no a nuestra plataforma.' },
+    { icon: <Lock size={22} color="#7B2FFF" />, title: 'Acceso privado', desc: 'Los archivos en tu vault son privados por defecto. Sólo vos podés ver y acceder a ellos desde el dashboard.' },
+    { icon: <Globe size={22} color="#FF9F0A" />, title: 'Infraestructura soberana', desc: 'Sin Google Drive. Sin Dropbox. Sin términos de servicio que te digan qué podés guardar y qué no. Tu almacenamiento. Tus reglas.' },
+  ]
 
   return (
-    <div style={{ minHeight: '100vh', padding: 'clamp(24px,5vw,48px) clamp(16px,5vw,40px)' }}>
-      <div style={{ maxWidth: 800, margin: '0 auto' }}>
-        <h1 style={{ fontFamily: 'Luna, sans-serif', fontWeight: 800, fontSize: 32, color: '#F0F8FF', marginBottom: 8 }}>
-          <HardDrive size={28} style={{ marginRight: 12, verticalAlign: 'middle' }} />
-          Mi Vault
-        </h1>
-
-        {!vault ? (
-          <div className="glass-card" style={{ textAlign: 'center', padding: '48px 32px' }}>
-            <p style={{ fontFamily: 'Luna, sans-serif', fontWeight: 700, fontSize: 20, color: '#F0F8FF', marginBottom: 12 }}>Tu vault personal no está activo</p>
-            <p style={{ fontSize: 14, color: 'rgba(180,210,255,0.5)', marginBottom: 28 }}>Almacenamiento en la nube privado por $25 USDC/año.</p>
-            <button className="btn-primary">Activar Vault — $25/año</button>
-          </div>
-        ) : (
-          <>
-            <div className="glass-card" style={{ marginBottom: 24 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                <span style={{ fontSize: 13, color: 'rgba(180,210,255,0.5)', fontFamily: 'Luna, sans-serif' }}>
-                  {vault.storage_used_gb.toFixed(2)} GB de {vault.storage_gb.toFixed(2)} GB
-                </span>
-                {vault.expires_at && (
-                  <span style={{ fontSize: 11, color: 'rgba(180,210,255,0.35)', fontFamily: 'Luna, sans-serif' }}>
-                    Vence {new Date(vault.expires_at).toLocaleDateString('es-ES')}
-                  </span>
-                )}
-              </div>
-              <div style={{ height: 8, background: 'rgba(123,47,255,0.2)', borderRadius: 8, overflow: 'hidden' }}>
-                <div style={{ width: `${pctUsed}%`, height: '100%', background: pctUsed > 80 ? '#FF6B6B' : 'linear-gradient(90deg, #4ABAFF, #00D4AA)', borderRadius: 8, transition: 'width 0.5s ease' }} />
-              </div>
-            </div>
-
-            <input type="file" accept=".pdf,.webp,.webm" style={{ display: 'none' }} ref={fileInputRef} onChange={e => { const f = e.target.files?.[0]; if (f) handleUpload(f) }} />
-            <button className="btn-primary" onClick={() => fileInputRef.current?.click()} disabled={uploading} style={{ marginBottom: 24, display: 'flex', alignItems: 'center', gap: 8 }}>
-              {uploading ? <><Loader2 size={16} className="animate-spin" /> Subiendo...</> : <><Upload size={16} /> Subir archivo</>}
-            </button>
-            {error && <p style={{ color: '#ff6b6b', fontSize: 13, marginBottom: 16, fontFamily: 'Luna, sans-serif' }}>{error}</p>}
-
-            <div className="glass-card" style={{ padding: 0, overflow: 'hidden' }}>
-              {files.length === 0 ? (
-                <div style={{ padding: 40, textAlign: 'center', color: 'rgba(180,210,255,0.4)', fontFamily: 'Luna, sans-serif' }}>No hay archivos en tu vault.</div>
-              ) : files.map(f => (
-                <div key={f.id} style={{ display: 'flex', alignItems: 'center', padding: '12px 20px', borderBottom: '1px solid rgba(100,200,255,0.06)', gap: 12 }}>
-                  <File size={16} color="rgba(180,210,255,0.4)" />
-                  <div style={{ flex: 1 }}>
-                    <p style={{ color: '#F0F8FF', fontSize: 14, fontWeight: 500 }}>{f.file_name}</p>
-                    <p style={{ fontSize: 11, color: 'rgba(180,210,255,0.35)', fontFamily: 'Luna, sans-serif' }}>
-                      {(f.file_size_bytes / 1024 / 1024).toFixed(2)} MB · {new Date(f.uploaded_at).toLocaleDateString('es-ES')}
-                    </p>
-                  </div>
-                  <a href={f.shadow_url} target="_blank" rel="noopener noreferrer" style={{ color: '#4ABAFF', fontSize: 13, textDecoration: 'none' }}>Abrir</a>
-                </div>
+    <div style={{ minHeight: '100vh' }}>
+      <nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 24px', borderBottom: '1px solid rgba(123,47,255,0.12)', backdropFilter: 'blur(12px)', position: 'sticky', top: 0, zIndex: 50, background: 'rgba(10,0,21,0.7)' }}>
+        <a href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
+          <img src="/logo.jpg" alt="Solvik Studio" style={{ height: 28, objectFit: 'contain', borderRadius: 4 }} />
+          <span style={{ fontWeight: 800, fontSize: 15, color: '#F0F8FF', fontFamily: 'Luna, sans-serif' }}>Solvik Studio</span>
+        </a>
+        <div style={{ display: 'none', alignItems: 'center', gap: 20 }} className="nav-desktop">
+          <a href="/pechat" style={{ color: 'rgba(240,240,255,0.55)', textDecoration: 'none', fontSize: 14 }}>Pečat</a>
+          <a href="/torg"   style={{ color: 'rgba(240,240,255,0.55)', textDecoration: 'none', fontSize: 14 }}>Torg</a>
+          <a href="/vault"  style={{ color: '#4ABAFF', textDecoration: 'none', fontSize: 14, fontWeight: 600 }}>Vault</a>
+          <a href="/spaces" style={{ color: 'rgba(240,240,255,0.55)', textDecoration: 'none', fontSize: 14 }}>Spaces</a>
+          <a href="/terms"  style={{ color: 'rgba(240,240,255,0.55)', textDecoration: 'none', fontSize: 14 }}>Términos</a>
+          <LanguageSwitcher />
+          <WalletAuthButton />
+        </div>
+        <div className="mobile-menu">
+          <button onClick={() => setMenuOpen(v => !v)} style={{ background: 'rgba(74,186,255,0.08)', border: '1px solid rgba(74,186,255,0.2)', borderRadius: 8, padding: '8px 10px', cursor: 'pointer', color: '#4ABAFF', display: 'flex', alignItems: 'center' }}>
+            {menuOpen ? <X size={18} /> : <Menu size={18} />}
+          </button>
+          {menuOpen && (
+            <div style={{ position: 'absolute', top: 'calc(100% + 8px)', right: 0, background: 'rgba(5,10,40,0.97)', backdropFilter: 'blur(20px)', border: '1px solid rgba(74,186,255,0.15)', borderRadius: 12, padding: '8px 0', minWidth: 180, zIndex: 200 }}>
+              {[['Pečat', '/pechat'], ['Torg', '/torg'], ['Vault', '/vault'], ['Spaces', '/spaces'], ['Términos', '/terms']].map(([label, href]) => (
+                <a key={href} href={href} onClick={() => setMenuOpen(false)} style={{ display: 'block', padding: '12px 18px', color: 'rgba(240,240,255,0.7)', textDecoration: 'none', fontSize: 14, borderBottom: '1px solid rgba(74,186,255,0.08)' }}>{label}</a>
               ))}
+              <div style={{ padding: '10px 18px' }}><LanguageSwitcher /></div>
             </div>
-          </>
-        )}
+          )}
+        </div>
+      </nav>
+
+      <div style={{ textAlign: 'center', padding: '80px 40px 64px', maxWidth: 760, margin: '0 auto' }}>
+        <div style={{ display: 'inline-block', background: 'rgba(74,186,255,0.1)', border: '1px solid rgba(74,186,255,0.35)', borderRadius: 50, padding: '4px 18px', marginBottom: 24 }}>
+          <span style={{ fontSize: 12, fontWeight: 700, color: '#4ABAFF', letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'Luna, sans-serif' }}>Solvik Vault</span>
+        </div>
+        <h1 style={{ fontFamily: 'Luna, sans-serif', fontWeight: 800, fontSize: 'clamp(36px, 6vw, 58px)', color: '#F0F0FF', lineHeight: 1.15, marginBottom: 20 }}>
+          Almacenamiento<br />
+          <span style={{ background: 'linear-gradient(90deg, #4ABAFF, #00FFB3)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+            descentralizado
+          </span>
+        </h1>
+        <p style={{ fontSize: 18, color: 'rgba(180,210,255,0.65)', fontFamily: 'Luna, sans-serif', lineHeight: 1.7, maxWidth: 520, margin: '0 auto 36px' }}>
+          Tus archivos. Tu wallet. Tu control total. Sin servidores centralizados, sin términos arbitrarios, sin terceros que decidan qué podés guardar.
+        </p>
+        <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
+          {hasSession ? (
+            <a href="/dashboard/vault" className="btn-primary" style={{ fontSize: 15, padding: '13px 32px', background: 'linear-gradient(180deg, rgba(74,186,255,0.9), rgba(0,120,200,1))' }}>
+              Ir a mi Vault →
+            </a>
+          ) : (
+            <WalletAuthButton showWidget />
+          )}
+          <a href="/pechat" className="btn-secondary" style={{ fontSize: 15, padding: '13px 32px' }}>Ver planes →</a>
+        </div>
       </div>
+
+      <div style={{ maxWidth: 680, margin: '0 auto 64px', padding: '0 clamp(16px,5vw,40px)' }}>
+        <div style={{ background: 'rgba(74,186,255,0.05)', border: '1px solid rgba(74,186,255,0.18)', borderRadius: 16, padding: '28px 32px' }}>
+          <p style={{ fontFamily: 'Luna, sans-serif', fontWeight: 700, fontSize: 16, color: '#F0F0FF', marginBottom: 12 }}>No es Google Drive. No es Dropbox.</p>
+          <p style={{ fontSize: 14, color: 'rgba(180,210,255,0.6)', lineHeight: 1.7, fontFamily: 'Luna, sans-serif' }}>
+            Vault es almacenamiento descentralizado donde la propiedad es tuya — no de nuestra plataforma, no de ningún servidor.
+            Los archivos viven en Shadow Drive, la red de almacenamiento de Solana.
+            Si mañana Solvik Studio desapareciera, tus archivos seguirían siendo accesibles desde tu wallet.
+          </p>
+        </div>
+      </div>
+
+      <div style={{ maxWidth: 900, margin: '0 auto 80px', padding: '0 clamp(16px,5vw,40px)' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 20 }}>
+          {features.map(f => (
+            <div key={f.title} style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14, padding: '22px 22px 24px' }}>
+              <div style={{ width: 44, height: 44, borderRadius: 12, background: 'rgba(74,186,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}>{f.icon}</div>
+              <p style={{ fontWeight: 700, fontSize: 15, color: '#F0F0FF', marginBottom: 8, fontFamily: 'Luna, sans-serif' }}>{f.title}</p>
+              <p style={{ fontSize: 13, color: 'rgba(180,210,255,0.55)', lineHeight: 1.65, fontFamily: 'Luna, sans-serif' }}>{f.desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ background: 'rgba(74,186,255,0.04)', border: '1px solid rgba(74,186,255,0.12)', padding: '40px', textAlign: 'center' }}>
+        <p style={{ fontFamily: 'Luna, sans-serif', fontWeight: 800, fontSize: 22, color: '#F0F0FF', marginBottom: 12 }}>Vault incluido con todos los planes Pečat</p>
+        <p style={{ fontSize: 14, color: 'rgba(180,210,255,0.5)', marginBottom: 24, fontFamily: 'Luna, sans-serif' }}>No es un producto separado — viene integrado con tu suscripción a Pečat.</p>
+        <a href="/pechat" className="btn-primary" style={{ fontSize: 15, padding: '13px 32px', background: 'linear-gradient(180deg, rgba(74,186,255,0.9), rgba(0,120,200,1))' }}>Ver planes →</a>
+      </div>
+
+      <footer style={{ borderTop: '1px solid rgba(123,47,255,0.1)', padding: '28px 40px', textAlign: 'center' }}>
+        <p style={{ fontSize: 12, color: 'rgba(240,240,255,0.2)', fontFamily: 'Luna, sans-serif' }}>
+          © 2025 Solvik Studio · <a href="/terms" style={{ color: 'rgba(240,240,255,0.3)', textDecoration: 'none' }}>{t.nav.terms}</a>
+        </p>
+      </footer>
     </div>
   )
 }
