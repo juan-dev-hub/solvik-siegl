@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { CheckCircle, Loader2, Upload } from 'lucide-react'
+import { CheckCircle, Loader2 } from 'lucide-react'
 
 export default function CreatePage() {
   const router = useRouter()

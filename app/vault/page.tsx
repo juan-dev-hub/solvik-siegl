@@ -1,7 +1,6 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
 import { HardDrive, Upload, File, Loader2 } from 'lucide-react'
-import Link from 'next/link'
 
 type VaultAccount = { storage_gb: number; storage_used_gb: number; expires_at: string | null }
 type VaultFile    = { id: string; file_name: string; shadow_url: string; file_size_bytes: number; file_type: string; uploaded_at: string }
